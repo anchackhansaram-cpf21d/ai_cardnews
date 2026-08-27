@@ -1,0 +1,22 @@
+name: 토큰 만료 점검
+
+on:
+  schedule:
+    - cron: "0 1 * * 1"   # 매주 월요일 오전 10시 (KST)
+  workflow_dispatch:
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+      - run: pip install --quiet requests
+      - name: 토큰 상태 확인
+        env:
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          META_APP_ID: ${{ secrets.META_APP_ID }}
+          META_APP_SECRET: ${{ secrets.META_APP_SECRET }}
+        run: cd scripts && python token_check.py --warn 14

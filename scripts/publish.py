@@ -1,0 +1,149 @@
+#!/usr/bin/env python3
+"""렌더링된 카드뉴스를 인스타그램 캐러셀로 발행한다.
+
+이미지는 GitHub raw URL(커밋 SHA 고정)로 노출하고, Meta 서버가 그걸 받아간다.
+필요한 환경변수:
+  IG_USER_ID       인스타그램 프로페셔널 계정의 ID (숫자)
+  IG_ACCESS_TOKEN  장기 액세스 토큰
+  GITHUB_REPOSITORY  owner/repo   (Actions가 자동 주입)
+  GITHUB_SHA         이미지가 포함된 커밋 SHA (Actions가 자동 주입)
+"""
+
+import argparse
+import os
+import pathlib
+import sys
+import time
+from datetime import datetime, timedelta, timezone
+
+import requests
+
+import postqueue as q
+
+ROOT = pathlib.Path(__file__).resolve().parent.parent
+API = "https://graph.facebook.com/v25.0"
+MAX_CARDS = 10          # 인스타 캐러셀 상한
+KST = timezone(timedelta(hours=9))
+
+
+def need(name):
+    v = os.environ.get(name)
+    if not v:
+        sys.exit(f"환경변수 {name} 가 없습니다.")
+    return v
+
+
+def raw_url(repo, sha, slug, n):
+    return f"https://raw.githubusercontent.com/{repo}/{sha}/out/{slug}/{n:02d}.jpg"
+
+
+def build_caption(data):
+    cap = data.get("caption", "").strip()
+    tags = " ".join(data.get("hashtags", []))
+    return f"{cap}\n\n.\n.\n.\n{tags}".strip()
+
+
+def post(url, params, tries=4):
+    """Graph API 호출 + 지수 백오프 재시도."""
+    delay = 5
+    last = None
+    for attempt in range(1, tries + 1):
+        r = requests.post(url, data=params, timeout=90)
+        if r.status_code == 200:
+            return r.json()
+        last = f"HTTP {r.status_code}: {r.text[:500]}"
+        # 4xx 중 재시도가 무의미한 것은 즉시 중단
+        if r.status_code == 400 and "rate limit" not in r.text.lower():
+            break
+        print(f"  재시도 {attempt}/{tries} ({last})")
+        time.sleep(delay)
+        delay *= 2
+    sys.exit(f"Graph API 호출 실패 -> {url}\n{last}")
+
+
+def wait_ready(container_id, token, timeout=300):
+    """컨테이너가 FINISHED 될 때까지 대기."""
+    deadline = time.time() + timeout
+    while time.time() < deadline:
+        r = requests.get(f"{API}/{container_id}",
+                         params={"fields": "status_code,status",
+                                 "access_token": token}, timeout=60)
+        j = r.json()
+        code = j.get("status_code")
+        if code == "FINISHED":
+            return True
+        if code == "ERROR":
+            sys.exit(f"컨테이너 처리 실패: {j}")
+        time.sleep(5)
+    sys.exit(f"컨테이너 {container_id} 처리 대기 시간 초과")
+
+
+def main():
+    ap = argparse.ArgumentParser()
+    ap.add_argument("--slug", required=True)
+    ap.add_argument("--dry-run", action="store_true",
+                    help="Graph API 호출 없이 URL과 캡션만 출력")
+    a = ap.parse_args()
+
+    repo = need("GITHUB_REPOSITORY")
+    sha = need("GITHUB_SHA")
+    data = q.load(a.slug)
+
+    img_dir = ROOT / "out" / a.slug
+    imgs = sorted(img_dir.glob("*.jpg"))[:MAX_CARDS]
+    if not imgs:
+        sys.exit(f"out/{a.slug}/ 에 이미지가 없습니다. 먼저 render.py를 실행하세요.")
+
+    urls = [raw_url(repo, sha, a.slug, i) for i in range(1, len(imgs) + 1)]
+    caption = build_caption(data)
+
+    if a.dry_run:
+        print("--- 이미지 URL ---")
+        print("\n".join(urls))
+        print("\n--- 캡션 ---")
+        print(caption)
+        return
+
+    ig_user = need("IG_USER_ID")
+    token = need("IG_ACCESS_TOKEN")
+
+    # 1) 이미지별 컨테이너 생성
+    children = []
+    for i, u in enumerate(urls, 1):
+        print(f"[{i}/{len(urls)}] 컨테이너 생성")
+        j = post(f"{API}/{ig_user}/media",
+                 {"image_url": u, "is_carousel_item": "true",
+                  "access_token": token})
+        children.append(j["id"])
+
+    # 2) 캐러셀 컨테이너 생성
+    print("캐러셀 컨테이너 생성")
+    carousel = post(f"{API}/{ig_user}/media",
+                    {"media_type": "CAROUSEL",
+                     "children": ",".join(children),
+                     "caption": caption,
+                     "access_token": token})["id"]
+
+    # 3) 처리 완료 대기 후 발행
+    wait_ready(carousel, token)
+    print("발행 중")
+    media_id = post(f"{API}/{ig_user}/media_publish",
+                    {"creation_id": carousel, "access_token": token})["id"]
+
+    permalink = None
+    try:
+        permalink = requests.get(f"{API}/{media_id}",
+                                 params={"fields": "permalink",
+                                         "access_token": token},
+                                 timeout=60).json().get("permalink")
+    except Exception:
+        pass
+
+    now = datetime.now(KST).isoformat(timespec="seconds")
+    q.mark_posted(a.slug, permalink=permalink, media_id=media_id, when=now)
+    print(f"✅ 발행 완료: {permalink or media_id}")
+    print(f"남은 원고: {q.remaining()}편")
+
+
+if __name__ == "__main__":
+    main()

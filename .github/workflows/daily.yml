@@ -1,0 +1,118 @@
+name: 매일 인스타 카드뉴스 발행
+
+on:
+  schedule:
+    # 02:30 UTC = 한국시간 11:30. GitHub 크론은 UTC 기준입니다.
+    # (러너 혼잡으로 몇 분~수십 분 늦게 시작될 수 있습니다. 정시 발행이
+    #  중요하면 cron을 10~15분 앞당겨 두세요.)
+    - cron: "30 2 * * *"
+  workflow_dispatch:
+    inputs:
+      dry_run:
+        description: "실제 업로드 없이 이미지·캡션만 확인"
+        type: boolean
+        default: false
+      slug:
+        description: "특정 원고를 지정해 발행 (비우면 큐의 다음 순서)"
+        type: string
+        default: ""
+
+permissions:
+  contents: write
+
+concurrency:
+  group: instagram-daily
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 한글 폰트 설치
+        run: |
+          sudo apt-get update -qq
+          sudo apt-get install -y -qq fonts-noto-cjk fonts-noto-color-emoji
+
+      - name: 의존성 설치
+        run: |
+          pip install --quiet playwright requests
+          playwright install --with-deps chromium
+
+      - name: 발행할 원고 선택
+        id: pick
+        run: |
+          cd scripts
+          if [ -n "${{ inputs.slug }}" ]; then
+            SLUG="${{ inputs.slug }}"
+          else
+            SLUG=$(python -c "import postqueue; s=postqueue.next_slug(); print(s or '')")
+          fi
+          if [ -z "$SLUG" ]; then
+            echo "::error::발행 대기 중인 원고가 없습니다. content/queue/ 를 채워주세요."
+            exit 1
+          fi
+          echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
+          echo "오늘 발행: $SLUG"
+
+      - name: 원고 형식 검사
+        run: cd scripts && python validate.py "${{ steps.pick.outputs.slug }}"
+
+      - name: 카드 이미지 렌더링
+        run: cd scripts && python render.py --slug "${{ steps.pick.outputs.slug }}"
+
+      - name: 렌더 결과 업로드 (백업용)
+        uses: actions/upload-artifact@v4
+        with:
+          name: cards-${{ steps.pick.outputs.slug }}
+          path: out/${{ steps.pick.outputs.slug }}/*.jpg
+          retention-days: 14
+
+      - name: 이미지 커밋 & 푸시
+        id: commit
+        run: |
+          git config user.name  "cardnews-bot"
+          git config user.email "actions@github.com"
+          git add out/
+          git commit -m "render: ${{ steps.pick.outputs.slug }}" || echo "변경 없음"
+          git push
+          echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: 인스타그램 발행
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+          GITHUB_REPOSITORY: ${{ github.repository }}
+          GITHUB_SHA: ${{ steps.commit.outputs.sha }}
+        run: |
+          cd scripts
+          if [ "${{ inputs.dry_run }}" = "true" ]; then
+            python publish.py --slug "${{ steps.pick.outputs.slug }}" --dry-run
+          else
+            python publish.py --slug "${{ steps.pick.outputs.slug }}"
+          fi
+
+      - name: 발행 기록 커밋
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          git add state.json
+          git commit -m "posted: ${{ steps.pick.outputs.slug }}" || echo "변경 없음"
+          git pull --rebase --autostash || true
+          git push
+
+      - name: 남은 원고 확인
+        if: ${{ inputs.dry_run != true }}
+        run: |
+          cd scripts
+          LEFT=$(python -c "import postqueue; print(postqueue.remaining())")
+          echo "남은 원고: $LEFT편"
+          if [ "$LEFT" -le 7 ]; then
+            echo "::warning::원고가 $LEFT편 남았습니다. 곧 채워주세요."
+          fi
