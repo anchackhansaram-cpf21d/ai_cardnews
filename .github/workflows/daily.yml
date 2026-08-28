@@ -24,13 +24,23 @@ concurrency:
   group: instagram-daily
   cancel-in-progress: false
 
+env:
+  MAIN_BRANCH: main
+
 jobs:
   publish:
     runs-on: ubuntu-latest
     timeout-minutes: 25
 
     steps:
+      # ref/fetch-depth 를 반드시 지정합니다.
+      # 기본값은 "트리거 시점에 고정된 SHA"라서, 재실행(Re-run)이나 대기열에
+      # 밀린 실행은 옛날 커밋을 체크아웃하게 되고 → 옛 state.json 으로 이미
+      # 발행한 원고를 다시 고르거나 push가 non-fast-forward로 거부됩니다.
       - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
 
       - uses: actions/setup-python@v5
         with:
@@ -62,6 +72,20 @@ jobs:
           echo "slug=$SLUG" >> "$GITHUB_OUTPUT"
           echo "오늘 발행: $SLUG"
 
+      # 중복 발행 방지: 이미 state.json 에 기록된 원고면 여기서 멈춥니다.
+      - name: 중복 발행 방지 확인
+        if: ${{ inputs.dry_run != true }}
+        env:
+          SLUG: ${{ steps.pick.outputs.slug }}
+        run: |
+          cd scripts
+          python - <<'PY'
+          import os, sys, postqueue
+          slug = os.environ["SLUG"]
+          if slug in postqueue.load_state().get("posted", []):
+              sys.exit(f"::error::{slug} 는 이미 발행된 원고입니다. 중복 발행을 막고 종료합니다.")
+          PY
+
       - name: 원고 형식 검사
         run: cd scripts && python validate.py "${{ steps.pick.outputs.slug }}"
 
@@ -81,9 +105,25 @@ jobs:
           git config user.name  "cardnews-bot"
           git config user.email "actions@github.com"
           git add out/
-          git commit -m "render: ${{ steps.pick.outputs.slug }}" || echo "변경 없음"
-          git push
+          if git diff --cached --quiet; then
+            echo "커밋할 이미지 변경 없음 (기존 커밋 재사용)"
+          else
+            git commit -m "render: ${{ steps.pick.outputs.slug }}"
+          fi
+          # 다른 실행이 그 사이 main 을 밀어 올렸을 수 있으므로 rebase 후 재시도
+          ok=0
+          for i in 1 2 3 4 5; do
+            git fetch origin "$MAIN_BRANCH" \
+              && git rebase "origin/$MAIN_BRANCH" \
+              && git push origin "HEAD:$MAIN_BRANCH" \
+              && { ok=1; break; }
+            git rebase --abort 2>/dev/null || true
+            echo "push 재시도 $i/5"
+            sleep $((RANDOM % 5 + 3))
+          done
+          [ "$ok" = "1" ] || { echo "::error::이미지 푸시 실패"; exit 1; }
           echo "sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
+          echo "발행에 사용할 SHA: $(git rev-parse HEAD)"
 
       - name: 인스타그램 발행
         env:
@@ -99,13 +139,31 @@ jobs:
             python publish.py --slug "${{ steps.pick.outputs.slug }}"
           fi
 
+      # 발행은 이미 끝난 뒤이므로, 기록 커밋이 실패하면 반드시 크게 알려야
+      # 합니다. (기록이 안 남으면 다음날 같은 원고를 또 올리게 됩니다.)
       - name: 발행 기록 커밋
         if: ${{ inputs.dry_run != true }}
         run: |
           git add state.json
-          git commit -m "posted: ${{ steps.pick.outputs.slug }}" || echo "변경 없음"
-          git pull --rebase --autostash || true
-          git push
+          if git diff --cached --quiet; then
+            echo "::warning::state.json 변경이 없습니다. 발행 기록을 확인하세요."
+            exit 0
+          fi
+          git commit -m "posted: ${{ steps.pick.outputs.slug }}"
+          ok=0
+          for i in 1 2 3 4 5; do
+            git fetch origin "$MAIN_BRANCH" \
+              && git rebase "origin/$MAIN_BRANCH" \
+              && git push origin "HEAD:$MAIN_BRANCH" \
+              && { ok=1; break; }
+            git rebase --abort 2>/dev/null || true
+            echo "push 재시도 $i/5"
+            sleep $((RANDOM % 5 + 3))
+          done
+          [ "$ok" = "1" ] || {
+            echo "::error::인스타 발행은 됐지만 state.json 푸시에 실패했습니다. 수동으로 state.json 을 커밋하지 않으면 내일 같은 원고가 다시 올라갑니다."
+            exit 1
+          }
 
       - name: 남은 원고 확인
         if: ${{ inputs.dry_run != true }}
