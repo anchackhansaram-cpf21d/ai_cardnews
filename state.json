@@ -2,7 +2,16 @@
   "posted": [
     "001-attention",
     "002-positional-encoding",
-    "003-backpropagation"
+    "003-backpropagation",
+    "004-rag-retrieval"
   ],
-  "last_run": null
+  "last_run": "2026-08-30T19:09:19+09:00",
+  "log": [
+    {
+      "slug": "004-rag-retrieval",
+      "posted_at": "2026-08-30T19:09:19+09:00",
+      "media_id": "17911115580465334",
+      "permalink": "https://www.instagram.com/p/DcqQ3LujlgD/"
+    }
+  ]
 }
