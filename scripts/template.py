@@ -2,6 +2,8 @@
 
 import html
 
+import diagrams
+
 W, H = 1080, 1350
 
 CSS = """
@@ -15,6 +17,7 @@ CSS = """
   --line:rgba(255,255,255,.10);
   --accent:#7C9CFF;
   --accent2:#FFB870;
+  --warm:#FFB870;      /* 다이어그램 강조색 */
 }
 
 body{
@@ -50,7 +53,7 @@ body{
 .glow.a{ width:640px; height:640px; background:var(--accent); top:-260px; right:-220px; }
 .glow.b{ width:520px; height:520px; background:#3B2E7A; bottom:-260px; left:-200px; opacity:.42; }
 
-.card.insight{ --accent:var(--accent2); background:#0D0A1C; }
+.card.insight{ --accent:var(--accent2); --warm:#7C9CFF; background:#0D0A1C; }
 .card.insight .glow.a{ background:#FF9A4D; opacity:.24; }
 .card.insight .glow.b{ background:#5B2E6E; opacity:.40; }
 
@@ -148,6 +151,15 @@ body{
   width:.42em; height:.42em; border-radius:50%; background:var(--accent2);
 }
 .bullets li b{ color:#fff; font-weight:700; }
+
+/* 시각화 카드 */
+.dia{ display:block; margin:.2em 0 0; overflow:visible; }
+.vcap{
+  margin-top:1.4em; padding-top:1.1em; border-top:1px solid var(--line);
+  font-size:1.92em; line-height:1.62; color:#C9D2EC; font-weight:400;
+}
+.vcap .em{ color:#fff; font-weight:700; }
+.vlead{ font-size:1.98em; line-height:1.66; color:#D3DAF0; margin-bottom:1.1em; }
 
 /* 마지막 CTA */
 .cta{
@@ -247,6 +259,19 @@ def render_card(card, idx, total, meta):
         align = "center"
         swipe = ('<div class="swipe"><span>밀어서 보기</span>'
                  '<span class="arrow">&#8250;&#8250;</span></div>')
+    elif kind == "visual":
+        body = ""
+        if card.get("kicker") or card.get("kicker_label"):
+            body += (f'<div class="kicker"><span class="num">{idx:02d}</span>'
+                     f'<span>{esc(card.get("kicker_label",""))}</span></div>')
+        body += f'<h2 class="heading">{esc(card.get("heading",""))}</h2>'
+        if card.get("lead"):
+            body += f'<p class="vlead">{esc(card["lead"])}</p>'
+        body += diagrams.build(card["visual"])
+        if card.get("caption"):
+            body += f'<div class="vcap">{esc(card["caption"])}</div>'
+        align = "center"
+
     elif kind == "insight":
         body = f'<div class="badge">{esc(card.get("label","실무자 인사이트"))}</div>'
         body += f'<h2 class="heading">{esc(card.get("heading",""))}</h2>'

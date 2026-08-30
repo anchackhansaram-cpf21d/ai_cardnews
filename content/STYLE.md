@@ -18,8 +18,39 @@
 | 순서 | type | 역할 |
 |---|---|---|
 | 1 | `cover` | 후킹 질문형 제목 |
-| 2–8 | `body` | 입문자용. 문제 제기 → 아이디어 → 구조 → 계산 → 의미 → 확장 |
+| 2–8 | `visual` 중심, `body` 보조 | 입문자용. 문제 제기 → 아이디어 → 구조 → 계산 → 의미 → 확장 |
 | 9–10 | `insight` | 실무자용. 비용·함정·실전 판단 기준 |
+
+**2–8번 중 최소 4장은 `visual`로 만드세요.** 글만 이어지면 스크롤이 멈춥니다.
+
+## visual 카드
+
+```json
+{"type":"visual","kicker_label":"실측","heading":"짧은 제목",
+ "lead":"(선택) 그림 위 한 문장",
+ "visual":{"kind":"bars", ...},
+ "caption":"그림 아래 한두 문장. 그림이 뭘 말하는지 해석해 줍니다."}
+```
+
+`kind`는 여섯 가지입니다.
+
+| kind | 언제 | 필수 필드 |
+|---|---|---|
+| `flow` | 파이프라인·단계 | `steps:[{label,sub,highlight}]`, `direction:"h"|"v"` |
+| `bars` | 수치 비교 | `items:[{label,value,highlight}]`, `max`(눈금 상한) |
+| `line` | 추세·곡선 | `series:[{label,points:[[x,y]…]}]`, `xlabel`, `ylabel` |
+| `heatmap` | 여러 대상 × 여러 지표 | `rows`, `cols`, `values`, `normalize:"col"` |
+| `compare` | 둘의 대비 | `left/right:{title,items:[…]}` |
+| `formula` | 수식 각 항 설명 | `parts:[{text,note,color}]` |
+
+규칙 몇 가지.
+
+- `bars`에는 **반드시 `max`를 지정**하세요. 없으면 눈금이 자동으로 잡혀 차이가 과장됩니다.
+- `heatmap`에서 지표마다 값의 범위가 다르면 `"normalize":"col"`을 쓰세요. 안 쓰면 전부 비슷한 색으로 뭉갭니다.
+- `flow`는 가로 4단계, 세로 3단계까지가 깔끔합니다. `label`은 6자 이내, `sub`는 한 줄.
+- `compare`의 `items`는 한 줄에 20자 이내, 3~4개.
+- 강조하고 싶은 한 곳에만 `highlight: true`를 씁니다. 두 곳 이상 쓰면 강조가 죽습니다.
+- **출처가 특정 실험이면 `caption`에 "한 실습 데이터셋 기준"처럼 범위를 밝히세요.** 일반화된 벤치마크인 것처럼 쓰면 안 됩니다.
 
 10번 카드에는 반드시 `cta`로 다음 편 예고 + 저장 유도를 넣습니다.
 

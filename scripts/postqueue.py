@@ -2,6 +2,7 @@
 
 import json
 import pathlib
+import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 QUEUE = ROOT / "content" / "queue"
@@ -20,8 +21,19 @@ def save_state(state):
                      encoding="utf-8")
 
 
+# 원고 파일명 규칙: 001-슬러그.json
+# 이 패턴에 맞지 않는 JSON(설정 파일 등)이 큐에 섞여도 원고로 오인하지 않는다.
+EPISODE = re.compile(r"^\d{3}-")
+
+
 def all_slugs():
-    return sorted(p.stem for p in QUEUE.glob("*.json"))
+    return sorted(p.stem for p in QUEUE.glob("*.json") if EPISODE.match(p.stem))
+
+
+def stray_files():
+    """큐 안에 있지만 원고가 아닌 파일 목록."""
+    return sorted(p.name for p in QUEUE.glob("*.json")
+                  if not EPISODE.match(p.stem))
 
 
 def next_slug():

@@ -61,6 +61,42 @@ def post(url, params, tries=4):
     sys.exit(f"Graph API 호출 실패 -> {url}\n{last}")
 
 
+def preflight(ig_user, token):
+    """발행을 시작하기 전에 계정 ID와 토큰이 맞는지 먼저 확인한다."""
+    try:
+        r = requests.get(f"{API}/{ig_user}",
+                         params={"fields": "username", "access_token": token},
+                         timeout=60)
+    except requests.RequestException as e:
+        sys.exit(f"Meta 서버에 접속하지 못했습니다: {type(e).__name__}. "
+                 f"잠시 뒤 다시 실행해 주세요.")
+    if r.status_code == 200:
+        print(f"계정 확인: @{r.json().get('username', '?')}")
+        return
+
+    err = {}
+    try:
+        err = r.json().get("error", {})
+    except Exception:
+        pass
+    code, sub = err.get("code"), err.get("error_subcode")
+
+    if code == 100:
+        sys.exit(
+            "IG_USER_ID 를 찾을 수 없습니다.\n"
+            "  인스타그램 계정 ID 대신 페이지 ID를 넣으셨을 가능성이 큽니다.\n"
+            "  아래 주소로 진짜 ID를 확인하세요 (결과의 instagram_business_account.id):\n"
+            f"  https://graph.facebook.com/v25.0/[페이지ID]"
+            f"?fields=instagram_business_account&access_token=[페이지토큰]\n"
+            f"  (현재 설정된 값의 길이: {len(str(ig_user))}자 · 정상은 17자 안팎)"
+        )
+    if code == 190:
+        sys.exit("IG_ACCESS_TOKEN 이 만료되었거나 무효합니다. 토큰을 재발급하세요.")
+    if code == 10 or code == 200:
+        sys.exit("토큰에 권한이 부족합니다. instagram_content_publish 권한을 확인하세요.")
+    sys.exit(f"계정 확인 실패 (code={code}, subcode={sub}): {r.text[:400]}")
+
+
 def wait_ready(container_id, token, timeout=300):
     """컨테이너가 FINISHED 될 때까지 대기."""
     deadline = time.time() + timeout
@@ -104,8 +140,11 @@ def main():
         print(caption)
         return
 
-    ig_user = need("IG_USER_ID")
-    token = need("IG_ACCESS_TOKEN")
+    ig_user = need("IG_USER_ID").strip()
+    token = need("IG_ACCESS_TOKEN").strip()
+
+    # 0) 계정·토큰 사전 점검
+    preflight(ig_user, token)
 
     # 1) 이미지별 컨테이너 생성
     children = []
