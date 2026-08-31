@@ -61,6 +61,60 @@ def post(url, params, tries=4):
     sys.exit(f"Graph API 호출 실패 -> {url}\n{last}")
 
 
+def check_images_public(urls):
+    """Meta가 가져갈 수 있는 주소인지 먼저 확인한다.
+
+    저장소가 private이거나 이미지 푸시가 실패하면 raw 주소가 404가 되고,
+    Meta는 "미디어를 가져올 수 없다"(code 9004)로만 알려줘 원인 파악이 어렵다.
+    """
+    url = urls[0]
+    # 푸시 직후에는 raw CDN에 파일이 아직 안 퍼져 404가 날 수 있다.
+    # Meta가 그 타이밍에 받아가면 code 9004로 실패하므로, 먼저 여기서 기다린다.
+    r = None
+    for attempt in range(1, 13):          # 최대 약 60초
+        try:
+            r = requests.get(url, timeout=45, stream=True)
+        except requests.RequestException as e:
+            sys.exit(f"이미지 주소에 접속하지 못했습니다: {type(e).__name__}\n  {url}")
+        if r.status_code == 200 and r.headers.get("content-type", "").startswith("image/"):
+            break
+        if attempt == 1:
+            print(f"이미지가 아직 공개되지 않았습니다 (HTTP {r.status_code}). "
+                  f"CDN 반영을 기다립니다...")
+        time.sleep(5)
+
+    ctype = r.headers.get("content-type", "")
+    if r.status_code == 404:
+        sys.exit(
+            "이미지 주소가 404입니다. Meta가 카드를 가져갈 수 없습니다.\n"
+            f"  {url}\n"
+            "  원인은 보통 둘 중 하나입니다:\n"
+            "  1) 저장소가 Private — Settings → General → 맨 아래 Change visibility → Public\n"
+            "  2) 이미지 커밋이 푸시되지 않음 — 위쪽 '이미지 커밋 & 푸시' 단계 로그를 확인하세요\n"
+            "  브라우저 시크릿 창에서 위 주소를 열어보면 바로 확인됩니다."
+        )
+    if r.status_code != 200:
+        sys.exit(f"이미지 주소가 HTTP {r.status_code} 입니다.\n  {url}")
+    if not ctype.startswith("image/"):
+        sys.exit(
+            f"이미지 주소가 이미지가 아닌 응답을 돌려줍니다 (content-type: {ctype}).\n"
+            f"  {url}\n"
+            "  저장소가 Private이면 로그인 페이지가 반환되어 이 증상이 납니다."
+        )
+    # 첫 장만 되고 나머지가 아직인 경우가 있어 마지막 장도 확인한다
+    if len(urls) > 1:
+        for attempt in range(1, 13):
+            last = requests.get(urls[-1], timeout=45, stream=True)
+            if last.status_code == 200:
+                break
+            time.sleep(5)
+        else:
+            sys.exit(f"마지막 이미지가 아직 공개되지 않았습니다.\n  {urls[-1]}")
+
+    size = int(r.headers.get("content-length") or 0)
+    print(f"이미지 접근 확인: {len(urls)}장 · 첫 장 {size // 1024}KB · {ctype}")
+
+
 def preflight(ig_user, token):
     """발행을 시작하기 전에 계정 ID와 토큰이 맞는지 먼저 확인한다."""
     try:
@@ -141,17 +195,20 @@ def main():
     caption = build_caption(data)
 
     if a.dry_run:
+        # 수동 업로드용으로 캡션을 파일로도 남긴다 (이미지와 함께 내려받게)
+        (img_dir / "caption.txt").write_text(caption, encoding="utf-8")
         print("--- 이미지 URL ---")
         print("\n".join(urls))
-        print("\n--- 캡션 ---")
+        print("\n--- 캡션 (out/%s/caption.txt 에도 저장) ---" % a.slug)
         print(caption)
         return
 
     ig_user = need("IG_USER_ID").strip()
     token = need("IG_ACCESS_TOKEN").strip()
 
-    # 0) 계정·토큰 사전 점검
+    # 0) 계정·토큰, 그리고 이미지 주소 사전 점검
     preflight(ig_user, token)
+    check_images_public(urls)
 
     # 1) 이미지별 컨테이너 생성
     children = []
