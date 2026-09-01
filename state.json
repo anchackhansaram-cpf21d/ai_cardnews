@@ -4,9 +4,10 @@
     "002-positional-encoding",
     "003-backpropagation",
     "004-rag-retrieval",
-    "005-lora"
+    "005-lora",
+    "006-peft"
   ],
-  "last_run": "2026-08-31T11:44:40+09:00",
+  "last_run": "2026-09-01T14:40:15+09:00",
   "log": [
     {
       "slug": "004-rag-retrieval",
@@ -19,6 +20,12 @@
       "posted_at": "2026-08-31T11:44:40+09:00",
       "media_id": "17906811894303712",
       "permalink": "https://www.instagram.com/p/DcsCwpeEtKk/"
+    },
+    {
+      "slug": "006-peft",
+      "posted_at": "2026-09-01T14:40:15+09:00",
+      "media_id": "18155428180505658",
+      "permalink": "https://www.instagram.com/p/Dcu7qEiHB0L/"
     }
   ]
 }
