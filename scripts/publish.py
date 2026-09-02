@@ -52,8 +52,13 @@ def post(url, params, tries=4):
         if r.status_code == 200:
             return r.json()
         last = f"HTTP {r.status_code}: {r.text[:500]}"
-        # 4xx 중 재시도가 무의미한 것은 즉시 중단
-        if r.status_code == 400 and "rate limit" not in r.text.lower():
+        body = r.text.lower()
+        # 9004 = "미디어를 가져올 수 없음". 갓 푸시한 커밋은 raw CDN 반영이
+        # 늦어 Meta 쪽에서만 404 로 보일 수 있으므로 재시도 대상이다.
+        retryable = ("rate limit" in body or "9004" in body
+                     or "media" in body and "fetch" in body)
+        # 그 밖의 4xx(토큰 만료·잘못된 파라미터 등)는 재시도해도 소용없다
+        if r.status_code == 400 and not retryable:
             break
         print(f"  재시도 {attempt}/{tries} ({last})")
         time.sleep(delay)
@@ -61,58 +66,59 @@ def post(url, params, tries=4):
     sys.exit(f"Graph API 호출 실패 -> {url}\n{last}")
 
 
-def check_images_public(urls):
-    """Meta가 가져갈 수 있는 주소인지 먼저 확인한다.
-
-    저장소가 private이거나 이미지 푸시가 실패하면 raw 주소가 404가 되고,
-    Meta는 "미디어를 가져올 수 없다"(code 9004)로만 알려줘 원인 파악이 어렵다.
-    """
-    url = urls[0]
-    # 푸시 직후에는 raw CDN에 파일이 아직 안 퍼져 404가 날 수 있다.
-    # Meta가 그 타이밍에 받아가면 code 9004로 실패하므로, 먼저 여기서 기다린다.
+def _wait_public(url, tries=36, gap=5):
+    """raw URL 이 200 + image/* 로 응답할 때까지 대기 (기본 최대 3분)."""
     r = None
-    for attempt in range(1, 13):          # 최대 약 60초
+    for attempt in range(1, tries + 1):
         try:
             r = requests.get(url, timeout=45, stream=True)
         except requests.RequestException as e:
             sys.exit(f"이미지 주소에 접속하지 못했습니다: {type(e).__name__}\n  {url}")
         if r.status_code == 200 and r.headers.get("content-type", "").startswith("image/"):
-            break
+            return r
         if attempt == 1:
-            print(f"이미지가 아직 공개되지 않았습니다 (HTTP {r.status_code}). "
-                  f"CDN 반영을 기다립니다...")
-        time.sleep(5)
+            print(f"  아직 공개되지 않음 (HTTP {r.status_code}). CDN 반영 대기...")
+        time.sleep(gap)
+    return r
 
-    ctype = r.headers.get("content-type", "")
-    if r.status_code == 404:
+
+def check_images_public(urls):
+    """Meta가 가져갈 수 있는 주소인지 발행 전에 전부 확인한다.
+
+    Meta는 못 가져오면 code 9004 로만 알려줘 원인 파악이 어렵다. 그래서
+    첫 장·마지막 장뿐 아니라 실제로 넘길 10장을 모두 여기서 검증한다.
+    """
+    first = _wait_public(urls[0])
+    if first.status_code == 404:
         sys.exit(
             "이미지 주소가 404입니다. Meta가 카드를 가져갈 수 없습니다.\n"
-            f"  {url}\n"
-            "  원인은 보통 둘 중 하나입니다:\n"
-            "  1) 저장소가 Private — Settings → General → 맨 아래 Change visibility → Public\n"
-            "  2) 이미지 커밋이 푸시되지 않음 — 위쪽 '이미지 커밋 & 푸시' 단계 로그를 확인하세요\n"
+            f"  {urls[0]}\n"
+            "  원인은 보통 셋 중 하나입니다:\n"
+            "  1) SHA 오지정 — 이미지가 없는 커밋을 가리키고 있음. 워크플로의\n"
+            "     IMAGE_SHA 가 '이미지 커밋 & 푸시' 단계의 sha 와 같은지 확인.\n"
+            "     (GITHUB_SHA 는 예약 변수라 덮어써도 러너가 되돌립니다)\n"
+            "  2) 저장소가 Private — Settings → General → Change visibility → Public\n"
+            "  3) 이미지 커밋이 푸시되지 않음 — 위 단계 로그 확인\n"
             "  브라우저 시크릿 창에서 위 주소를 열어보면 바로 확인됩니다."
         )
-    if r.status_code != 200:
-        sys.exit(f"이미지 주소가 HTTP {r.status_code} 입니다.\n  {url}")
+    ctype = first.headers.get("content-type", "")
+    if first.status_code != 200:
+        sys.exit(f"이미지 주소가 HTTP {first.status_code} 입니다.\n  {urls[0]}")
     if not ctype.startswith("image/"):
         sys.exit(
             f"이미지 주소가 이미지가 아닌 응답을 돌려줍니다 (content-type: {ctype}).\n"
-            f"  {url}\n"
+            f"  {urls[0]}\n"
             "  저장소가 Private이면 로그인 페이지가 반환되어 이 증상이 납니다."
         )
-    # 첫 장만 되고 나머지가 아직인 경우가 있어 마지막 장도 확인한다
-    if len(urls) > 1:
-        for attempt in range(1, 13):
-            last = requests.get(urls[-1], timeout=45, stream=True)
-            if last.status_code == 200:
-                break
-            time.sleep(5)
-        else:
-            sys.exit(f"마지막 이미지가 아직 공개되지 않았습니다.\n  {urls[-1]}")
 
-    size = int(r.headers.get("content-length") or 0)
-    print(f"이미지 접근 확인: {len(urls)}장 · 첫 장 {size // 1024}KB · {ctype}")
+    # 나머지 장도 전부 확인 (한 장만 404여도 캐러셀 전체가 실패한다)
+    for i, u in enumerate(urls[1:], 2):
+        r = _wait_public(u, tries=24)
+        if r.status_code != 200:
+            sys.exit(f"{i}번째 이미지가 공개되지 않았습니다 (HTTP {r.status_code}).\n  {u}")
+
+    size = int(first.headers.get("content-length") or 0)
+    print(f"이미지 접근 확인: {len(urls)}장 전부 OK · 첫 장 {size // 1024}KB · {ctype}")
 
 
 def preflight(ig_user, token):
@@ -183,7 +189,10 @@ def main():
     a = ap.parse_args()
 
     repo = need("GITHUB_REPOSITORY")
-    sha = need("GITHUB_SHA")
+    # IMAGE_SHA = 방금 이미지를 푸시한 커밋. GITHUB_SHA 는 Actions 예약 변수라
+    # 워크플로에서 덮어써도 러너가 "트리거 시점의 헤드"로 되돌려 버린다.
+    # 그 값을 쓰면 렌더 커밋 이전을 가리켜 raw URL 이 영구 404 가 된다.
+    sha = (os.environ.get("IMAGE_SHA") or "").strip() or need("GITHUB_SHA")
     data = q.load(a.slug)
 
     img_dir = ROOT / "out" / a.slug

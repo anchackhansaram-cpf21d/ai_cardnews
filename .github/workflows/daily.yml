@@ -130,7 +130,11 @@ jobs:
           IG_USER_ID: ${{ secrets.IG_USER_ID }}
           IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
           GITHUB_REPOSITORY: ${{ github.repository }}
-          GITHUB_SHA: ${{ steps.commit.outputs.sha }}
+          # GITHUB_SHA 는 Actions 예약 변수라 여기서 덮어써도 러너가 기본값
+          # (트리거 시점의 main 헤드)으로 되돌립니다. 그러면 방금 만든 렌더
+          # 커밋이 아니라 그 이전 커밋을 가리켜 raw URL 이 영구 404 가 됩니다.
+          # 반드시 GITHUB_ 접두사가 없는 이름을 쓸 것.
+          IMAGE_SHA: ${{ steps.commit.outputs.sha }}
         run: |
           cd scripts
           if [ "${{ inputs.dry_run }}" = "true" ]; then
