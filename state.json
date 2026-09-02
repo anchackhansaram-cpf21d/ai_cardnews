@@ -5,9 +5,10 @@
     "003-backpropagation",
     "004-rag-retrieval",
     "005-lora",
-    "006-peft"
+    "006-peft",
+    "007-sft"
   ],
-  "last_run": "2026-09-01T14:40:15+09:00",
+  "last_run": "2026-09-02T12:06:49+09:00",
   "log": [
     {
       "slug": "004-rag-retrieval",
@@ -26,6 +27,12 @@
       "posted_at": "2026-09-01T14:40:15+09:00",
       "media_id": "18155428180505658",
       "permalink": "https://www.instagram.com/p/Dcu7qEiHB0L/"
+    },
+    {
+      "slug": "007-sft",
+      "posted_at": "2026-09-02T12:06:49+09:00",
+      "media_id": "17900785764577252",
+      "permalink": "https://www.instagram.com/p/DcxO5gYDh32/"
     }
   ]
 }
