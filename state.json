@@ -6,9 +6,10 @@
     "004-rag-retrieval",
     "005-lora",
     "006-peft",
-    "007-sft"
+    "007-sft",
+    "008-cpt-vs-it"
   ],
-  "last_run": "2026-09-02T12:06:49+09:00",
+  "last_run": "2026-09-03T16:20:33+09:00",
   "log": [
     {
       "slug": "004-rag-retrieval",
@@ -33,6 +34,12 @@
       "posted_at": "2026-09-02T12:06:49+09:00",
       "media_id": "17900785764577252",
       "permalink": "https://www.instagram.com/p/DcxO5gYDh32/"
+    },
+    {
+      "slug": "008-cpt-vs-it",
+      "posted_at": "2026-09-03T16:20:33+09:00",
+      "media_id": "18471515716115185",
+      "permalink": "https://www.instagram.com/p/Dc0Qt7YIAYV/"
     }
   ]
 }
