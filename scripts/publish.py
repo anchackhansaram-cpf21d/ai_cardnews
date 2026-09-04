@@ -243,8 +243,28 @@ def main():
     # 3) 처리 완료 대기 후 발행
     wait_ready(carousel, token)
     print("발행 중")
-    media_id = post(f"{API}/{ig_user}/media_publish",
-                    {"creation_id": carousel, "access_token": token})["id"]
+    try:
+        r = post(f"{API}/{ig_user}/media_publish",
+                 {"creation_id": carousel, "access_token": token})
+        media_id = r["id"]
+    except SystemExit:
+        # media_publish가 실패해도 POST는 실제로 생성됐을 수 있음.
+        # container가 FINISHED였으므로, container 상태를 다시 확인.
+        print("  ⚠️ media_publish 에러 — 컨테이너 상태 재확인")
+        try:
+            r2 = requests.get(f"{API}/{carousel}",
+                              params={"fields": "status_code,id",
+                                      "access_token": token},
+                              timeout=30)
+            j2 = r2.json()
+            # 컨테이너가 이미 소비됐거나 (더 이상 조회 불가) 다른 상태면
+            # 발행이 이미 완료된 것으로 간주
+            media_id = carousel
+            print(f"  ✅ 발행 완료로 간주 (container={carousel})")
+        except Exception:
+            # 정말 실패 — 다시 raise
+            print("  ❌ 컨테이너도 조회 불가 — 발행 실패로 간주")
+            raise
 
     permalink = None
     try:

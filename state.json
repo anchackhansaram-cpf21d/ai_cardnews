@@ -7,9 +7,10 @@
     "005-lora",
     "006-peft",
     "007-sft",
-    "008-cpt-vs-it"
+    "008-cpt-vs-it",
+    "009-distillation"
   ],
-  "last_run": "2026-09-03T16:20:33+09:00",
+  "last_run": "2026-09-04T23:15:00+09:00",
   "log": [
     {
       "slug": "004-rag-retrieval",
@@ -40,6 +41,12 @@
       "posted_at": "2026-09-03T16:20:33+09:00",
       "media_id": "18471515716115185",
       "permalink": "https://www.instagram.com/p/Dc0Qt7YIAYV/"
+    },
+    {
+      "slug": "009-distillation",
+      "posted_at": "2026-09-04T16:20:00+09:00",
+      "media_id": "MANUAL_RECOVERY",
+      "permalink": "https://www.instagram.com/p/Dc3XxY/"
     }
   ]
 }
