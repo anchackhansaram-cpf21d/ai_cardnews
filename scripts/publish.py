@@ -55,13 +55,16 @@ def post(url, params, tries=4):
         body = r.text.lower()
         # 9004 = "미디어를 가져올 수 없음". 갓 푸시한 커밋은 raw CDN 반영이
         # 늦어 Meta 쪽에서만 404 로 보일 수 있으므로 재시도 대상이다.
-        retryable = ("rate limit" in body or "request limit" in body
-                     or "9004" in body
+        is_rate_limit = "rate limit" in body or "request limit" in body
+        retryable = (is_rate_limit or "9004" in body
                      or "media" in body and "fetch" in body)
         # 그 밖의 4xx(토큰 만료·잘못된 파라미터 등)는 재시도해도 소용없다
         if r.status_code in (400, 403) and not retryable:
             break
         print(f"  재시도 {attempt}/{tries} ({last})")
+        # rate limit은 장기 대기 (몇 분~한 시간)
+        if is_rate_limit:
+            delay = 60  # 1분 대기 후 재시도
         time.sleep(delay)
         delay *= 2
     sys.exit(f"Graph API 호출 실패 -> {url}\n{last}")
