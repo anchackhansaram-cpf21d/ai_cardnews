@@ -9,9 +9,10 @@
     "007-sft",
     "008-cpt-vs-it",
     "009-distillation",
-    "010-training-data-types"
+    "010-training-data-types",
+    "011-rlhf"
   ],
-  "last_run": "2026-09-05T16:05:35+09:00",
+  "last_run": "2026-09-06T16:16:25+09:00",
   "log": [
     {
       "slug": "004-rag-retrieval",
@@ -53,6 +54,12 @@
       "slug": "010-training-data-types",
       "posted_at": "2026-09-05T16:05:35+09:00",
       "media_id": "18096430850131705",
+      "permalink": null
+    },
+    {
+      "slug": "011-rlhf",
+      "posted_at": "2026-09-06T16:16:25+09:00",
+      "media_id": "18096762302131705",
       "permalink": null
     }
   ]
