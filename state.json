@@ -11,9 +11,10 @@
     "009-distillation",
     "010-training-data-types",
     "011-rlhf",
-    "012-dpo"
+    "012-dpo",
+    "013-rlvr"
   ],
-  "last_run": "2026-09-07T16:30:20+09:00",
+  "last_run": "2026-09-08T16:24:06+09:00",
   "log": [
     {
       "slug": "004-rag-retrieval",
@@ -67,6 +68,12 @@
       "slug": "012-dpo",
       "posted_at": "2026-09-07T16:30:20+09:00",
       "media_id": "18097110203131705",
+      "permalink": null
+    },
+    {
+      "slug": "013-rlvr",
+      "posted_at": "2026-09-08T16:24:06+09:00",
+      "media_id": "18097411823131705",
       "permalink": null
     }
   ]
