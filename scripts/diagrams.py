@@ -114,8 +114,8 @@ def bars(s):
 # ── 3. 꺾은선 / 곡선 ────────────────────────────────────────────
 def line(s):
     series = s["series"]
-    H = 470
-    pad_l, pad_r, pad_t, pad_b = 86, 34, 26, 74
+    H = 486
+    pad_l, pad_r, pad_t, pad_b = 104, 40, 34, 86
     w, h = CW - pad_l - pad_r, H - pad_t - pad_b
     xs = [p[0] for sr in series for p in sr["points"]]
     ys = [p[1] for sr in series for p in sr["points"]]
@@ -144,20 +144,21 @@ def line(s):
         ex, ey = sr["points"][-1]
         out.append(f'<circle cx="{sx(ex):.1f}" cy="{sy(ey):.1f}" r="9" fill="{col}"/>')
         if sr.get("label"):
-            out.append(f'<text x="{sx(ex)-14:.1f}" y="{sy(ey)-26:.1f}" text-anchor="end" '
+            dy = -26 if k == 0 else 40      # 두 선의 라벨이 겹치지 않도록
+            out.append(f'<text x="{sx(ex)-16:.1f}" y="{sy(ey)+dy:.1f}" text-anchor="end" '
                        f'font-size="23" font-weight="700" fill="{col}">'
                        f'{esc(sr["label"])}</text>')
 
     if s.get("xlabel"):
-        out.append(f'<text x="{pad_l+w/2:.0f}" y="{H-22}" text-anchor="middle" '
+        out.append(f'<text x="{pad_l+w/2:.0f}" y="{H-10}" text-anchor="middle" '
                    f'font-size="22" font-weight="500" fill="var(--muted)">'
                    f'{esc(s["xlabel"])}</text>')
     if s.get("ylabel"):
-        out.append(f'<text transform="translate(28,{pad_t+h/2:.0f}) rotate(-90)" '
+        out.append(f'<text transform="translate(34,{pad_t+h/2:.0f}) rotate(-90)" '
                    f'text-anchor="middle" font-size="22" font-weight="500" '
                    f'fill="var(--muted)">{esc(s["ylabel"])}</text>')
     for a in s.get("ticks", []):
-        out.append(f'<text x="{sx(a[0]):.0f}" y="{pad_t+h+34}" text-anchor="middle" '
+        out.append(f'<text x="{sx(a[0]):.0f}" y="{pad_t+h+32}" text-anchor="middle" '
                    f'font-size="21" fill="var(--muted)">{esc(a[1])}</text>')
     return _wrap("".join(out), H)
 
