@@ -6,7 +6,8 @@
   IG_USER_ID       인스타그램 프로페셔널 계정의 ID (숫자)
   IG_ACCESS_TOKEN  장기 액세스 토큰
   GITHUB_REPOSITORY  owner/repo   (Actions가 자동 주입)
-  GITHUB_SHA         이미지가 포함된 커밋 SHA (Actions가 자동 주입)
+  IMAGE_SHA          이미지가 포함된 커밋 SHA (steps.commit.outputs.sha)
+  GITHUB_SHA         IMAGE_SHA가 없을 때 fallback (Actions 자동 주입)
 """
 
 import argparse
@@ -183,7 +184,9 @@ def main():
     a = ap.parse_args()
 
     repo = need("GITHUB_REPOSITORY")
-    sha = need("GITHUB_SHA")
+    # GITHUB_SHA는 Actions 예약 변수라 작업에서 덮어써도 원래 값으로 되돌아감.
+    # workflow에서 IMAGE_SHA로 전달된 값이 우선, 없으면 GITHUB_SHA fallback.
+    sha = os.environ.get("IMAGE_SHA") or need("GITHUB_SHA")
     data = q.load(a.slug)
 
     img_dir = ROOT / "out" / a.slug
