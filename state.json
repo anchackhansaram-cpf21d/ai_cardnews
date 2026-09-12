@@ -13,7 +13,8 @@
     "011-rlhf",
     "012-dpo",
     "013-rlvr",
-    "014-synthetic-data"
+    "014-synthetic-data",
+    "015-embedding"
   ],
   "last_run": "2026-09-09T16:32:41+09:00",
   "log": [
