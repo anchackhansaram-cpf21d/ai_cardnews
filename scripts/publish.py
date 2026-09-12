@@ -176,6 +176,58 @@ def wait_ready(container_id, token, timeout=300):
     sys.exit(f"컨테이너 {container_id} 처리 대기 시간 초과")
 
 
+def _check_instagram_duplicate(ig_user, token, slug):
+    """Instagram 최근 미디어를 스캔해 slug가 이미 발행됐는지 확인한다.
+    runner가 비정상 종료돼 state.json이 푸시되지 않은 경우를 위한 2차 방어.
+    """
+    try:
+        r = requests.get(
+            f"{API}/{ig_user}/media",
+            params={"fields": "caption,id,timestamp",
+                    "access_token": token, "limit": 50},
+            timeout=30)
+        if r.status_code != 200:
+            return
+        for media in r.json().get("data", []):
+            if slug.lower() in (media.get("caption") or "").lower():
+                print(f"  Instagram에서 '{slug}' 중복 발견 (media: {media['id']})")
+                print("  이번 실행을 건너뛰고 state.json에 기록합니다.")
+                q.mark_posted(slug, media_id=media.get("id"))
+                _git_push_state_json(slug)
+                sys.exit(0)
+    except requests.RequestException as e:
+        print(f"  Instagram 중복 확인 실패 (진행): {e}")
+
+
+def _git_push_state_json(slug):
+    """state.json을 커밋하고 origin/main에 푸시한다.
+    실패 시 로그를 남기고 진행을 막지는 않는다 — 워크플로우 "발행 기록 커밋"
+    스텝이 2차 안전장치 역할을 한다.
+    """
+    import subprocess
+    for i in range(1, 6):
+        try:
+            r = subprocess.run(["git", "add", "state.json"], cwd=ROOT,
+                               capture_output=True, text=True, timeout=30)
+            if r.returncode != 0:
+                print(f"  git add 실패 (시도 {i}/5): {r.stderr.strip()}")
+                continue
+            r = subprocess.run(["git", "commit", "--no-verify", "-m", f"posted: {slug}"],
+                               cwd=ROOT, capture_output=True, text=True, timeout=30)
+            if r.returncode != 0 and "nothing to commit" not in r.stdout:
+                print(f"  git commit 상태 (시도 {i}/5): {r.stdout.strip()}")
+            r = subprocess.run(["git", "push", "origin", "HEAD:main"],
+                               cwd=ROOT, capture_output=True, text=True, timeout=30)
+            if r.returncode == 0:
+                print("  state.json 푸시 완료")
+                return
+            print(f"  push 재시도 {i}/5: {r.stderr.strip()[:200]}")
+        except subprocess.TimeoutExpired:
+            print(f"  timeout (시도 {i}/5)")
+        import time as _t; _t.sleep(i * 3)
+    print("::error::발행은 됐지만 state.json 푸시 실패. 수동 커밋 필요.")
+
+
 def main():
     ap = argparse.ArgumentParser()
     ap.add_argument("--slug", required=True)
@@ -213,6 +265,10 @@ def main():
     preflight(ig_user, token)
     check_images_public(urls)
 
+    # Instagram API를 통해 이미 발행된 원고인지 확인 (runner 중단으로
+    # state.json이 푸시되지 않은 경우를 위한 2차 방어)
+    _check_instagram_duplicate(ig_user, token, a.slug)
+
     # 1) 이미지별 컨테이너 생성
     children = []
     for i, u in enumerate(urls, 1):
@@ -247,6 +303,9 @@ def main():
 
     now = datetime.now(KST).isoformat(timespec="seconds")
     q.mark_posted(a.slug, permalink=permalink, media_id=media_id, when=now)
+    # state.json을 즉시 원격에도 반영 — 발행 직후 푸시하므로
+    # 다음 실행이 state.json 변경 내역을 체크아웃해 중복을 방지한다.
+    _git_push_state_json(a.slug)
     print(f"✅ 발행 완료: {permalink or media_id}")
     print(f"남은 원고: {q.remaining()}편")
 
