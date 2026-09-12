@@ -37,9 +37,11 @@ def stray_files():
 
 
 def next_slug():
-    """아직 발행하지 않은 원고 중 가장 앞선 것. 없으면 None."""
+    """아직 발행하지 않은 원고 중 가장 최신(높은 번호) 것. 없으면 None.
+    성장 크론이 생성한 신규 콘텐츠를 우선 발행하기 위해 역순으로 선택한다.
+    """
     posted = set(load_state()["posted"])
-    for slug in all_slugs():
+    for slug in reversed(all_slugs()):   # 높은 번호부터
         if slug not in posted:
             return slug
     return None
