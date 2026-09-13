@@ -1,0 +1,80 @@
+{
+  "series_no": 34,
+  "topic": "추측 디코딩(Speculative Decoding) — LLM을 5배 빠르게 만드는 '뻔뻔한' 기술",
+  "source": "growth",
+  "cards": [
+    {
+      "type": "cover",
+      "eyebrow": "⚡ 일요일 체크리스트",
+      "title": "GPT야 '대충 찍고' 와 — 5배 빠른 방법이 있다 🔥",
+      "highlight": ["대충 찍고", "5배 빠른"],
+      "subtitle": "Speculative Decoding: 작은 모델이 찍고 큰 모델이 검증만 한다. 코드 0줄, GPU 비용 50% 절감."
+    },
+    {
+      "type": "body",
+      "heading": "문제: LLM은 한 글자마다 처음부터 다시 읽는다",
+      "body": "GPT가 '서울의 인구는 940만 명입니다'를 만들 때:\n\n**서** → (전체 계산) → **울** → (전체 계산) → **의** → ...\n\n**한 토큰(token: 약 0.7단어) 생성마다 70B 신경망을 통째로 통과**해야 한다.\n10토큰 = 10회 forward pass. H100 GPU가 초당 30토큰밖에 못 뽑는 이유다.\n\n**병목은 계산이 아니라 '순차성(sequentiality)'** — GPU가 받아칠 양은 남아도는데, 순서 때문에 놀고 있다.",
+      "emoji": "🎯"
+    },
+    {
+      "type": "body",
+      "heading": "비유: '고시생'과 '선생님'의 합작",
+      "body": "고시생 혼자 문제를 푼다 → **한 문제씩, 차례대로.**\n= GPT의 일반 생성 방식. 느리지만 정확.\n\n고시생 옆에 있는 **선생님이 찍어준다:**\n\"이건 답이 ③번일 거 같은데?\"\n= 드래프트 모델(draft model, 작고 빠름)의 역할.\n\n고시생이 **한 번에 확인한다:**\n\"선생님이 찍은 거, 다 맞네. 한꺼번에 통과!\"\n= 타겟 모델이 **한 번의 forward pass**로 K개 토큰 전부 검증.\n\n→ **고시생 혼자 10분, 선생님 도움 받으면 2분.** 이게 추측 디코딩의 전부다.",
+      "emoji": "📚"
+    },
+    {
+      "type": "body",
+      "heading": "해결: '드래프트-검증' 패러다임",
+      "body": "**① 드래프트 (Draft)**\n작은 모델(예: Llama-3.2-1B)이 빠르게 K개의 토큰을 '추측' 생성.\n작은 모델의 1토큰 생성 비용 = 타겟의 **1/100**.\n\n**② 검증 (Verify)**\n큰 모델(예: Llama-3.1-70B)이 **한 번의 forward pass**로 K개 전부 검증.\n드래프트의 예측이 타겟의 확률 분포와 일치하는지 확인.\n\n**③ 의사결정**\n- 모두 일치 → K개 **전부 승인!**\n- 중간에 틀림 → 그 지점까지만 승인, 나머지는 버리고 재시작\n\n→ '서울의' 다음에 '인구는'이 올 확률은 99%. **이 '쉬운 구간'을 활용하는 게 핵심.**",
+      "emoji": "🔬"
+    },
+    {
+      "type": "visual",
+      "heading": "수락률 α가 성능을 결정한다",
+      "body": "수락률 α = 드래프트 토큰 중 타겟이 승인한 비율\n\n| α | 가속비 | 현실 |\n|:--:|:------:|------|\n| 0.5 | 1.6× | 절반만 맞혀도 이득! |\n| 0.7 | 2.3× | 괜찮은 드래프트 수준 |\n| 0.8 | 3.0× | 상용 서비스 기준 |\n| 0.9 | 5.0× | 이론적 상한 |\n\n→ **EAGLE-3**는 공동 학습(joint training)으로 α 0.85 달성.\n→ 드래프트 품질이 가장 중요한 하이퍼파라미터다.\n→ 수식: `Speedup = (Draft 속도 × α) / (1 - α + Draft 상대비용)`",
+      "emoji": "📊"
+    },
+    {
+      "type": "body",
+      "heading": "근데 왜 2026년에 '성숙'했을까?",
+      "body": "🔸 **EAGLE-3**: 드래프트 모델을 타겟의 '헤드'만 떼서 공동 학습. 수락률 0.5 → 0.85로 폭등.\n\n🔸 **SSD (Speculative Speculative Decoding)**: 드래프트와 검증을 아예 병렬화! Saguaro 알고리즘으로 기존 SD보다 평균 30% 추가 가속. (arXiv 2603.03251)\n\n🔸 **실전 배포 완료**: SGLang, vLLM 0.6+, TensorRT-LLM 전부 SD 기본 탑재. `--speculative` 한 줄.\n\n🔸 **멀티-드래프트**: 여러 작은 모델이 동시에 추측 → 트리 구조 검증(Tree Verification). 구글 연구에서 가장 효과적 입증.",
+      "emoji": "📈"
+    },
+    {
+      "type": "body",
+      "heading": "실무자 체크리스트: SD 도입 결정",
+      "body": "✅ **적용해야 하는 경우:**\n  ☑ User-facing 챗봇 / 코드 어시스턴트\n  ☑ 실시간 스트리밍 응답 필요\n  ☑ GPU당 QPS(Queries Per Second)가 병목\n  ☑ 배치 사이즈 ≤ 32\n  ☑ 낮은 온도(≤0.3)의 결정론적 생성\n\n❌ **적용하지 말아야 하는 경우:**\n  ☒ 배치 사이즈 ≥ 64 (GPU가 이미 계산-bound)\n  ☒ 고온도 생성(>0.8) — 수락률 급락\n  ☒ Throughput > Latency 우선순위\n  ☒ 모델 이미 양자화 + 커스텀 커널로 최적화됨\n\n```\n도입 난이도: ★☆☆☆☆ (10분)\n코드 변경: 0줄\n비용 절감: 30~50%\n출력 품질: 100% 동일\n```",
+      "emoji": "📋"
+    },
+    {
+      "type": "body",
+      "heading": "주요 엔진별 SD 세팅 (vLLM / SGLang / TRT-LLM)",
+      "body": "**vLLM:**\n`--speculative-model meta-llama/Llama-3.2-1B --num-speculative-tokens 5`\n\n**SGLang (SD 기본 탑재):**\n`python -m sglang.launch_server --model meta-llama/Llama-3.1-70B`\n\n**TensorRT-LLM:**\n`python examples/speculative_decoding.py --draft_model_size 1B --target_model_size 70B`\n\n**핵심 튜닝 파라미터:**\n| 파라미터 | 권장값 | 영향 |\n|---------|:------:|------|\n| K (드래프트 길이) | 5~7 | 너무 길면 수락률 ↓ |\n| 드래프트 크기 | 타겟의 1~3% | 70B → 1B optimal |\n| Temperature | ≤0.3 | 높으면 수락률 급락 |\n| Batch size | ≤32 | 초과 시 효과 미미 |\n\n→ **\"SD 키고 안 키고 = 3배 속도차 = 3배 비용차\"**",
+      "emoji": "💻"
+    },
+    {
+      "type": "insight",
+      "kicker": "Speculative Decoding 핵심 5줄",
+      "kicker_label": "📝 요약",
+      "bullets": [
+        "LLM 추론의 병목은 '순차성(sequentiality)' — SD가 이걸 작은 모델의 '추측'으로 깬다",
+        "작은 모델이 드래프트(draft) → 큰 모델이 한 번에 검증(verify). 출력 품질 100% 동일",
+        "수락률(Accept Rate) ≥ 0.7이면 2~3배 속도 향상. EAGLE-3는 0.85까지 올림",
+        "vLLM에 `--speculative-model` 한 줄 추가면 적용 끝. 코드 수정 0줄",
+        "배치 >64 또는 온도 >0.8에서는 역효과 — 도메인에 맞는 선택이 필수"
+      ],
+      "cta": "💾 저장하고, GPU 비용 50% 아끼는 방법 더 보려면 팔로우 ➕"
+    }
+  ],
+  "caption": "GPT가 '서울의 인구는'이라는 문장을 생성할 때, 한 글자마다 70B짜리 거대 신경망을 통째로 통과한다. 3800만 달러 GPU가 초당 30토큰밖에 못 뽑는 이유가 여기 있다. 🐢\n\nSpeculative Decoding(추측 디코딩)은 이 문제를 '뻔뻔하게' 해결한다. 작은 모델(드래프트)이 먼저 '대충 찍고', 큰 모델(타겟)이 '한 번에 검증만 한다'. 출력 품질은 100% 동일하면서 속도는 최대 5배까지 빨라진다. 2026년 현재 SGLang, vLLM, TensorRT-LLM 전부 기본 탑재했고, SSD(Saguaro) 기술로 추가 30% 가속까지 가능해졌다.\n\n💾 이 기술을 알면 LLM 서빙 인프라의 50% 비용을 아낄 수 있는 눈이 생긴다. 저장하고 다음 편도 꼭 보세요.\n\n다음 편: 'EAGLE-3 — Speculative Decoding의 수락률을 0.85까지 올린 드래프트 공동 학습의 비밀'. 댓글로 궁금한 점 남겨주세요 👇",
+  "hashtags": [
+    "#인공지능", "#AI", "#머신러닝", "#딥러닝",
+    "#LLM", "#AI개발자", "#AI서빙", "#인퍼런스",
+    "#SpeculativeDecoding", "#추측디코딩", "#LLM최적화",
+    "#vLLM", "#SGLang", "#TensorRTLLM",
+    "#EAGLE3", "#Saguaro", "#SSD",
+    "#GPU효율", "#비용절감", "#AI인프라",
+    "#오늘의AI", "#AI트렌드", "#AI공부",
+    "#MLOps", "#AI서비스", "#AI공부스타그램"
+  ]
+}
