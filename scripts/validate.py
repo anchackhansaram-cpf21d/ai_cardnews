@@ -8,7 +8,8 @@ import postqueue as q
 
 MAX_CAPTION = 2200      # 인스타 캡션 상한
 MAX_HASHTAGS = 30       # 인스타 해시태그 상한
-REQUIRED = 10           # 캐러셀 카드 수
+MIN_CARDS = 5
+MAX_CARDS = 10
 
 
 def check(slug):
@@ -19,8 +20,8 @@ def check(slug):
         return [f"JSON 문법 오류: {e}"], []
 
     cards = d.get("cards", [])
-    if len(cards) != REQUIRED:
-        errs.append(f"카드가 {len(cards)}장입니다. 정확히 {REQUIRED}장이어야 합니다.")
+    if not (MIN_CARDS <= len(cards) <= MAX_CARDS):
+        errs.append(f"카드가 {len(cards)}장입니다. {MIN_CARDS}~{MAX_CARDS}장이어야 합니다.")
 
     if cards and cards[0].get("type") != "cover":
         errs.append("첫 카드는 type이 'cover' 여야 합니다.")
@@ -37,6 +38,8 @@ def check(slug):
             if len(c.get("title", "")) > 30:
                 warns.append(f"{i}번 카드: 표지 제목이 {len(c['title'])}자로 깁니다 (30자 이하 권장)")
         else:
+            if t in ("insight", "cta", "outro"):
+                continue  # 이 카드 타입은 heading 없어도 됨
             if not c.get("heading"):
                 errs.append(f"{i}번 카드: heading 없음")
             if len(c.get("heading", "")) > 26:
