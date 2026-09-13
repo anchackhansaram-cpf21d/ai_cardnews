@@ -97,6 +97,7 @@ open ../out/002-positional-encoding/_preview.html
 | 2 | 2026-09-12 | 📝 031-hallucination 생성 | — |
 | 3 | 2026-09-13 | 📝 032-diffusion 생성 (확산 모델) | — |
 | 4 | 2026-09-14 | 📝 033-sparse-autoencoder 생성 (SAE와 특징 분해) | — |
+| 5 | 2026-09-14 | 📝 034-speculative-decoding 생성 (추측 디코딩) | — |
 | ... | ... | ... | ... |
 | 100 | 2026-12-20 | 🏁 1000명 달성 | 0/1000 |
 
