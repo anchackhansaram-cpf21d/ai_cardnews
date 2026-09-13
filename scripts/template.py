@@ -267,7 +267,8 @@ def render_card(card, idx, total, meta):
         body += f'<h2 class="heading">{esc(card.get("heading",""))}</h2>'
         if card.get("lead"):
             body += f'<p class="vlead">{esc(card["lead"])}</p>'
-        body += diagrams.build(card["visual"])
+        if card.get("visual"):
+            body += diagrams.build(card["visual"])
         if card.get("caption"):
             body += f'<div class="vcap">{esc(card["caption"])}</div>'
         align = "center"
