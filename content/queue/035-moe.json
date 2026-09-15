@@ -7,7 +7,10 @@
       "type": "cover",
       "eyebrow": "💾 모르면 손해",
       "title": "AI 개발자 90%가\n모르는 MoE의 진실",
-      "highlight": ["90%", "진실"],
+      "highlight": [
+        "90%",
+        "진실"
+      ],
       "subtitle": "671B 모델이 37B로 돌아가는 원리"
     },
     {
@@ -23,7 +26,7 @@
       "body": "기존 Dense 모델: \"모든 입력에 모든 뉴런이 깨어난다\" → 비효율\n\nMoE: \"토큰이 '수학 문제'라고 신호 보내면, 수학 전문가만 깨운다\" → 효율적\n\n이를 **조건부 계산(Conditional Computation[입력에 따라 필요한 부분만 연산하는 방식])**이라 부른다. FFN(피드포워드 네트워크)[입력 변환을 담당하는 신경망 층] 레이어가 수십 개의 '전문가' FFN으로 분할되고, **라우터(Router)**가 토큰 성격에 따라 적합한 전문가에게만 연산을 위임한다."
     },
     {
-      "type": "visual",
+      "type": "body",
       "label": "📊",
       "title": "수치로 보는 MoE",
       "subtitle": "DeepSeek-V3 기준",
@@ -33,7 +36,8 @@
         "비율: **5.5%**만 사용 — 94.5%는 대기",
         "전문가: **256개 라우티드 + 1개 공유**",
         "Top-8 라우팅 — 토큰당 8명만 활성화"
-      ]
+      ],
+      "body": ""
     },
     {
       "type": "body",
@@ -48,7 +52,7 @@
       "body": "부하가 너무 심하면 **토큰 드랍(Token Drop: 처리가 어려운 토큰을 그냥 버리는 행위)**을 고려하게 된다.\n\n**절대 하지 마라.** 추론 품질이 폭락한다. 특히 CoT(Chain-of-Thought: 단계적 추론 과정)이 필요한 태스크에서 사고 과정이 통째로 증발한다.\n\n대신 **EPLB(Expert Parallelism Load Balancer[전문가 병렬 부하 분산기: 핫한 전문가를 여러 GPU에 복제])**를 쓰자. 2~5GB VRAM만 추가하면 부하 30~50% 분산, 품질 저하 제로."
     },
     {
-      "type": "visual",
+      "type": "body",
       "label": "📈",
       "title": "MoE vs Dense 실전 비교",
       "bullets": [
@@ -59,7 +63,8 @@
         "GPU 필요|1장 H100|8장 H100|",
         "저부하 비용|✅ 저렴|❌ 기본료 비쌈|",
         "고부하 비용|❌ 비쌈|✅ 2.5~4배↓|"
-      ]
+      ],
+      "body": ""
     },
     {
       "type": "body",
@@ -89,15 +94,30 @@
   ],
   "caption": "AI 개발자 90%가 모르는 충격적 사실: 671B 모델이 37B 모델보다 추론이 가볍다. 🤯\n\n이게 바로 MoE(Mixture of Experts)의 마법. 수백 개의 FFN 중 몇 개만 깨우는 조건부 계산(Conditional Computation) 덕분입니다. DeepSeek-V3는 671B 전체 파라미터를 저장하지만, 실제 추론 때는 37B만 연산합니다. 저장 공간은 크지만, 연산은 Dense 70B보다 적습니다.\n\n💾 저장 안 하면 다음에 까먹어요.\n\n• Dense 모델 = 모든 뉴런 활성 (비효율적)\n• MoE = 토큰 성격에 맞는 전문가만 활성 (효율적)\n• 핵심 병목: All-to-All 통신 (레이어당 2회, 총 134회)\n• Token drop은 절대 금지 → EPLB로 해결\n• 고트래픽 환경에서 Dense 대비 비용 2.5~4배 저렴\n• 2026 최신 EMNLP 연구: 전문가 절반만 켜도 성능 유지 가능\n\n다음 편: FlashAttention — 행렬을 만들지 않는 어텐션 혁명.\n댓글로 \"MoE 써본 사람\" 손 🙋",
   "hashtags": [
-    "#인공지능", "#AI", "#머신러닝", "#딥러닝",
-    "#LLM", "#MoE", "#MixtureOfExperts",
-    "#AI개발자", "#AI공부", "#AI이론",
-    "#DeepSeekV3", "#트랜스포머",
-    "#추론최적화", "#GPU서빙", "#모델구조",
-    "#EPLB", "#AlltoAll", "#CoRM",
-    "#FlashAttention", "#EMNLP",
-    "#AI트렌드", "#개발자팁",
-    "#테크지식", "#AI인사이트",
+    "#인공지능",
+    "#AI",
+    "#머신러닝",
+    "#딥러닝",
+    "#LLM",
+    "#MoE",
+    "#MixtureOfExperts",
+    "#AI개발자",
+    "#AI공부",
+    "#AI이론",
+    "#DeepSeekV3",
+    "#트랜스포머",
+    "#추론최적화",
+    "#GPU서빙",
+    "#모델구조",
+    "#EPLB",
+    "#AlltoAll",
+    "#CoRM",
+    "#FlashAttention",
+    "#EMNLP",
+    "#AI트렌드",
+    "#개발자팁",
+    "#테크지식",
+    "#AI인사이트",
     "#조건부계산"
   ]
 }

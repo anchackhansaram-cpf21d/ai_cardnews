@@ -264,13 +264,16 @@ def render_card(card, idx, total, meta):
         if card.get("kicker") or card.get("kicker_label"):
             body += (f'<div class="kicker"><span class="num">{idx:02d}</span>'
                      f'<span>{esc(card.get("kicker_label",""))}</span></div>')
-        body += f'<h2 class="heading">{esc(card.get("heading",""))}</h2>'
-        if card.get("lead"):
-            body += f'<p class="vlead">{esc(card["lead"])}</p>'
-        if card.get("visual"):
-            body += diagrams.build(card["visual"])
-        if card.get("caption"):
-            body += f'<div class="vcap">{esc(card["caption"])}</div>'
+        if card.get("heading") or card.get("visual") or card.get("lead"):
+            body += f'<h2 class="heading">{esc(card.get("heading",""))}</h2>'
+            if card.get("lead"):
+                body += f'<p class="vlead">{esc(card["lead"])}</p>'
+            if card.get("visual"):
+                body += diagrams.build(card["visual"])
+            if card.get("caption"):
+                body += f'<div class="vcap">{esc(card["caption"])}</div>'
+        else:
+            body += paras(card.get("body", ""))
         align = "center"
 
     elif kind == "insight":
