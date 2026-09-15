@@ -294,6 +294,8 @@ def render_card(card, idx, total, meta):
                      f'<span>{esc(card.get("kicker_label",""))}</span></div>')
         body += f'<h2 class="heading">{esc(card.get("heading",""))}</h2>'
         body += paras(card.get("body", ""))
+        if not body.strip():
+            body = paras("(내용 준비 중)")
         if card.get("note"):
             n = card["note"]
             body += (f'<div class="note"><span class="nlabel">'
