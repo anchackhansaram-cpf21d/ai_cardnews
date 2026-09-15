@@ -292,8 +292,12 @@ def render_card(card, idx, total, meta):
             # 번호는 캐러셀 페이지와 항상 일치시킨다 (원고의 kicker 값은 무시)
             body += (f'<div class="kicker"><span class="num">{idx:02d}</span>'
                      f'<span>{esc(card.get("kicker_label",""))}</span></div>')
-        body += f'<h2 class="heading">{esc(card.get("heading",""))}</h2>'
-        body += paras(card.get("body", ""))
+        has_heading = card.get("heading", "").strip()
+        if has_heading:
+            body += f'<h2 class="heading">{esc(has_heading)}</h2>'
+        body_text = card.get("body", "").strip()
+        if body_text:
+            body += paras(body_text)
         if not body.strip():
             body = paras("(내용 준비 중)")
         if card.get("note"):
