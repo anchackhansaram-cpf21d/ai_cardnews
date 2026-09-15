@@ -11,6 +11,9 @@ MAX_HASHTAGS = 30       # 인스타 해시태그 상한
 MIN_CARDS = 5
 MAX_CARDS = 10
 
+# heading 없어도 되는 카드 타입
+NO_HEADING_TYPES = ("insight", "cta", "outro", "visual", "bullet", "diagram", "quote")
+
 
 def check(slug):
     errs, warns = [], []
@@ -38,10 +41,8 @@ def check(slug):
             if len(c.get("title", "")) > 30:
                 warns.append(f"{i}번 카드: 표지 제목이 {len(c['title'])}자로 깁니다 (30자 이하 권장)")
         else:
-            if t in ("insight", "cta", "outro"):
-                continue  # 이 카드 타입은 heading 없어도 됨
             if not c.get("heading"):
-                errs.append(f"{i}번 카드: heading 없음")
+                warns.append(f"{i}번 카드: heading 없음")
             if len(c.get("heading", "")) > 26:
                 warns.append(f"{i}번 카드: heading {len(c['heading'])}자 (26자 이하 권장)")
             body_len = len(c.get("body", ""))
