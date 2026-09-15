@@ -319,8 +319,20 @@ def render_card(card, idx, total, meta):
 </div>"""
 
 
+def has_content(card):
+    """카드에 실제 렌더링 가능한 내용이 있는지 확인"""
+    t = card.get("type", "body")
+    if t == "cover":
+        return bool(card.get("title", "").strip())
+    if t == "visual":
+        return bool(card.get("visual") or card.get("heading","").strip() or card.get("lead","").strip())
+    if t == "insight":
+        return bool(card.get("body","").strip() or card.get("bullets") or card.get("cta","").strip())
+    return bool(card.get("body","").strip() or card.get("heading","").strip())
+
+
 def build_html(data):
-    cards = data["cards"]
+    cards = [c for c in data["cards"] if has_content(c)]
     total = len(cards)
     body = "\n".join(render_card(c, i + 1, total, data) for i, c in enumerate(cards))
     return (f"<!doctype html><html lang='ko'><head><meta charset='utf-8'>"
