@@ -1,0 +1,86 @@
+{
+  "series_no": 37,
+  "topic": "Adam — 왜 기본값이 되었나",
+  "source": "growth",
+  "cards": [
+    {
+      "type": "cover",
+      "eyebrow": "🔥 10년째 기본값, 아직도 이유를 모른다면?",
+      "title": "Adam, 왜 아무도 안 바꾸는가?",
+      "highlight": ["기본값", "Adam", "10년"],
+      "subtitle": "2014년 탄생한 옵티마이저, ICLR 2025에서 Test of Time 수상"
+    },
+    {
+      "type": "body",
+      "label": "⚙️",
+      "title": "Adam = 모멘텀(Momentum) + 알엠에스프롭(RMSProp)",
+      "body": "킹마(Kingma)와 바(Ba)가 2014년 ICLR에 제출한 Adam은 **적응형 학습률**(adaptive learning rate)과 **모멘텀**(momentum)을 하나로 합쳤다.\n\n모멘텀은 관성, 알엠에스프롭(RMSProp)은 학습률을 파라미터별로 조절한다. 두 개념을 합치니 SGD의 느린 수렴은 해결하면서, 알엠에스프롭(RMSProp)의 불안정함까지 잡혔다.\n\n2015년 ICLR에 **단 7쪽**으로 제출된 이 논문은 10년 후인 **ICLR 2025 Test of Time Award**를 수상했다."
+    },
+    {
+      "type": "body",
+      "label": "🧠",
+      "title": "왜 기본값이 되었나? — 연구자들이 포기한 이유",
+      "body": "SGD(확률적 경사하강법)는 학습률·모멘텀·감쇠율을 맞추는 게 예술 수준이다. 반면 Adam은 `lr=3e-4`, `beta1=0.9`, `beta2=0.999`라는 **범용 기본값** 하나로 비전부터 언어, 강화학습까지 **어디서든 일단 통했다**.\n\n연구자들의 심리: \"SGD 튜닝할 시간에 모델 구조에 집중하자.\" 이 심리 하나가 Adam을 10년간 절대 기본값으로 만든 진짜 이유다.\n\nGPT 시리즈, Stable Diffusion, BERT, ResNet — 거의 모든 유명 모델이 Adam 또는 그 변형을 사용했다."
+    },
+    {
+      "type": "body",
+      "label": "🩹",
+      "title": "Adam → AdamW: L2 규제의 함정을 고치다",
+      "body": "2017년 로스실로프(Loshchilov)와 후터(Hutter)가 심각한 실수를 발견했다: Adam의 L2 규제(L2 Regularization)는 사실 **웨이트 디케이(weight decay)**와 달랐다.\n\nL2 규제는 그레이디언트(Gradient) 자체에 페널티를 주지만, 웨이트 디케이는 가중치를 직접 깎는다. Adam의 적응형 학습률이 L2 규제를 왜곡해서 일반화 성능을 떨어뜨렸다.\n\n**AdamW**의 수정은 단순했다: `weight_decay`를 `learning_rate`와 분리. 이 한 줄이 학습 안정성을 획기적으로 개선했고, 오늘날 모든 구현이 AdamW를 기본으로 탑재한다."
+    },
+    {
+      "type": "visual",
+      "label": "🌀",
+      "title": "2026년 충격 — 하이퍼파라미터 공간은 프랙탈(Fractal)이었다",
+      "body": "2026년 9월, 스벨레바(Sveleba) 연구팀이 Adam의 `beta1`-`beta2` 하이퍼파라미터 공간을 **고해상도로 매핑**한 결과가 발표됐다.\n\n결과는 충격적: 안정적 수렴 영역과 발산 영역의 경계가 **프랙탈(Fractal) 구조**를 띠고 있었다. 자기닮음꼴(self-similar) 경계가 좁은 간격으로 반복되며, 거의 모든 지점이 경계 근처에 위치한다. 경계의 프랙탈 차원은 **D ≈ 1.9** — 거의 평면을 채울 정도로 복잡했다.\n\n즉 'beta1=0.9, beta2=0.999'라는 기본값은 운 좋게 안정적 영역에 걸린 것이다. 이 사실은 **Adam 튜닝이 과학이 아니라 지형 탐험**이었음을 의미한다."
+    },
+    {
+      "type": "body",
+      "label": "🚀",
+      "title": "2026년, 프론티어(Frontier) 모델은 AdamW를 버리기 시작했다",
+      "body": "프론티어 스케일에서 변화가 일어나고 있다:\n\n• **뮤온(Muon)** 옵티마이저 — 뉴턴-슐츠(Newton-Schulz) 직교화로 업데이트 방향을 회전시킨다. Kimi K2(1조 파라미터), GLM-5(744B), DeepSeek-V4(1.6조) 모두 Muon 변형 사용. AdamW 대비 **스텝당 약 2배 샘플 효율**.\n\n• **ADANA** — 긴 학습 호라이즌(horizon)에서 AdamW를 일관되게 능가. 500K 스텝 이상 장기 학습에 적합.\n\n• **AdamX** — 2026년 9월 새 제안, 코사인 유사도(Cosine Similarity)로 업데이트 크기 조절.\n\n단, **중소 규모(1B 미만)에서는 AdamW가 여전히 가장 안전한 선택**이다. Muon은 100B+에서 빛을 본다."
+    },
+    {
+      "type": "insight",
+      "kicker": "🧭 옵티마이저 선택 가이드 2026",
+      "kicker_label": "요약",
+      "bullets": [
+        "✅ 1B 미만 모델 → AdamW 기본값(lr=3e-4, beta1=0.9, beta2=0.999, wd=0.01)",
+        "✅ 첫 실험은 무조건 AdamW로 시작, 수렴 확인 후 튜닝",
+        "❌ L2 정칙화 말고 weight_decay만 써라 (AdamW에서 둘은 다름)",
+        "✅ 100B+ 프론티어 스케일 → Muon 또는 ADANA 실험 (Kimi K2 사례 참고)",
+        "✅ beta1/beta2 튜닝할 땐 로그 스케일 격자 탐색 — 프랙탈 경계 회피",
+        "❌ 기본값 맹신 금지 — loss 평탄하면 lr 10분의 1로 낮추고 재시작"
+      ],
+      "cta": "💾 저장하고 다음 편 '뮤온(Muon)의 시대'도 확인하세요!"
+    }
+  ],
+  "caption": "🔥 2014년 단 7쪽짜리 논문에서 탄생한 옵티마이저 하나가 10년간 AI 업계의 절대 기본값으로 군림했다. Adam(Adaptive Moment Estimation) — Kingma와 Ba가 만든 이 알고리즘은 모멘텀과 적응형 학습률을 결합해 SGD의 튜닝 지옥에서 연구자들을 해방시켰고, 2025년 ICLR Test of Time Award를 수상했다. 하지만 2026년, 이 체제에 균열이 생기고 있다. Muon 옵티마이저가 Kimi K2와 DeepSeek-V4에서 AdamW를 대체하기 시작했고, ADANA는 긴 학습 기간에서 더 나은 성능을 증명했다. 심지어 Adam의 beta1/beta2 하이퍼파라미터 공간은 프랙탈 구조였다는 연구 결과가 2026년 9월에 발표되면서 '왜 기본값이 기본값인지'에 대한 근본적인 질문이 제기되고 있다.\n\n💾 이거 저장 안 하면 또 까먹어요. 옵티마이저 고를 때마다 꺼내보세요.\n\n다음 편: 'Muon의 시대 — 프론티어 옵티마이저 전쟁'에서 뵐게요.\n댓글로 \"지금 무슨 옵티마이저 쓰세요?\" 👇",
+  "hashtags": [
+    "#인공지능",
+    "#AI",
+    "#딥러닝",
+    "#옵티마이저",
+    "#Adam",
+    "#AdamW",
+    "#Muon",
+    "#ADANA",
+    "#ICLR2025",
+    "#TestOfTime",
+    "#머신러닝",
+    "#하이퍼파라미터",
+    "#프랙탈",
+    "#모델학습",
+    "#AI연구",
+    "#KimiK2",
+    "#DeepSeekV4",
+    "#GLM5",
+    "#딥러닝팁",
+    "#웨이트디케이",
+    "#L2규제",
+    "#카드뉴스",
+    "#AI공부",
+    "#딥러닝기초",
+    "#ML엔지니어"
+  ]
+}
