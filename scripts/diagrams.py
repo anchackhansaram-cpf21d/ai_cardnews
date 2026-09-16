@@ -31,12 +31,10 @@ def heatmap(s):
     cell = min(104, (CW - lab_w - 20) // max(n_c, 1))
     gap = 6
     gw = n_c * (cell + gap) - gap
-    # 라벨 + 격자를 한 덩어리로 보고 카드 가운데에 놓는다
     x0 = (CW - (lab_w + gw)) / 2 + lab_w
     y0 = lab_h + 8
     H = int(y0 + n_r * (cell + gap) - gap + 16)
 
-    # 지표마다 범위가 다르면 열 단위로 정규화해야 차이가 보인다
     if s.get("normalize", "all") == "col":
         lo = [min(r[j] for r in vals) for j in range(n_c)]
         hi = [max(r[j] for r in vals) for j in range(n_c)]
@@ -67,7 +65,6 @@ def heatmap(s):
                        f'height="{cell}" rx="8" fill="var(--accent)" '
                        f'fill-opacity="{op:.2f}"/>')
             fill = "#0B1020" if strong else "var(--ink)"
-            # text 행렬이 있으면 숫자 대신 그 문자열을 찍는다
             cellstr = s["text"][i][j] if s.get("text") else f"{v:.2f}"
             fsz = 22 if len(str(cellstr)) <= 4 else 19
             out.append(f'<text x="{cx+cell/2:.1f}" y="{cy+8:.1f}" text-anchor="middle" '
@@ -83,7 +80,6 @@ def bars(s):
     lab_w = 250
     bar_h, gap = 62, 26
     H = len(items) * (bar_h + gap) - gap + 16
-    # 눈금 최대값을 직접 지정할 수 있게 한다. 지정하지 않으면 차이가 과장된다.
     vmax = s.get("max") or (max(i["value"] for i in items) * 1.15) or 1
     track = CW - lab_w - 30
     out = []
@@ -99,7 +95,6 @@ def bars(s):
                    f'rx="10" fill="var(--ink)" fill-opacity=".07"/>')
         out.append(f'<rect x="{lab_w}" y="{y}" width="{w:.0f}" height="{bar_h}" '
                    f'rx="10" fill="{col}" fill-opacity="{.95 if hot else .72}"/>')
-        # show_values:false 이면 막대 길이로 상대 비교만 보여준다
         if s.get("show_values", True):
             txt = f'{it["value"]:g}{unit}'
             inside = w > 150
@@ -144,7 +139,7 @@ def line(s):
         ex, ey = sr["points"][-1]
         out.append(f'<circle cx="{sx(ex):.1f}" cy="{sy(ey):.1f}" r="9" fill="{col}"/>')
         if sr.get("label"):
-            dy = -26 if k == 0 else 40      # 두 선의 라벨이 겹치지 않도록
+            dy = -26 if k == 0 else 40
             out.append(f'<text x="{sx(ex)-16:.1f}" y="{sy(ey)+dy:.1f}" text-anchor="end" '
                        f'font-size="23" font-weight="700" fill="{col}">'
                        f'{esc(sr["label"])}</text>')
@@ -223,7 +218,7 @@ def _box(x, y, w, h, st, hot, small=False):
 
 # ── 5. 주석 달린 수식 ───────────────────────────────────────────
 def formula(s):
-    parts = s["parts"]           # [{text, note}]
+    parts = s["parts"]
     H = 330
     total = sum(len(p["text"]) for p in parts) or 1
     unit = (CW - 60) / total
@@ -276,8 +271,87 @@ def compare(s):
     return _wrap("".join(out), int(H))
 
 
+# ── 7. 아키텍처 블록 다이어그램 ─────────────────────────────────
+def arch(s):
+    blocks = s["blocks"]
+    direction = s.get("direction", "h")
+    gap, pad = 46, 36
+    if direction == "v":
+        bh, bw = 110, 460
+        H = len(blocks) * (bh + gap) - gap + pad
+        x = (CW - bw) / 2
+        out = []
+        for k, blk in enumerate(blocks):
+            y = k * (bh + gap) + pad / 2
+            col = ["var(--accent)", "var(--warm)", "#6ED4B3"][k % 3]
+            out.append(f'<rect x="{x:.0f}" y="{y:.0f}" width="{bw}" height="{bh}" rx="14" '
+                       f'fill="{col}" fill-opacity=".12" stroke="{col}" stroke-opacity=".55" stroke-width="2"/>')
+            out.append(f'<text x="{CW/2:.0f}" y="{y+bh/2+10:.0f}" text-anchor="middle" '
+                       f'font-size="26" font-weight="700" fill="{col}">{esc(blk["label"])}</text>')
+            if blk.get("sub"):
+                out.append(f'<text x="{CW/2:.0f}" y="{y+bh-18:.0f}" text-anchor="middle" '
+                           f'font-size="19" font-weight="500" fill="var(--muted)">{esc(blk["sub"])}</text>')
+            if k < len(blocks) - 1:
+                cy = y + bh
+                out.append(f'<path d="M{CW/2},{cy+6} L{CW/2},{cy+gap-12}" stroke="{col}" '
+                           f'stroke-width="3.5" marker-end="url(#ar)"/>')
+    else:
+        n = len(blocks)
+        bw = min(280, (CW - gap * (n - 1)) / n)
+        bh, H = 180, 224
+        x0 = (CW - (n * bw + (n - 1) * gap)) / 2
+        out = []
+        for k, blk in enumerate(blocks):
+            x = x0 + k * (bw + gap)
+            col = ["var(--accent)", "var(--warm)", "#6ED4B3"][k % 3]
+            out.append(f'<rect x="{x:.0f}" y="6" width="{bw}" height="{bh}" rx="14" '
+                       f'fill="{col}" fill-opacity=".10" stroke="{col}" stroke-opacity=".45" stroke-width="2"/>')
+            out.append(f'<text x="{x+bw/2:.0f}" y="{bh/2+8:.0f}" text-anchor="middle" '
+                       f'font-size="{24 if len(blk.get("label",""))>8 else 28}" font-weight="700" '
+                       f'fill="{col}">{esc(blk["label"])}</text>')
+            if blk.get("sub"):
+                out.append(f'<text x="{x+bw/2:.0f}" y="{bh-22:.0f}" text-anchor="middle" '
+                           f'font-size="18" font-weight="500" fill="var(--muted)">{esc(blk["sub"])}</text>')
+            if k < n - 1:
+                cx = x + bw
+                out.append(f'<path d="M{cx+8},{bh/2+6} L{cx+gap-12},{bh/2+6}" stroke="{col}" '
+                           f'stroke-width="3.5" marker-end="url(#ar)"/>')
+    marker = ('<defs><marker id="ar" viewBox="0 0 10 10" refX="8" refY="5" '
+              'markerWidth="6" markerHeight="6" orient="auto-start-reverse">'
+              '<path d="M0,1 L9,5 L0,9 z" fill="var(--accent)"/></marker></defs>')
+    return _wrap(marker + "".join(out), int(H))
+
+
+# ── 8. 벤 다이어그램 ─────────────────────────────────────────────
+def venn(s):
+    sets = s.get("sets", [])
+    H = 440
+    cx, cy = CW / 2, H / 2 + 10
+    r = 180
+    out = []
+    colors = ["var(--accent)", "var(--warm)"]
+    for k, item in enumerate(sets[:3]):
+        dx = (k - (len(sets) - 1) / 2) * r * 0.8
+        col = colors[k % 2]
+        out.append(f'<circle cx="{cx+dx:.0f}" cy="{cy:.0f}" r="{r}" '
+                   f'fill="{col}" fill-opacity=".09" stroke="{col}" stroke-opacity=".40" stroke-width="2.5"/>')
+        out.append(f'<text x="{cx+dx:.0f}" y="{cy+8:.0f}" text-anchor="middle" '
+                   f'font-size="24" font-weight="600" fill="{col}">{esc(item)}</text>')
+    if s.get("overlap"):
+        out.append(f'<text x="{cx:.0f}" y="{cy-42:.0f}" text-anchor="middle" '
+                   f'font-size="25" font-weight="800" fill="var(--ink)">{esc(s["overlap"])}</text>')
+    if s.get("labels"):
+        for k, lbl in enumerate(s["labels"]):
+            dx = (k - (len(sets) - 1) / 2) * r * 0.8
+            out.append(f'<text x="{cx+dx:.0f}" y="{cy-r-14:.0f}" text-anchor="middle" '
+                       f'font-size="30" font-weight="800" fill="var(--ink)">{esc(lbl)}</text>')
+    return _wrap("".join(out), H)
+
+
+# BUILDERS (모든 draw 함수가 정의된 후에 위치해야 함)
 BUILDERS = {"heatmap": heatmap, "bars": bars, "line": line,
-            "flow": flow, "formula": formula, "compare": compare}
+            "flow": flow, "formula": formula, "compare": compare,
+            "arch": arch, "venn": venn}
 
 
 def build(spec):

@@ -1,12 +1,23 @@
 """카드뉴스 HTML 템플릿 (1080x1350, 인스타 4:5)."""
 
-import html
+import html, re
 
 import diagrams
 
 W, H = 1080, 1350
 
-CSS = """
+# KaTeX로 렌더링할 인라인/블록 수식 패턴
+MATH_INLINE = re.compile(r"\$(.+?)\$")
+MATH_BLOCK = re.compile(r"\$\$(.+?)\$\$")
+
+KATEX_CSS = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">'
+KATEX_JS = (
+    '<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>'
+    '<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"'
+    ' onload="renderMathInElement(document.body,{delimiters:[{left:\'$$\',right:\'$$\',display:true},{left:\'$\',right:\'$\',display:false}]})"></script>'
+)
+
+CSS = """\
 * { margin:0; padding:0; box-sizing:border-box; }
 
 :root{
@@ -17,7 +28,7 @@ CSS = """
   --line:rgba(255,255,255,.10);
   --accent:#7C9CFF;
   --accent2:#FFB870;
-  --warm:#FFB870;      /* 다이어그램 강조색 */
+  --warm:#FFB870;
 }
 
 body{
@@ -25,7 +36,7 @@ body{
   font-family:"Noto Sans CJK KR","Noto Sans KR",sans-serif;
   -webkit-font-smoothing:antialiased;
   text-rendering:optimizeLegibility;
-  word-break:keep-all;          /* 한글 어절 단위 줄바꿈 */
+  word-break:keep-all;
   overflow-wrap:break-word;
 }
 
@@ -39,8 +50,6 @@ body{
   overflow:hidden;
   margin-bottom:40px;
 }
-
-/* 배경 장식 */
 .card::before{
   content:""; position:absolute; inset:0;
   background-image:radial-gradient(rgba(255,255,255,.055) 1px, transparent 1px);
@@ -56,10 +65,8 @@ body{
 .card.insight{ --accent:var(--accent2); --warm:#7C9CFF; background:#0D0A1C; }
 .card.insight .glow.a{ background:#FF9A4D; opacity:.24; }
 .card.insight .glow.b{ background:#5B2E6E; opacity:.40; }
-
 .card.cover{ background:linear-gradient(160deg,#0C1226 0%,#0A0E1F 55%,#0D0A1C 100%); }
 
-/* 상·하단 바 */
 .topbar,.bottombar{
   position:relative; z-index:2;
   display:flex; align-items:center; justify-content:space-between;
@@ -75,13 +82,11 @@ body{
 .handle{ font-weight:500; letter-spacing:.02em; }
 .tag{ color:var(--accent); font-weight:700; letter-spacing:.04em; }
 
-/* 본문 무대 */
 .stage{ position:relative; z-index:2; flex:1 1 auto; min-height:0; display:flex; overflow:hidden; }
 .stage.center{ align-items:center; }
 .stage.top{ align-items:center; }
 .inner{ width:100%; font-size:calc(var(--s,1) * 16px); }
 
-/* 표지 */
 .eyebrow{
   display:inline-block; font-size:1.6em; font-weight:700; letter-spacing:.14em;
   color:var(--accent); margin-bottom:1.5em;
@@ -96,7 +101,6 @@ body{
 .rule{ width:132px; height:7px; border-radius:4px; background:var(--accent); margin:1.5em 0 1.1em; }
 .cover-sub{ font-size:2.15em; line-height:1.62; color:var(--muted); font-weight:400; max-width:27ch; }
 
-/* 본문 카드 */
 .kicker{
   display:flex; align-items:baseline; gap:.6em;
   font-size:1.55em; font-weight:800; letter-spacing:.12em; color:var(--accent);
@@ -135,7 +139,6 @@ body{
   padding:.42em .9em; border-radius:999px;
 }
 
-/* 인사이트 카드 */
 .badge{
   display:inline-block; font-size:1.48em; font-weight:800; letter-spacing:.1em;
   color:#0D0A1C; background:var(--accent2);
@@ -152,7 +155,6 @@ body{
 }
 .bullets li b{ color:#fff; font-weight:700; }
 
-/* 시각화 카드 */
 .dia{ display:block; margin:.2em 0 0; overflow:visible; }
 .vcap{
   margin-top:1.4em; padding-top:1.1em; border-top:1px solid var(--line);
@@ -161,7 +163,6 @@ body{
 .vcap .em{ color:#fff; font-weight:700; }
 .vlead{ font-size:1.98em; line-height:1.66; color:#D3DAF0; margin-bottom:1.1em; }
 
-/* 마지막 CTA */
 .cta{
   margin-top:1.7em; padding:1.25em 1.4em;
   border:1px solid rgba(255,184,112,.40); border-radius:18px;
@@ -289,7 +290,6 @@ def render_card(card, idx, total, meta):
     else:
         body = ""
         if card.get("kicker") or card.get("kicker_label"):
-            # 번호는 캐러셀 페이지와 항상 일치시킨다 (원고의 kicker 값은 무시)
             body += (f'<div class="kicker"><span class="num">{idx:02d}</span>'
                      f'<span>{esc(card.get("kicker_label",""))}</span></div>')
         has_heading = card.get("heading", "").strip()
@@ -320,7 +320,6 @@ def render_card(card, idx, total, meta):
 
 
 def has_content(card):
-    """카드에 실제 렌더링 가능한 내용이 있는지 확인"""
     t = card.get("type", "body")
     if t == "cover":
         return bool(card.get("title", "").strip())
@@ -336,5 +335,5 @@ def build_html(data):
     total = len(cards)
     body = "\n".join(render_card(c, i + 1, total, data) for i, c in enumerate(cards))
     return (f"<!doctype html><html lang='ko'><head><meta charset='utf-8'>"
-            f"<style>{CSS}</style></head><body>{body}"
-            f"<script>{FIT_JS}</script></body></html>")
+            f"{KATEX_CSS}<style>{CSS}</style></head><body>{body}"
+            f"{KATEX_JS}<script>{FIT_JS}</script></body></html>")
