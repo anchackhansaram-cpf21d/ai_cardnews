@@ -1,0 +1,94 @@
+{
+  "series_no": 40,
+  "topic": "CLIP — 그림과 글을 같은 공간에 넣는 법",
+  "source": "growth",
+  "cards": [
+    {
+      "type": "cover",
+      "eyebrow": "🧠 AI가 '본다'는 것의 진실",
+      "title": "AI는 그림을 보지 않는다, 좌표로 읽는다",
+      "highlight": ["임베딩 공간", "멀티모달"],
+      "subtitle": "\"이미지 검색 좀 해줘\" — 그 뒤에서 CLIP이 4억 장을 훑는다"
+    },
+    {
+      "type": "visual",
+      "heading": "CLIP은 '번역기'다 — 그림↔글",
+      "visual": {
+        "kind": "arch",
+        "description": "이미지 인코더(Image Encoder, ViT) → 이미지 임베딩 벡터 ← 대조 손실(Contrastive Loss) → 텍스트 임베딩 벡터 ← 텍스트 인코더(Text Encoder, Transformer)"
+      },
+      "caption": "두 인코더의 출력을 같은 차원(512D)으로 맞춰서 비교 가능하게 만든다 — 이것이 '멀티모달 정렬(Multimodal Alignment)'"
+    },
+    {
+      "type": "visual",
+      "heading": "ViT는 이미지를 문장처럼 읽는다",
+      "visual": {
+        "kind": "heatmap",
+        "description": "224×224 이미지 → 16×16 패치(patch) 196개 → 각 패치를 임베딩으로 변환 → 트랜스포머 레이어 통과 → [CLS] 토큰이 전체 이미지의 대표 임베딩으로 최종 출력"
+      },
+      "caption": "ViT는 이미지를 196개의 '단어'로 쪼개서 트랜스포머가 읽게 만든다 — 패치 하나가 문장의 단어 하나와 같은 역할"
+    },
+    {
+      "type": "body",
+      "heading": "대조 손실(Contrastive Loss) — 맞는 쌍은 당기고, 틀린 쌍은 민다",
+      "content": "배치(batch) 크기 N=32,768이라면 정답 쌍은 N개, 오답 쌍은 N²-N개. CLIP은 **정답 쌍의 코사인 유사도(cosine similarity)** 를 최대화하고, 나머지 수백만 개 오답 쌍의 유사도를 최대한 0에 가깝게 만든다. 이 단순한 아이디어가 놀라운 일반화 능력을 만들어냈다."
+    },
+    {
+      "type": "visual",
+      "heading": "배치 내 모든 쌍 비교 — 10억 건의 대결",
+      "visual": {
+        "kind": "heatmap",
+        "description": "32,768×32,768 유사도 행렬. 대각선(정답)은 밝게, 나머지는 어둡게 — 모든 이미지가 모든 텍스트 캡션과 비교된다"
+      },
+      "caption": "10억 개의 이미지-텍스트 유사도를 한 번에 비교해서 정답 쌍만 골라낸다 — 이게 '대조 사전학습(Contrastive Pretraining)'의 본질"
+    },
+    {
+      "type": "body",
+      "heading": "제로샷(Zero-shot) — 이미지 하나와 1000개의 클래스명",
+      "content": "ImageNet 분류를 예로 들어보자. CLIP은 1000개 클래스명을 각각 텍스트 인코더에 넣어 1000개의 텍스트 임베딩을 만든다. 그다음 새 이미지 하나를 이미지 인코더에 넣고, 1000개 텍스트 임베딩 중 **가장 가까운 것**을 선택한다. 단 한 번의 순전파(forward pass)로 분류 완료. 학습 데이터 0장."
+    },
+    {
+      "type": "visual",
+      "heading": "CLIP vs 지도학습 — 데이터 없이 비벼볼 만하다",
+      "visual": {
+        "kind": "bars",
+        "description": "ImageNet 정확도: CLIP ViT-L/14 (제로샷, 학습 데이터 0장) = 76.2%, ResNet-50 (120만 장 학습) = 76.1%, ResNet-101 (120만 장) ≈ 77.4%. CLIP이 학습 데이터 없이도 거의 따라잡았다"
+      },
+      "caption": "120만 장의 레이블을 모으는 데 얼마나 공수가 들까? CLIP은 그 비용을 0으로 만들었다"
+    },
+    {
+      "type": "visual",
+      "heading": "CLIP 생태계 — 2026년 진화",
+      "visual": {
+        "kind": "flow",
+        "description": "CLIP(2021) → OpenCLIP(LAION-5B, 공개 가중치) → SigLIP(시그모이드 손실, 2023) → SigLIP2(다국어, 2024, ~84%) → LLM2CLIP(텍스트 인코더를 LLM으로 대체, 긴 캡션 이해) → UniLiP(CLIP+생성 통합, GenEval 0.90)"
+      },
+      "caption": "5년 동안 텍스트 인코더가 GPT 수준으로 고도화되고 데이터가 10배 늘었지만, '대조 학습'이라는 기본 아이디어는 그대로다"
+    },
+    {
+      "type": "body",
+      "heading": "CLIP의 한계 — 의미는 잘 잡지만 디테일은 약하다",
+      "content": "CLIP은 **의미(semantics)** 는 잘 잡지만 **픽셀 디테일(pixel detail)** 은 놓친다. '고양이'라는 개념은 알지만 털 한 올 한 올의 질감은 임베딩에 반영되지 않는다. 그래서 생성 모델(image generation model)은 CLIP + VAE를 함께 써서 의미는 CLIP이, 디테일은 VAE가 담당하게 한다."
+    },
+    {
+      "type": "insight",
+      "kicker": "CLIP 한 방 정리",
+      "kicker_label": "⚡ 3줄 요약",
+      "bullets": [
+        "CLIP = 그림 인코더(ViT) + 글 인코더(Transformer)를 같은 벡터 공간으로 대조 학습 — 레이블 0장으로도 분류 가능",
+        "4억 쌍 데이터로 ImageNet 제로샷 76.2% 달성, 2026년 SigLIP2는 84%까지 진화",
+        "멀티모달 백본으로 검색·생성·추천·로봇까지 확장 중 — 다음 편 'VAE와 잠재공간'과 짝을 이룸"
+      ],
+      "cta": "💾 저장하고 다음 편도 확인하세요 — 'VAE와 잠재공간'에서 생성 모델의 숨은 반쪽을 파헤칩니다"
+    }
+  ],
+  "caption": "2021년 등장 당시 'CLIP 하나로 분류기를 대체할 수 있다'는 말은 과장처럼 들렸습니다. 하지만 ImageNet 제로샷 76.2%는 실제였고, 그 성능은 2026년 SigLIP2의 84%까지 올랐습니다. 가장 인상적인 점은 아이디어의 단순함입니다 — 이미지 인코더와 텍스트 인코더의 출력 공간을 강제로 일치시키는 것, 그게 전부였습니다.\n\n오늘날 CLIP은 이미지 검색, 추천 시스템, 생성 모델의 조건 제어(conditioning), 로봇 시각, 비디오 이해까지 모든 멀티모달 시스템의 공통 레이어가 되었습니다. 저장해두고 천천히 읽어보세요 — 생성 모델과 VAE를 이해할 때 다시 CLIP을 만나게 됩니다.\n\n다음 편 'VAE와 잠재공간'에서 CLIP이 왜 생성 모델과 함께 다뤄지는지 알 수 있습니다. 팔로우하고 기다려주세요!",
+  "hashtags": [
+    "#인공지능", "#AI", "#머신러닝", "#딥러닝",
+    "#CLIP", "#멀티모달", "#대조학습", "#OpenAI",
+    "#제로샷", "#ImageNet", "#컴퓨터비전", "#ViT",
+    "#AI공부", "#AI이론", "#AI개발자", "#트랜스포머",
+    "#이미지검색", "#SigLIP", "#파운데이션모델", "#NLP",
+    "#벡터임베딩", "#데이터과학", "#기술트렌드", "#추천시스템"
+  ]
+}
