@@ -15,7 +15,12 @@
       "heading": "CLIP은 '번역기'다 — 그림↔글",
       "visual": {
         "kind": "arch",
-        "description": "이미지 인코더(Image Encoder, ViT) → 이미지 임베딩 벡터 ← 대조 손실(Contrastive Loss) → 텍스트 임베딩 벡터 ← 텍스트 인코더(Text Encoder, Transformer)"
+        "direction": "h",
+        "blocks": [
+          {"label": "이미지 인코더", "sub": "ViT → 512D"},
+          {"label": "대조 손실", "sub": "정답 쌍 당기기"},
+          {"label": "텍스트 인코더", "sub": "Transformer → 512D"}
+        ]
       },
       "caption": "두 인코더의 출력을 같은 차원(512D)으로 맞춰서 비교 가능하게 만든다 — 이것이 '멀티모달 정렬(Multimodal Alignment)'"
     },
@@ -23,8 +28,14 @@
       "type": "visual",
       "heading": "ViT는 이미지를 문장처럼 읽는다",
       "visual": {
-        "kind": "heatmap",
-        "description": "224×224 이미지 → 16×16 패치(patch) 196개 → 각 패치를 임베딩으로 변환 → 트랜스포머 레이어 통과 → [CLS] 토큰이 전체 이미지의 대표 임베딩으로 최종 출력"
+        "kind": "flow",
+        "steps": [
+          {"label": "224×224 이미지"},
+          {"label": "16×16 패치", "sub": "196개"},
+          {"label": "패치 임베딩"},
+          {"label": "Transformer"},
+          {"label": "[CLS] 토큰", "sub": "최종 임베딩"}
+        ]
       },
       "caption": "ViT는 이미지를 196개의 '단어'로 쪼개서 트랜스포머가 읽게 만든다 — 패치 하나가 문장의 단어 하나와 같은 역할"
     },
@@ -38,7 +49,10 @@
       "heading": "배치 내 모든 쌍 비교 — 10억 건의 대결",
       "visual": {
         "kind": "heatmap",
-        "description": "32,768×32,768 유사도 행렬. 대각선(정답)은 밝게, 나머지는 어둡게 — 모든 이미지가 모든 텍스트 캡션과 비교된다"
+        "rows": ["샘플1", "샘플2", "샘플3", "샘플4"],
+        "cols": ["텍스트1", "텍스트2", "텍스트3", "텍스트4"],
+        "values": [[0.92, 0.12, 0.08, 0.15], [0.11, 0.88, 0.14, 0.09], [0.07, 0.13, 0.91, 0.10], [0.16, 0.08, 0.11, 0.89]],
+        "text": [["✓0.92","0.12","0.08","0.15"],["0.11","✓0.88","0.14","0.09"],["0.07","0.13","✓0.91","0.10"],["0.16","0.08","0.11","✓0.89"]]
       },
       "caption": "10억 개의 이미지-텍스트 유사도를 한 번에 비교해서 정답 쌍만 골라낸다 — 이게 '대조 사전학습(Contrastive Pretraining)'의 본질"
     },
@@ -52,7 +66,12 @@
       "heading": "CLIP vs 지도학습 — 데이터 없이 비벼볼 만하다",
       "visual": {
         "kind": "bars",
-        "description": "ImageNet 정확도: CLIP ViT-L/14 (제로샷, 학습 데이터 0장) = 76.2%, ResNet-50 (120만 장 학습) = 76.1%, ResNet-101 (120만 장) ≈ 77.4%. CLIP이 학습 데이터 없이도 거의 따라잡았다"
+        "unit": "%",
+        "items": [
+          {"label": "CLIP ViT-L/14", "value": 76.2, "highlight": true},
+          {"label": "ResNet-50", "value": 76.1},
+          {"label": "ResNet-101", "value": 77.4}
+        ]
       },
       "caption": "120만 장의 레이블을 모으는 데 얼마나 공수가 들까? CLIP은 그 비용을 0으로 만들었다"
     },
@@ -61,7 +80,13 @@
       "heading": "CLIP 생태계 — 2026년 진화",
       "visual": {
         "kind": "flow",
-        "description": "CLIP(2021) → OpenCLIP(LAION-5B, 공개 가중치) → SigLIP(시그모이드 손실, 2023) → SigLIP2(다국어, 2024, ~84%) → LLM2CLIP(텍스트 인코더를 LLM으로 대체, 긴 캡션 이해) → UniLiP(CLIP+생성 통합, GenEval 0.90)"
+        "steps": [
+          {"label": "CLIP", "sub": "2021 OpenAI"},
+          {"label": "OpenCLIP", "sub": "LAION-5B"},
+          {"label": "SigLIP/2", "sub": "~84%"},
+          {"label": "LLM2CLIP", "sub": "LLM 텍스트 인코더"},
+          {"label": "UniLiP", "sub": "생성+CLIP 통합"}
+        ]
       },
       "caption": "5년 동안 텍스트 인코더가 GPT 수준으로 고도화되고 데이터가 10배 늘었지만, '대조 학습'이라는 기본 아이디어는 그대로다"
     },
