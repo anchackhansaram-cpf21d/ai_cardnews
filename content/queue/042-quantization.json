@@ -62,22 +62,6 @@
       "body": "**GGUF**(GPT-Generated Unified Format)는 llama.cpp 생태계의 양자화 포맷으로, CPU/GPU 혼합 환경에 최적화되었다.\n\n**k-퀀트(k-quant)** 레벨이 다양한데, 핵심만 추리면:\n- **Q2_K**: 2비트, 최고 압축 (품질 저하 큼)\n- **Q4_K_M**: 4비트 중간, 밸런스 최고\n- **Q5_K_M**: 5비트, 7B~32B 모델 최적 **(1.2% 손실, VRAM 38% 절약)**\n- **Q8_0**: 8비트, 거의 무손실 (저장만 50%)\n\n**중요**: 작은 모델(≤4B)은 양자화에 더 민감하다. Qwen3 4B는 Q4_K_M에서 HumanEval+(코드 생성 벤치마크) 점수가 **6.4점 하락**하지만, 70B 모델은 같은 설정에서 **1.1점만 하락**한다. 즉 **클수록 양자화 내성이 강하다**. 70B는 파라미터 중복성(redundancy)이 높아 일부 손실을 다른 가중치가 보완할 수 있기 때문이다."
     },
     {
-      "type": "visual",
-      "heading": "모델 크기별 양자화 민감도",
-      "visual": {
-        "kind": "bars",
-        "data": {
-          "bars": [
-            {"label": "Qwen3 4B", "drop": 6.4, "unit": "점↓", "color": "red"},
-            {"label": "Llama 7B", "drop": 3.2, "unit": "점↓", "color": "orange"},
-            {"label": "Llama 13B", "drop": 2.1, "unit": "점↓", "color": "yellow"},
-            {"label": "Llama 70B", "drop": 1.1, "unit": "점↓", "color": "green"}
-          ]
-        }
-      },
-      "caption": "Q4_K_M 양자화 시 HumanEval+ 점수 하락 폭. **작은 모델일수록 양자화 타격이 크다.** 4B 모델은 6.4점이나 떨어지지만 70B는 1.1점만 하락. 같은 Q4_K_M이라도 모델 크기에 따라 결과가 완전히 다르므로, 자신의 모델을 알고 선택해야 한다."
-    },
-    {
       "type": "body",
       "title": "2026년의 중심: FP8과 마이크로스케일링 FP4",
       "body": "2026년 가장 큰 변화는 **정수(INT)에서 저정밀 부동소수점(FP)으로의 전환**이다.\n\n**FP8**: H100(Hopper)부터 하드웨어 네이티브. E4M3(정밀형, 3비트 가수+4비트 지수)와 E5M2(범위형) 두 포맷. 지수(exponent) 덕분에 큰 값과 작은 값을 동시에 표현해 이상값(outlier)에 강하다.\n\n**NVFP4**: NVIDIA의 4비트 부동소수점. 블록 단위 스케일링(32개 값마다 공유 스케일 인자)으로 FP4의 좁은 범위를 최적화. Blackwell GPU에서 **W4A4**(가중치+활성화 모두 4비트)로 동작, 7개 벤치마크 평균 1% 미만 저하. KV 캐시까지 4비트(W4A4KV4)면 FP16 대비 비용 1/10.\n\n**OpenAI gpt-oss**가 MXFP4(OCP 표준)로 배포된 게 상징적 — 이제 양자화는 '타협'이 아니라 '기본값'이다."
@@ -86,23 +70,6 @@
       "type": "body",
       "title": "주의: 양자화가 항상 빠른 건 아니다",
       "body": "반드시 알아야 할 사실: **양자화 ≠ 무조건 빠름.**\n\n추론의 병목(bottleneck)은 연산 자체가 아니라 **메모리 대역폭**(GPU 메모리에서 연산 유닛으로 데이터를 가져오는 속도)이다. 양자화는 전송할 데이터를 줄여 병목을 완화하지만, **역양자화(dequantization: 저장된 저정밀 값을 다시 고정밀 복원)** 비용이 오히려 속도를 늦출 수 있다.\n\n작은 배치(batch)에서는 역양자화 오버헤드가 병목이 된다. 이게 Marlin, ExLlamaV2, Q4_K_M 같은 **커널(kernel: 양자화 연산을 실제로 실행하는 저수준 코드)** 선택이 알고리즘만큼 중요한 이유다.\n\n실제 사례: 레퍼런스 PyTorch 커널로 4비트 모델을 서빙했더니 FP16보다 느렸다. 커널을 AWQ-Marlin으로 바꾸자 **2.3배 빨라졌다**."
-    },
-    {
-      "type": "visual",
-      "heading": "사용 사례별 최적 양자화 선택",
-      "visual": {
-        "kind": "arch",
-        "data": {
-          "layers": [
-            {"name": "vLLM 서빙 → AWQ INT4 + Marlin", "color": "blue", "desc": "GPU 생산 서빙, 최고 처리량. 4비트 디코드 1위"},
-            {"name": "llama.cpp 로컬 → GGUF Q5_K_M", "color": "green", "desc": "CPU/GPU 혼합, 밸런스 최고. 1.2% 손실·38% 절약"},
-            {"name": "Blackwell → NVFP4 W4A4", "color": "purple", "desc": "무손실급, 최고 압축률. W4A4KV4 가능"},
-            {"name": "QLoRA 학습 → bitsandbytes NF4", "color": "orange", "desc": "파인튜닝 중에도 양자화 유지, 런타임 변환"},
-            {"name": "고속 추론 → FP8 (H100+)", "color": "red", "desc": "W8A8, 하드웨어 가속, 거의 완전 무손실"}
-          ]
-        }
-      },
-      "caption": "사용 사례별 최적 양자화 선택. 잘못 고르면 오히려 느려질 수 있다. **커널이 알고리즘보다 중요하다** — 같은 AWQ라도 Marlin vs PyTorch 레퍼런스에서 2배 이상 차이난다."
     },
     {
       "type": "insight",
