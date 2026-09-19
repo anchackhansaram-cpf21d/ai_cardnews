@@ -348,16 +348,85 @@ def venn(s):
     return _wrap("".join(out), H)
 
 
+# ── 9. 범용 폴백 (스펙이 어긋나도 크래시 없이 렌더) ─────────────
+_SEV_COLOR = {"매우 높음": "#FF6B6B", "높음": "var(--warm)", "중간": "var(--accent)",
+              "낮음": "#6ED4B3", "매우 낮음": "#6ED4B3"}
+
+
+def _fallback_rows(rows, title=None):
+    """임의의 dict 리스트를 라벨+서브텍스트 행으로 렌더한다."""
+    n = len(rows)
+    row_h, gap = 76, 16
+    top = 46 if title else 8
+    H = top + n * (row_h + gap) - gap + 16
+    out = []
+    if title:
+        out.append(f'<text x="{CW/2:.0f}" y="30" text-anchor="middle" font-size="23" '
+                   f'font-weight="600" fill="var(--muted)">{esc(title)}</text>')
+    for i, it in enumerate(rows):
+        if not isinstance(it, dict):
+            it = {"label": str(it)}
+        y = top + i * (row_h + gap)
+        label = it.get("label") or it.get("name") or it.get("title") or it.get("key") or ""
+        sub = it.get("sub") or it.get("desc") or it.get("description") or it.get("value") or ""
+        sev = str(it.get("severity") or "")
+        cname = str(it.get("color") or "").lower()
+        col = _SEV_COLOR.get(sev) or {
+            "red": "#FF6B6B", "green": "#6ED4B3", "orange": "var(--warm)",
+            "warm": "var(--warm)", "blue": "var(--accent)",
+        }.get(cname, "var(--accent)")
+        out.append(f'<rect x="24" y="{y}" width="{CW-48}" height="{row_h}" rx="12" '
+                   f'fill="{col}" fill-opacity=".10" stroke="{col}" '
+                   f'stroke-opacity=".40" stroke-width="1.5"/>')
+        if sub:
+            out.append(f'<text x="52" y="{y+34:.0f}" font-size="25" font-weight="700" '
+                       f'fill="{col}">{esc(str(label))}</text>')
+            out.append(f'<text x="52" y="{y+62:.0f}" font-size="19" font-weight="500" '
+                       f'fill="var(--muted)">{esc(str(sub)[:54])}</text>')
+        else:
+            out.append(f'<text x="52" y="{y+row_h/2+9:.0f}" font-size="26" font-weight="700" '
+                       f'fill="{col}">{esc(str(label))}</text>')
+    return _wrap("".join(out), int(H))
+
+
+def fallback(s):
+    """스펙이 예상 스키마와 달라도 최소한 텍스트로 렌더한다 (crash 방지)."""
+    rows = []
+    for key in ("items", "blocks", "layers", "steps", "series", "parts",
+                "rows", "sets", "data", "entries"):
+        v = s.get(key)
+        if isinstance(v, list) and v:
+            rows = v
+            break
+    if not rows:
+        rows = [{"label": str(k), "sub": str(v)} for k, v in s.items()
+                if k not in ("kind", "title") and isinstance(v, (str, int, float))]
+    if not rows:
+        return _fallback_rows([], s.get("title") or "(시각자료 없음)")
+    return _fallback_rows(rows, s.get("title"))
+
+
 # BUILDERS (모든 draw 함수가 정의된 후에 위치해야 함)
 BUILDERS = {"heatmap": heatmap, "bars": bars, "line": line,
             "flow": flow, "formula": formula, "compare": compare,
-            "arch": arch, "venn": venn}
+            "arch": arch, "venn": venn, "list": fallback}
 
 
 def build(spec):
+    """어떤 스키마가 와도 크래시 없이 렌더한다.
+
+    1) {"kind":..., "data": {...}} 형태면 data 키를 최상위로 펼친다.
+    2) 빌더가 KeyError/TypeError 등으로 실패하면 범용 폴백으로 렌더한다.
+    """
+    if isinstance(spec, dict) and isinstance(spec.get("data"), dict):
+        merged = {**spec, **spec["data"]}
+        merged.pop("data", None)
+        spec = merged
     kind = spec.get("kind")
     fn = BUILDERS.get(kind)
     if not fn:
-        raise ValueError(f"알 수 없는 visual kind: {kind} "
-                         f"(가능: {', '.join(BUILDERS)})")
-    return fn(spec)
+        return fallback(spec)
+    try:
+        return fn(spec)
+    except (KeyError, TypeError, ValueError, IndexError):
+        return fallback(spec)
