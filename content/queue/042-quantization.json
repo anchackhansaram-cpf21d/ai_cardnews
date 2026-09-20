@@ -7,13 +7,17 @@
       "type": "cover",
       "eyebrow": "🔥 모델 크기는 반토막, 속도는 2배",
       "title": "GPT-4가 내 아이폰에? 양자화의 비밀",
-      "highlight": ["양자화", "W4A4", "FP8"],
+      "highlight": [
+        "양자화",
+        "W4A4",
+        "FP8"
+      ],
       "subtitle": "140GB 모델이 35GB로 줄어드는 원리"
     },
     {
       "type": "body",
-      "title": "정밀도를 버리는 기술, 양자화",
-      "body": "**양자화(Quantization)**는 모델의 가중치(weight: 뉴런 연결의 강도)를 더 적은 비트로 표현하는 기술이다. FP16(16비트 부동소수점)으로 저장된 파라미터를 INT4(4비트 정수)로 바꾸면 메모리가 75% 줄어든다.\n\n비유하자면: 풀HD 사진(FP16)을 웹용 저해상도(JPG)로 바꾸는 것과 같다. 육안으로 차이를 거의 못 느끼지만 파일 크기는 1/4로 줄어든다.\n\n70B 모델 기준:\n- FP16: 140GB → H100×2 필요\n- INT4: ~35GB → 한 장으로 충분\n\n메모리 대역폭이 추론 속도의 병목이므로, 데이터가 작을수록 더 빠르다."
+      "body": "**양자화(Quantization)**는 모델의 가중치(weight: 뉴런 연결의 강도)를 더 적은 비트로 표현하는 기술이다. FP16(16비트 부동소수점)으로 저장된 파라미터를 INT4(4비트 정수)로 바꾸면 메모리가 75% 줄어든다.\n\n비유하자면: 풀HD 사진(FP16)을 웹용 저해상도(JPG)로 바꾸는 것과 같다. 육안으로 차이를 거의 못 느끼지만 파일 크기는 1/4로 줄어든다.\n\n70B 모델 기준:\n- FP16: 140GB → H100×2 필요\n- INT4: ~35GB → 한 장으로 충분\n\n메모리 대역폭이 추론 속도의 병목이므로, 데이터가 작을수록 더 빠르다.",
+      "heading": "정밀도를 버리는 기술, 양자화"
     },
     {
       "type": "visual",
@@ -22,11 +26,41 @@
         "kind": "compare",
         "data": {
           "items": [
-            {"label": "GPTQ", "bits": "3~4", "calib": "30~90분", "speed": "Marlin 커널", "quality": "거의 무손실"},
-            {"label": "AWQ", "bits": "4", "calib": "10~25분", "speed": "디코드 최고", "quality": "거의 무손실"},
-            {"label": "GGUF", "bits": "2~8", "calib": "선택", "speed": "CPU/GPU 혼합", "quality": "뛰어남"},
-            {"label": "bitsandbytes", "bits": "4(NF4)", "calib": "불필요", "speed": "런타임 변환", "quality": "준수"},
-            {"label": "FP8(NVFP4)", "bits": "8/4", "calib": "불필요", "speed": "Blackwell 네이티브", "quality": "무손실급"}
+            {
+              "label": "GPTQ",
+              "bits": "3~4",
+              "calib": "30~90분",
+              "speed": "Marlin 커널",
+              "quality": "거의 무손실"
+            },
+            {
+              "label": "AWQ",
+              "bits": "4",
+              "calib": "10~25분",
+              "speed": "디코드 최고",
+              "quality": "거의 무손실"
+            },
+            {
+              "label": "GGUF",
+              "bits": "2~8",
+              "calib": "선택",
+              "speed": "CPU/GPU 혼합",
+              "quality": "뛰어남"
+            },
+            {
+              "label": "bitsandbytes",
+              "bits": "4(NF4)",
+              "calib": "불필요",
+              "speed": "런타임 변환",
+              "quality": "준수"
+            },
+            {
+              "label": "FP8(NVFP4)",
+              "bits": "8/4",
+              "calib": "불필요",
+              "speed": "Blackwell 네이티브",
+              "quality": "무손실급"
+            }
           ]
         }
       },
@@ -34,13 +68,13 @@
     },
     {
       "type": "body",
-      "title": "핵심 원리: 스케일 인자와 제로포인트",
-      "body": "FP16 숫자를 INT4로 바꾸려면 한 가지 문제가 있다. FP16은 $-10^4$에서 $10^4$ 범위를 표현하는데, INT4는 -8에서 7까지밖에 못 표현한다.\n\n해결법: **스케일 인자(scale factor)**와 **제로포인트(zero point)**.\n\n**대칭 양자화(Symmetric Quantization)** — 0을 중심으로:\n$x_{int} = \\text{round}\\left(\\frac{x_{fp}}{s}\\right)$\n\n**비대칭 양자화(Asymmetric Quantization)** — 실제 범위 활용:\n$x_{int} = \\text{round}\\left(\\frac{x_{fp} - \\text{min}}{\\Delta}\\right)$\n\n여기서 $\\Delta = \\frac{\\text{max} - \\text{min}}{2^n - 1}$는 스텝 크기. 복원은 $x_{fp} \\approx s \\cdot x_{int} + z$로 되돌린다. 이 단순한 트릭 하나로 모델 크기를 75% 줄인다."
+      "body": "FP16 숫자를 INT4로 바꾸려면 한 가지 문제가 있다. FP16은 $-10^4$에서 $10^4$ 범위를 표현하는데, INT4는 -8에서 7까지밖에 못 표현한다.\n\n해결법: **스케일 인자(scale factor)**와 **제로포인트(zero point)**.\n\n**대칭 양자화(Symmetric Quantization)** — 0을 중심으로:\n$x_{int} = \\text{round}\\left(\\frac{x_{fp}}{s}\\right)$\n\n**비대칭 양자화(Asymmetric Quantization)** — 실제 범위 활용:\n$x_{int} = \\text{round}\\left(\\frac{x_{fp} - \\text{min}}{\\Delta}\\right)$\n\n여기서 $\\Delta = \\frac{\\text{max} - \\text{min}}{2^n - 1}$는 스텝 크기. 복원은 $x_{fp} \\approx s \\cdot x_{int} + z$로 되돌린다. 이 단순한 트릭 하나로 모델 크기를 75% 줄인다.",
+      "heading": "핵심 원리: 스케일 인자와 제로포인트"
     },
     {
       "type": "body",
-      "title": "GPTQ: 헤시안(2차 도함수)으로 오차 분산",
-      "body": "GPTQ(Generative Pre-trained Transformer Quantization)는 2022년에 등장해 4비트 시대를 연 기술이다. 핵심 아이디어: **한 가중치를 양자화할 때 생긴 오차를 아직 양자화하지 않은 나머지 가중치에 분산시킨다.**\n\n이를 위해 **헤시안 행렬(Hessian Matrix: 2차 도함수 행렬)**을 사용한다. 각 컬럼(column)을 양자화한 후, 그 오차를 헤시안 역행렬로 나머지 컬럼에 재분배한다.\n\n$\\delta_{W} = -\\frac{W_q - W}{[H^{-1}]_{ii}} \\cdot (H^{-1})_{:,i}$\n\n결과: 175B 모델을 3~4비트로 양자화해도 perplexity(언어 모델 예측 난이도) 증가가 0.5 이하. 단점: 캘리브레이션(calibration: 최적 양자화 파라미터를 찾는 과정)에 30~90분 필요."
+      "body": "GPTQ(Generative Pre-trained Transformer Quantization)는 2022년에 등장해 4비트 시대를 연 기술이다. 핵심 아이디어: **한 가중치를 양자화할 때 생긴 오차를 아직 양자화하지 않은 나머지 가중치에 분산시킨다.**\n\n이를 위해 **헤시안 행렬(Hessian Matrix: 2차 도함수 행렬)**을 사용한다. 각 컬럼(column)을 양자화한 후, 그 오차를 헤시안 역행렬로 나머지 컬럼에 재분배한다.\n\n$\\delta_{W} = -\\frac{W_q - W}{[H^{-1}]_{ii}} \\cdot (H^{-1})_{:,i}$\n\n결과: 175B 모델을 3~4비트로 양자화해도 perplexity(언어 모델 예측 난이도) 증가가 0.5 이하. 단점: 캘리브레이션(calibration: 최적 양자화 파라미터를 찾는 과정)에 30~90분 필요.",
+      "heading": "GPTQ: 헤시안(2차 도함수)으로 오차 분산"
     },
     {
       "type": "visual",
@@ -49,8 +83,18 @@
         "kind": "bars",
         "data": {
           "bars": [
-            {"label": "Salient(보호)", "value": 1, "unit": "%", "color": "red"},
-            {"label": "Non-salient(양자화)", "value": 99, "unit": "%", "color": "blue"}
+            {
+              "label": "Salient(보호)",
+              "value": 1,
+              "unit": "%",
+              "color": "red"
+            },
+            {
+              "label": "Non-salient(양자화)",
+              "value": 99,
+              "unit": "%",
+              "color": "blue"
+            }
           ]
         }
       },
@@ -58,18 +102,18 @@
     },
     {
       "type": "body",
-      "title": "GGUF: 로컬 추론의 현실적 선택",
-      "body": "**GGUF**(GPT-Generated Unified Format)는 llama.cpp 생태계의 양자화 포맷으로, CPU/GPU 혼합 환경에 최적화되었다.\n\n**k-퀀트(k-quant)** 레벨이 다양한데, 핵심만 추리면:\n- **Q2_K**: 2비트, 최고 압축 (품질 저하 큼)\n- **Q4_K_M**: 4비트 중간, 밸런스 최고\n- **Q5_K_M**: 5비트, 7B~32B 모델 최적 **(1.2% 손실, VRAM 38% 절약)**\n- **Q8_0**: 8비트, 거의 무손실 (저장만 50%)\n\n**중요**: 작은 모델(≤4B)은 양자화에 더 민감하다. Qwen3 4B는 Q4_K_M에서 HumanEval+(코드 생성 벤치마크) 점수가 **6.4점 하락**하지만, 70B 모델은 같은 설정에서 **1.1점만 하락**한다. 즉 **클수록 양자화 내성이 강하다**. 70B는 파라미터 중복성(redundancy)이 높아 일부 손실을 다른 가중치가 보완할 수 있기 때문이다."
+      "body": "**GGUF**(GPT-Generated Unified Format)는 llama.cpp 생태계의 양자화 포맷으로, CPU/GPU 혼합 환경에 최적화되었다.\n\n**k-퀀트(k-quant)** 레벨이 다양한데, 핵심만 추리면:\n- **Q2_K**: 2비트, 최고 압축 (품질 저하 큼)\n- **Q4_K_M**: 4비트 중간, 밸런스 최고\n- **Q5_K_M**: 5비트, 7B~32B 모델 최적 **(1.2% 손실, VRAM 38% 절약)**\n- **Q8_0**: 8비트, 거의 무손실 (저장만 50%)\n\n**중요**: 작은 모델(≤4B)은 양자화에 더 민감하다. Qwen3 4B는 Q4_K_M에서 HumanEval+(코드 생성 벤치마크) 점수가 **6.4점 하락**하지만, 70B 모델은 같은 설정에서 **1.1점만 하락**한다. 즉 **클수록 양자화 내성이 강하다**. 70B는 파라미터 중복성(redundancy)이 높아 일부 손실을 다른 가중치가 보완할 수 있기 때문이다.",
+      "heading": "GGUF: 로컬 추론의 현실적 선택"
     },
     {
       "type": "body",
-      "title": "2026년의 중심: FP8과 마이크로스케일링 FP4",
-      "body": "2026년 가장 큰 변화는 **정수(INT)에서 저정밀 부동소수점(FP)으로의 전환**이다.\n\n**FP8**: H100(Hopper)부터 하드웨어 네이티브. E4M3(정밀형, 3비트 가수+4비트 지수)와 E5M2(범위형) 두 포맷. 지수(exponent) 덕분에 큰 값과 작은 값을 동시에 표현해 이상값(outlier)에 강하다.\n\n**NVFP4**: NVIDIA의 4비트 부동소수점. 블록 단위 스케일링(32개 값마다 공유 스케일 인자)으로 FP4의 좁은 범위를 최적화. Blackwell GPU에서 **W4A4**(가중치+활성화 모두 4비트)로 동작, 7개 벤치마크 평균 1% 미만 저하. KV 캐시까지 4비트(W4A4KV4)면 FP16 대비 비용 1/10.\n\n**OpenAI gpt-oss**가 MXFP4(OCP 표준)로 배포된 게 상징적 — 이제 양자화는 '타협'이 아니라 '기본값'이다."
+      "body": "2026년 가장 큰 변화는 **정수(INT)에서 저정밀 부동소수점(FP)으로의 전환**이다.\n\n**FP8**: H100(Hopper)부터 하드웨어 네이티브. E4M3(정밀형, 3비트 가수+4비트 지수)와 E5M2(범위형) 두 포맷. 지수(exponent) 덕분에 큰 값과 작은 값을 동시에 표현해 이상값(outlier)에 강하다.\n\n**NVFP4**: NVIDIA의 4비트 부동소수점. 블록 단위 스케일링(32개 값마다 공유 스케일 인자)으로 FP4의 좁은 범위를 최적화. Blackwell GPU에서 **W4A4**(가중치+활성화 모두 4비트)로 동작, 7개 벤치마크 평균 1% 미만 저하. KV 캐시까지 4비트(W4A4KV4)면 FP16 대비 비용 1/10.\n\n**OpenAI gpt-oss**가 MXFP4(OCP 표준)로 배포된 게 상징적 — 이제 양자화는 '타협'이 아니라 '기본값'이다.",
+      "heading": "2026년의 중심: FP8과 마이크로스케일링 FP4"
     },
     {
       "type": "body",
-      "title": "주의: 양자화가 항상 빠른 건 아니다",
-      "body": "반드시 알아야 할 사실: **양자화 ≠ 무조건 빠름.**\n\n추론의 병목(bottleneck)은 연산 자체가 아니라 **메모리 대역폭**(GPU 메모리에서 연산 유닛으로 데이터를 가져오는 속도)이다. 양자화는 전송할 데이터를 줄여 병목을 완화하지만, **역양자화(dequantization: 저장된 저정밀 값을 다시 고정밀 복원)** 비용이 오히려 속도를 늦출 수 있다.\n\n작은 배치(batch)에서는 역양자화 오버헤드가 병목이 된다. 이게 Marlin, ExLlamaV2, Q4_K_M 같은 **커널(kernel: 양자화 연산을 실제로 실행하는 저수준 코드)** 선택이 알고리즘만큼 중요한 이유다.\n\n실제 사례: 레퍼런스 PyTorch 커널로 4비트 모델을 서빙했더니 FP16보다 느렸다. 커널을 AWQ-Marlin으로 바꾸자 **2.3배 빨라졌다**."
+      "body": "반드시 알아야 할 사실: **양자화 ≠ 무조건 빠름.**\n\n추론의 병목(bottleneck)은 연산 자체가 아니라 **메모리 대역폭**(GPU 메모리에서 연산 유닛으로 데이터를 가져오는 속도)이다. 양자화는 전송할 데이터를 줄여 병목을 완화하지만, **역양자화(dequantization: 저장된 저정밀 값을 다시 고정밀 복원)** 비용이 오히려 속도를 늦출 수 있다.\n\n작은 배치(batch)에서는 역양자화 오버헤드가 병목이 된다. 이게 Marlin, ExLlamaV2, Q4_K_M 같은 **커널(kernel: 양자화 연산을 실제로 실행하는 저수준 코드)** 선택이 알고리즘만큼 중요한 이유다.\n\n실제 사례: 레퍼런스 PyTorch 커널로 4비트 모델을 서빙했더니 FP16보다 느렸다. 커널을 AWQ-Marlin으로 바꾸자 **2.3배 빨라졌다**.",
+      "heading": "주의: 양자화가 항상 빠른 건 아니다"
     },
     {
       "type": "insight",
@@ -86,11 +130,30 @@
   ],
   "caption": "🔥 140GB 모델이 35GB로? AI의 '다이어트' 기술, 양자화.\n\n70B 모델 FP16은 H100 두 장 필요. INT4 한 장이면 충분. 2026년, 양자화는 '타협'이 아니라 '기본값'이 되었습니다.\n\nGPTQ는 헤시안(2차 도함수)으로 오차를 분산하고, AWQ는 중요한 1%만 보호합니다. 작은 모델(4B)은 양자화에 6.4점 하락하는 반면, 70B는 1.1점만… 클수록 양자화 내성이 강합니다. Blackwell의 NVFP4는 KV 캐시까지 4비트로, FP16 대비 비용 1/10.\n\n🧠 내 GPU에 모델이 안 들어간다면? 저장 필수.\n\n다음 편: 'INT8·INT4와 GPTQ/AWQ 실전 선택법' — 내 작업에 딱 맞는 포맷 고르기.\n\n👇 댓글로 '양자화' 달면 실전 가이드 먼저 작업합니다!",
   "hashtags": [
-    "#인공지능", "#AI", "#양자화", "#Quantization", "#LLM",
-    "#GPTQ", "#AWQ", "#GGUF", "#FP8", "#모델경량화",
-    "#AI최적화", "#딥러닝", "#vLLM", "#llamacpp", "#Blackwell",
-    "#NVFP4", "#MXFP4", "#AI엔지니어링", "#모델배포", "#GPU",
-    "#메모리최적화", "#비용절감", "#온디바이스AI", "#로컬LLM",
+    "#인공지능",
+    "#AI",
+    "#양자화",
+    "#Quantization",
+    "#LLM",
+    "#GPTQ",
+    "#AWQ",
+    "#GGUF",
+    "#FP8",
+    "#모델경량화",
+    "#AI최적화",
+    "#딥러닝",
+    "#vLLM",
+    "#llamacpp",
+    "#Blackwell",
+    "#NVFP4",
+    "#MXFP4",
+    "#AI엔지니어링",
+    "#모델배포",
+    "#GPU",
+    "#메모리최적화",
+    "#비용절감",
+    "#온디바이스AI",
+    "#로컬LLM",
     "#2026트렌드"
   ]
 }
