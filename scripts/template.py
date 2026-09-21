@@ -229,6 +229,23 @@ def paras(text):
                    for p in str(text).split("\n") if p.strip())
 
 
+def parse_md_table(text):
+    """본문의 마크다운 표를 파싱한다. ({headers, rows}, 나머지텍스트) 반환."""
+    rows, rest = [], []
+    for line in str(text).split("\n"):
+        st = line.strip()
+        if st.count("|") >= 2:
+            cells = [c.strip() for c in st.strip("|").split("|")]
+            if all(c and set(c) <= set("-: ") for c in cells):
+                continue  # 구분선 |---|
+            rows.append(cells)
+        elif st:
+            rest.append(st)
+    if len(rows) >= 2:
+        return {"headers": rows[0], "rows": rows[1:]}, "\n".join(rest)
+    return None, "\n".join(rest)
+
+
 def render_card(card, idx, total, meta):
     kind = card.get("type", "body")
     klass = {"cover": "cover", "insight": "insight"}.get(kind, "body")
@@ -265,14 +282,24 @@ def render_card(card, idx, total, meta):
         if card.get("kicker") or card.get("kicker_label"):
             body += (f'<div class="kicker"><span class="num">{idx:02d}</span>'
                      f'<span>{esc(card.get("kicker_label",""))}</span></div>')
-        if card.get("heading") or card.get("visual") or card.get("lead"):
+        if card.get("heading") or card.get("visual") or card.get("lead") or card.get("kind"):
+            # 시각화 스펙 결정: card.visual 우선, 없으면 카드레벨 kind + 본문 표
+            spec = card.get("visual")
+            cap = card.get("caption", "")
+            if not isinstance(spec, dict) or not spec:
+                tbl, rest = parse_md_table(card.get("body", ""))
+                if tbl:
+                    spec = {"kind": "table", **tbl}
+                    cap = cap or rest
+                elif card.get("kind"):
+                    spec = {"kind": card["kind"]}
             body += f'<h2 class="heading">{esc(card.get("heading",""))}</h2>'
             if card.get("lead"):
                 body += f'<p class="vlead">{esc(card["lead"])}</p>'
-            if card.get("visual"):
-                body += diagrams.build(card["visual"])
-            if card.get("caption"):
-                body += f'<div class="vcap">{esc(card["caption"])}</div>'
+            if spec:
+                body += diagrams.build(spec)
+            if cap:
+                body += f'<div class="vcap">{esc(cap)}</div>'
         else:
             body += paras(card.get("body", ""))
         align = "center"

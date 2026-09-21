@@ -75,7 +75,24 @@ def heatmap(s):
 
 # ── 2. 가로 막대 ────────────────────────────────────────────────
 def bars(s):
-    items = s["items"]
+    items = s.get("items") or s.get("bars") or s.get("values") or []
+    # 라벨/값 키 정규화 (label|name, value|v|val|percent|pct)
+    norm = []
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        lab = it.get("label") or it.get("name") or it.get("key") or ""
+        val = it.get("value", it.get("v", it.get("val", it.get("percent", it.get("pct")))))
+        if val is None or isinstance(val, bool):
+            continue
+        try:
+            val = float(val)
+        except (TypeError, ValueError):
+            continue
+        norm.append({**it, "label": lab, "value": val})
+    items = norm
+    if not items:
+        raise ValueError("bars: no numeric items")
     unit = s.get("unit", "")
     lab_w = 250
     bar_h, gap = 62, 26
@@ -389,11 +406,22 @@ def _fallback_rows(rows, title=None):
     return _wrap("".join(out), int(H))
 
 
+def _has_numeric(rows):
+    for it in rows:
+        if not isinstance(it, dict):
+            continue
+        for k in ("value", "v", "val", "percent", "pct"):
+            val = it.get(k)
+            if isinstance(val, (int, float)) and not isinstance(val, bool):
+                return True
+    return False
+
+
 def fallback(s):
-    """스펙이 예상 스키마와 달라도 최소한 텍스트로 렌더한다 (crash 방지)."""
+    """스펙이 예상 스키마와 달라도 최소한 차트/텍스트로 렌더한다 (crash 방지)."""
     rows = []
-    for key in ("items", "blocks", "layers", "steps", "series", "parts",
-                "rows", "sets", "data", "entries"):
+    for key in ("items", "bars", "values", "blocks", "layers", "steps",
+                "series", "parts", "rows", "sets", "data", "entries"):
         v = s.get(key)
         if isinstance(v, list) and v:
             rows = v
@@ -403,13 +431,62 @@ def fallback(s):
                 if k not in ("kind", "title") and isinstance(v, (str, int, float))]
     if not rows:
         return _fallback_rows([], s.get("title") or "(시각자료 없음)")
+    # 숫자 값이 있으면 막대 차트로 그린다
+    if _has_numeric(rows):
+        try:
+            return bars({**s, "items": rows})
+        except Exception:
+            pass
     return _fallback_rows(rows, s.get("title"))
+
+
+# ── 10. 표(테이블) 렌더러 ────────────────────────────────────────
+def table(s):
+    """마크다운 표를 SVG 표로 그린다. {headers:[...], rows:[[...],...]}"""
+    headers = s.get("headers") or []
+    rows = s.get("rows") or []
+    ncol = 0
+    if headers:
+        ncol = max(ncol, len(headers))
+    for r in rows:
+        if isinstance(r, list):
+            ncol = max(ncol, len(r))
+    if ncol == 0:
+        raise ValueError("table: empty")
+    col_w = CW / ncol
+    row_h = 58
+    H = (len(rows) + (1 if headers else 0)) * row_h + 20
+    out = []
+    y = 10
+    if headers:
+        out.append(f'<rect x="0" y="{y}" width="{CW}" height="{row_h}" rx="10" '
+                   f'fill="var(--accent)" fill-opacity=".16"/>')
+        for j, h in enumerate(headers):
+            out.append(f'<text x="{j*col_w+col_w/2:.0f}" y="{y+row_h/2+8:.0f}" '
+                       f'text-anchor="middle" font-size="20" font-weight="800" '
+                       f'fill="var(--accent)">{esc(str(h)[:16])}</text>')
+        y += row_h + 6
+    for i, r in enumerate(rows):
+        if not isinstance(r, list):
+            r = [r]
+        if i % 2 == 1:
+            out.append(f'<rect x="0" y="{y}" width="{CW}" height="{row_h-6}" rx="8" '
+                       f'fill="var(--ink)" fill-opacity=".05"/>')
+        for j in range(ncol):
+            cell = r[j] if j < len(r) else ""
+            col = "var(--ink)" if j == 0 else "var(--muted)"
+            weight = 700 if j == 0 else 500
+            out.append(f'<text x="{j*col_w+col_w/2:.0f}" y="{y+(row_h-6)/2+8:.0f}" '
+                       f'text-anchor="middle" font-size="18" font-weight="{weight}" '
+                       f'fill="{col}">{esc(str(cell)[:16])}</text>')
+        y += row_h
+    return _wrap("".join(out), int(H))
 
 
 # BUILDERS (모든 draw 함수가 정의된 후에 위치해야 함)
 BUILDERS = {"heatmap": heatmap, "bars": bars, "line": line,
             "flow": flow, "formula": formula, "compare": compare,
-            "arch": arch, "venn": venn, "list": fallback}
+            "arch": arch, "venn": venn, "list": fallback, "table": table}
 
 
 def build(spec):
