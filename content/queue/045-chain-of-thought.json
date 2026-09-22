@@ -1,0 +1,125 @@
+{
+  "series_no": 45,
+  "topic": "체인 오브 소트(Chain-of-Thought) — 생각을 적으면 왜 정답률이 오르나",
+  "source": "growth",
+  "cards": [
+    {
+      "type": "cover",
+      "eyebrow": "🧠 2026년 9월 충격 실험",
+      "title": "AI도 '생각을 적자'\n정답률이 4배 폭발했다",
+      "highlight": ["생각을 적자", "4배 폭발"],
+      "subtitle": "Chain-of-Thought(CoT) — OpenAI가 밀레니엄 문제를 푼 심장 기술"
+    },
+    {
+      "type": "body",
+      "label": "비유부터 🤔",
+      "heading": "수학 문제를 푸는 두 가지 방법",
+      "body": "초등학생 둘에게 같은 문제를 냅니다: **'사과 12개를 3명이 나누면?'**\n\n**아이 A**: '4개!' 하고 바로 답한다.\n**아이 B**: '12를 3으로 나누면... 4. 맞나? 아, 12 나누기 3은 4니까 4개 맞다.'\n\n둘 다 정답이지만, 문제가 '2450원짜리 과자 3개와 1200원짜리 음료 2개의 총합은?'으로 어려워지면? 아이 A는 추측만으로 틀릴 확률이 높지만, B는 단계별로 계산해서 맞출 확률이 높습니다.\n\n**Chain-of-Thought(CoT: 사고 사슬)는 바로 이 '중간 사고 과정을 텍스트로 적는 것'입니다.** LLM(Large Language Model: 대규모 언어 모델)에게 바로 답을 내라고 하지 않고, '한 단계씩 생각해보자'고 프롬프트(명령어)를 주면 정답률이 폭발적으로 오릅니다."
+    },
+    {
+      "type": "visual",
+      "kicker_label": "실험 결과",
+      "heading": "CoT 유무에 따른 정확도 차이",
+      "visual": {
+        "kind": "bars",
+        "items": [
+          {"label": "직접 답변 (No CoT)", "value": 18},
+          {"label": "Chain-of-Thought 적용", "value": 78, "highlight": true}
+        ],
+        "unit": "% 정확도 (GSM8K math)",
+        "max": 100
+      },
+      "caption": "GSM8K(초등학교 수학 문제 데이터셋)에서 CoT를 적용하자 정확도가 18%에서 78%로 4배 넘게 뛰었습니다. 단지 '차근차근 생각해보자'는 말을 앞에 붙였을 뿐인데도 말이죠."
+    },
+    {
+      "type": "body",
+      "label": "원리 🔬",
+      "heading": "왜 '생각을 쓰면' 더 잘 풀까?",
+      "body": "LLM은 본질적으로 **'다음 토큰(token: 단어 조각) 예측기'**입니다. 지금까지 본 모든 단어를 바탕으로 '가장 그럴듯한 다음 단어'를 하나씩 뽑습니다.\n\nCoT 없이 바로 답을 내라고 하면, 모델은 **단 한 번의 직관**으로 결정해야 합니다. 마치 복잡한 미로 입구에서 '이쪽이다!'하고 바로 가는 것과 같죠.\n\nCoT를 쓰면 모델이 **자신이 생성한 중간 텍스트를 새로운 문맥(context: 맥락)으로 추가**합니다. '12÷3=4니까...'라는 텍스트가 생성되면, 그것이 다음 토큰 예측을 위한 문맥에 포함됩니다. 문맥이 점점 풍부해지면서 예측 정확도가 높아집니다.\n\n**간단히 말해: CoT는 모델이 '자기 자신과의 대화'를 통해 문제를 구조화하는 기술입니다.** 중간 결과를 문맥에 고정시켜서 추론 경로를 안내하는 거죠."
+    },
+    {
+      "type": "visual",
+      "kicker_label": "구조도",
+      "heading": "CoT가 문제를 푸는 흐름",
+      "visual": {
+        "kind": "flow",
+        "direction": "h",
+        "steps": [
+          {"label": "질문 입력", "sub": "\"사과 12개를 3명이...\""},
+          {"label": "중간 추론 1", "sub": "\"한 명이 받는 사과는 12/3...\"", "highlight": true},
+          {"label": "중간 추론 2", "sub": "\"12÷3=4니까...\"", "highlight": true},
+          {"label": "최종 답변", "sub": "\"각자 4개씩\"", "highlight": true}
+        ]
+      },
+      "caption": "Direct 추론(입력→출력)은 한 번의 큰 점프. CoT(입력→중간단계들→출력)는 여러 번의 작은 점프로 문제를 분해합니다. 작은 점프 하나하나는 LLM이 충분히 잘할 수 있는 수준이라 전체 정확도가 올라갑니다."
+    },
+    {
+      "type": "body",
+      "label": "진화 🧬",
+      "heading": "2022→2026: CoT가 밀레니엄 문제를 풀기까지",
+      "body": "초기 CoT(2022)는 단순히 프롬프트에 'let's think step by step'를 붙이는 기법이었습니다.\n\n**2024: Zero-shot CoT** → 프롬프트 하나로 모든 문제에 적용 가능.\n**2025: Self-Consistency** → CoT를 여러 번 생성해서 다수결로 답을 고름. 정확도 +10~15%p.\n**2025-2026: Tree-of-Thought(ToT)** → 단일 체인이 아니라 트리 구조로 가지를 뻗어 탐색.\n\n**2026년 현재: CoT + 강화학습(RL: Reinforcement Learning)의 결합.** 모델이 스스로 추론 경로를 생성하고, 올바른 경로에는 보상(reward)을 주는 방식으로 '어떻게 생각해야 할지'를 학습합니다.\n\n⚡ **2026년 9월, OpenAI가 이 방식으로 Navier-Stokes 방정식(밀레니엄 문제: 100만 달러 현상금 문제)을 포함해 100개 이상의 미해결 수학 문제를 풀었다고 발표했습니다.** 훈련 기간은 단 1개월이었습니다. 수학자들은 'AI 증명이 인간의 개념적 이해를 위협한다'며 경고했지만, OpenAI는 진행 속도를 제한하지 않겠다고 선을 그었습니다."
+    },
+    {
+      "type": "visual",
+      "kicker_label": "비용 분석",
+      "heading": "CoT 사용 시 토큰 증가율",
+      "visual": {
+        "kind": "bars",
+        "items": [
+          {"label": "Direct 추론", "value": 1},
+          {"label": "Zero-shot CoT", "value": 8},
+          {"label": "Self-Consistency x3", "value": 25},
+          {"label": "Reasoning 모델", "value": 60, "highlight": true}
+        ],
+        "unit": "출력 토큰 증가율 (Direct=1)",
+        "max": 65
+      },
+      "caption": "CoT는 정확도를 크게 올리지만, 출력 토큰이 8~60배로 폭발합니다. Reasoning 모델(GPT-5, Claude thinking)의 high effort 모드는 비용이 40~60배이므로 단순 작업에 쓰면 낭비입니다."
+    },
+    {
+      "type": "body",
+      "label": "경고 ⚠️",
+      "heading": "CoT의 함정: 정확함 ≠ 충실함",
+      "body": "CoT가 항상 '진짜 사고 과정'을 반영할까요? 연구가 보여주는 충격적인 사실: **아니오.**\n\n**NSF-CoT 연구(ACL 2026)**: CoT 중간 단계를 바꿔도 최종 답이 바뀌지 않는 경우가 많았습니다. 즉 LLM은 '답을 먼저 정하고, 그걸 정당화하는 CoT를 뒤에 붙이는' 경우가 있다는 겁니다. 마치 시험에서 답지를 먼저 보고 풀이를 거꾸로 쓰는 느낌이죠.\n\n**FRODO 연구(EMNLP 2024)**: CoT 충실도(faithfulness: 추론이 실제 의사결정을 반영하는 정도)를 측정한 결과, 12개 모델 중 대부분이 자신의 추론 단계를 믿을 만하게 사용하지 않았습니다.\n\n**Thought Space Explorer(EACL 2026)**: 기존 CoT는 이미 생성된 방향 안에서만 탐색해서 '사각지대(blind spot: 기존 추론 경로 밖의 미탐색 영역)'를 발견하지 못하는 문제가 있습니다."
+    },
+    {
+      "type": "visual",
+      "kicker_label": "실제 데이터",
+      "heading": "CoT 추론 중 42%는 '사후 정당화'",
+      "visual": {
+        "kind": "bars",
+        "items": [
+          {"label": "CoT가 실제 결정 반영", "value": 24},
+          {"label": "답→추론 (사후 정당화)", "value": 42, "highlight": true},
+          {"label": "CoT와 결정 무관", "value": 34}
+        ],
+        "unit": "% 비율",
+        "max": 100
+      },
+      "caption": "연구에 따르면 생성된 CoT 중 42%는 최종 결정을 반영하지 않는 post-hoc justification(사후 정당화: 답을 먼저 정하고 추론을 뒤에 붙이는 현상)입니다. 즉 AI가 '열심히 생각하는 척'할 수 있습니다."
+    },
+    {
+      "type": "insight",
+      "kicker": "실전 전략 🎯",
+      "kicker_label": "Direct → CoT → Reasoning",
+      "bullets": [
+        "✅ 단순 분류·추출: Direct (CoT 불필요, 빠르고 싸게)",
+        "✅ 복잡한 추론: Zero-shot CoT ('한 단계씩 생각해봐')",
+        "✅ 중요한 결정: Self-Consistency (3~5회 CoT → 다수결, 정확도 +10~15%)",
+        "✅ 최고 정확도 필요: Reasoning 모델 (GPT-5, Claude thinking) — 비용 40~60배 감안",
+        "⚠️ CoT 출력을 맹신하지 말 것 — 42%는 사후 정당화일 수 있음"
+      ],
+      "cta": "💾 저장하고, 다음에 AI에게 복잡한 문제 물을 때 '한 단계씩 생각해봐'를 꼭 붙여보세요!"
+    }
+  ],
+  "caption": "AI에게 '차근차근 생각해보자'고 말하는 것만으로 정답률이 18%에서 78%로 4배 폭발합니다. 이것이 Chain-of-Thought(CoT)의 힘입니다. 원리는 단순합니다: LLM은 다음 토큰 예측기이므로, 중간 추론을 먼저 생성하게 하면 그 텍스트가 다음 판단의 문맥이 되어 더 정확한 선택을 내리게 됩니다. '자기 자신과의 대화'를 통해 문제를 구조화하는 기술이죠.\n\n2026년 9월, OpenAI는 CoT에 강화학습(RL)을 결합한 Reasoning 모델로 Navier-Stokes 밀레니엄 문제를 포함한 100개 이상의 수학 난제를 풀었습니다. 훈련 기간 단 1개월. AI 추론 능력이 인간 수학자를 뛰어넘기 시작했습니다.\n\n실무 전략: ① 단순 작업 = Direct 추론 ② 복잡한 문제 = '한 단계씩 생각해봐' CoT ③ 중요한 결정 = Self-Consistency 3~5회 다수결 ④ 최고 정확도 = Reasoning 모델. 하지만 CoT 추론의 42%는 실제 결정을 반영하지 않는 '사후 정당화(post-hoc justification)'일 수 있으니 맹신하지 마세요.\n\n💾 저장하고 팔로우! 다음 편은 'Tree-of-Thought(ToT) — AI가 여러 경로로 생각하는 법'입니다. 댓글로 AI에게 '생각해봐'라고 붙여본 경험 공유해주세요 👇",
+  "hashtags": [
+    "#인공지능", "#AI", "#머신러닝", "#딥러닝",
+    "#LLM", "#ChainOfThought", "#CoT", "#추론",
+    "#AI이론", "#AI공부", "#AI개발자", "#개발자",
+    "#GPT5", "#ReasoningModel", "#프롬프트엔지니어링",
+    "#OpenAI", "#NavierStokes", "#수학난제",
+    "#AI트렌드", "#오늘의AI", "#AI뉴스", "#추론능력",
+    "#TreeOfThought", "#SelfConsistency", "#AI팁"
+  ]
+}
