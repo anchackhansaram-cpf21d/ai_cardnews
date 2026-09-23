@@ -9,6 +9,7 @@ import json
 import os
 import pathlib
 import sys
+import urllib.error
 import urllib.parse
 import urllib.request
 from datetime import datetime, timezone
@@ -28,8 +29,12 @@ METRIC_SETS = [
 def api(path, **params):
     params["access_token"] = TOKEN
     url = f"https://graph.facebook.com/{VER}/{path}?" + urllib.parse.urlencode(params)
-    with urllib.request.urlopen(url, timeout=30) as r:
-        return json.loads(r.read())
+    try:
+        with urllib.request.urlopen(url, timeout=30) as r:
+            return json.loads(r.read())
+    except urllib.error.HTTPError as e:
+        body = e.read().decode("utf-8", "replace")[:400]
+        raise RuntimeError(f"HTTP {e.code}: {body}") from None
 
 
 def fetch_insights(media_id):
