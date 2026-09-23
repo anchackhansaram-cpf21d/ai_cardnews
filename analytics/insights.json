@@ -1,5 +1,5 @@
 {
-  "collected_at": "2026-09-23T02:30:36.468446+00:00",
+  "collected_at": "2026-09-23T02:32:47.689737+00:00",
   "count": 26,
   "media": [
     {
@@ -11,7 +11,7 @@
       "like_count": 0,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -24,7 +24,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -37,7 +37,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -50,7 +50,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -63,7 +63,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -76,7 +76,7 @@
       "like_count": 0,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -89,7 +89,7 @@
       "like_count": 0,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -102,7 +102,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -115,7 +115,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -128,7 +128,7 @@
       "like_count": 1,
       "comments_count": 1,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -141,7 +141,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -154,7 +154,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -167,7 +167,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -180,7 +180,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -193,7 +193,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -206,7 +206,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -219,7 +219,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -232,7 +232,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -245,7 +245,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -258,7 +258,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -271,7 +271,7 @@
       "like_count": 3,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -284,7 +284,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -297,7 +297,7 @@
       "like_count": 4,
       "comments_count": 4,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -310,7 +310,7 @@
       "like_count": 3,
       "comments_count": 3,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -323,7 +323,7 @@
       "like_count": 4,
       "comments_count": 5,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     },
@@ -336,7 +336,7 @@
       "like_count": 2,
       "comments_count": 1,
       "insights": {
-        "_error": "HTTP Error 400: Bad Request"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
       },
       "metrics_used": ""
     }
