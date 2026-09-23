@@ -1,0 +1,344 @@
+{
+  "collected_at": "2026-09-23T02:30:36.468446+00:00",
+  "count": 26,
+  "media": [
+    {
+      "id": "18032570390665143",
+      "timestamp": "2026-09-23T02:19:03+0000",
+      "permalink": "https://www.instagram.com/p/DdnOHq0E2iu/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "AI에게 '차근차근 생각해보자'고 말하는 것만으로 정답률이 18%에서 78%로 4배 폭발합니다. 이것이 Chain-of-Thought(CoT)의",
+      "like_count": 0,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "17991456249029552",
+      "timestamp": "2026-09-22T02:18:48+0000",
+      "permalink": "https://www.instagram.com/p/DdkpS8QkwrJ/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "온도(Temperature)를 0으로 설정하면 출력이 항상 같다고 믿고 계신가요? 2026년 9월 실측 결과, 동시 요청 수에 따라 최대 30%",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "17961464718208803",
+      "timestamp": "2026-09-21T02:18:20+0000",
+      "permalink": "https://www.instagram.com/p/DdiEc1OjdMp/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "일부러 뉴런을 죽였는데 모델이 더 강해진다? 드롭아웃(Dropout)의 충격적인 역설입니다. Hinton 교수가 뇌의 시냅스 가지치기(synap",
+      "like_count": 2,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18215603638352329",
+      "timestamp": "2026-09-20T02:18:39+0000",
+      "permalink": "https://www.instagram.com/p/DdffsYJGPxG/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "🔥 140GB 모델이 35GB로? AI의 '다이어트' 기술, 양자화.",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18120828163938953",
+      "timestamp": "2026-09-19T02:43:34+0000",
+      "permalink": "https://www.instagram.com/p/Ddc9widia3u/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "⚠️ 2026년, AI 공격이 텍스트에서 행동으로 바뀌었습니다.",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18091013441214121",
+      "timestamp": "2026-09-18T02:25:29+0000",
+      "permalink": "https://www.instagram.com/p/DdaW4o-jZKl/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "2021년 등장 당시 'CLIP 하나로 분류기를 대체할 수 있다'는 말은 과장처럼 들렸습니다. 하지만 ImageNet 제로샷 76.2%는 실제였",
+      "like_count": 0,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18104796562957059",
+      "timestamp": "2026-09-17T02:19:10+0000",
+      "permalink": "https://www.instagram.com/p/DdXxXUqjZYz/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "트랜스포머 블록에서 '어텐션'이 유명하지만, 사실 **파라미터의 3분의 2는 피드포워드 층(FFN)이 차지한다.** FFN은 단순한 두 개의 선",
+      "like_count": 0,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18393118666161473",
+      "timestamp": "2026-09-16T02:21:12+0000",
+      "permalink": "https://www.instagram.com/p/DdVM0INDbL6/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "당신의 뇌는 하나의 '사과'를 볼 때 시각·미각·후각·운동 영역이 동시에 활성화된다. 트랜스포머도 똑같다. 하나의 문장을 여러 어텐션 헤드가 각",
+      "like_count": 2,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18410711506087516",
+      "timestamp": "2026-09-15T09:08:56+0000",
+      "permalink": "https://www.instagram.com/p/DdTWreUG2G1/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "AI 개발자 90%가 모르는 충격적 사실: 671B 모델이 37B 모델보다 추론이 가볍다. 🤯",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "17941133640088999",
+      "timestamp": "2026-09-14T08:03:08+0000",
+      "permalink": "https://www.instagram.com/p/DdQqWtMj4Y6/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "GPT가 '서울의 인구는'이라는 문장을 생성할 때, 한 글자마다 70B짜리 거대 신경망을 통째로 통과한다. 3800만 달러 GPU가 초당 30토",
+      "like_count": 1,
+      "comments_count": 1,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18095422772390643",
+      "timestamp": "2026-09-13T08:21:59+0000",
+      "permalink": "https://www.instagram.com/p/DdOHtL-oCtW/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "GPT가 글을 쓸 때, 그 내부에서는 수천 개의 개념이 동시에 춤을 춘다. 문제는 우리가 이 춤을 '통째로'만 볼 수 있고, '각 춤사위'는 볼",
+      "like_count": 2,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18127435220494476",
+      "timestamp": "2026-09-12T02:58:12+0000",
+      "permalink": "https://www.instagram.com/p/DdK93l4jIF9/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "단어가 하나도 안 겹치는데 검색이 되는 이유입니다.",
+      "like_count": 2,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18025169489883892",
+      "timestamp": "2026-09-09T07:31:35+0000",
+      "permalink": "https://www.instagram.com/p/DdDuxBxkkv8/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "데이터가 없으면 만들면 됩니다. 문제는 그 다음입니다.",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "17906561856507278",
+      "timestamp": "2026-09-08T07:23:00+0000",
+      "permalink": "https://www.instagram.com/p/DdBI-zXGyPH/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "정답을 기계가 채점할 수 있다면, 강화학습이 훨씬 쉬워집니다.",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "17909911575464110",
+      "timestamp": "2026-09-07T07:29:16+0000",
+      "permalink": "https://www.instagram.com/p/Dc-k58toN5m/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "보상 모델을 지우고도 정렬이 됩니다. DPO 이야기입니다.",
+      "like_count": 2,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "17987822021859814",
+      "timestamp": "2026-09-06T07:15:21+0000",
+      "permalink": "https://www.instagram.com/p/Dc7-hpEoADH/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "좋은 답을 글로 정의할 수 없을 때 쓰는 방법이 RLHF입니다.",
+      "like_count": 2,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18097299053539142",
+      "timestamp": "2026-09-05T07:04:30+0000",
+      "permalink": "https://www.instagram.com/p/Dc5YfXSDrrn/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "정렬 방법을 고르는 일은, 사실 어떤 데이터를 구할 수 있는지를 고르는 일입니다.",
+      "like_count": 2,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18004859270961398",
+      "timestamp": "2026-09-04T07:23:36+0000",
+      "permalink": "https://www.instagram.com/p/Dc214V9j8WC/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "요즘 작은 모델이 예전보다 훨씬 똑똑해진 이유의 상당 부분이 증류에 있습니다.",
+      "like_count": 2,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18471515716115185",
+      "timestamp": "2026-09-03T07:20:29+0000",
+      "permalink": "https://www.instagram.com/p/Dc0Qt7YIAYV/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "파인튜닝이 안 먹힌다면, 대개 둘 중 엉뚱한 쪽을 하고 있어서입니다.",
+      "like_count": 2,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "17900785764577252",
+      "timestamp": "2026-09-02T03:06:45+0000",
+      "permalink": "https://www.instagram.com/p/DcxO5gYDh32/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "모델을 가르친다는 게 정확히 무슨 뜻인지 뜯어봤습니다.",
+      "like_count": 2,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18155428180505658",
+      "timestamp": "2026-09-01T05:40:10+0000",
+      "permalink": "https://www.instagram.com/p/Dcu7qEiHB0L/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "파인튜닝을 시작하면 가장 먼저 만나는 갈림길입니다. 전체를 바꿀 것인가, 일부만 바꿀 것인가.",
+      "like_count": 3,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "17906811894303712",
+      "timestamp": "2026-08-31T02:44:36+0000",
+      "permalink": "https://www.instagram.com/p/DcsCwpeEtKk/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "70억 개짜리 모델을 가르치는데, 정작 바꾸는 건 1%도 안 됩니다.",
+      "like_count": 2,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "17911115580465334",
+      "timestamp": "2026-08-30T10:09:14+0000",
+      "permalink": "https://www.instagram.com/p/DcqQ3LujlgD/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "모델은 그대로 두고 검색 방식만 바꿨습니다.",
+      "like_count": 4,
+      "comments_count": 4,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "17875317438630600",
+      "timestamp": "2026-08-28T14:27:11+0000",
+      "permalink": "https://www.instagram.com/p/DclkyqZlPw9/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "역전파, 딥러닝 학습의 심장입니다.",
+      "like_count": 3,
+      "comments_count": 3,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18349831897220467",
+      "timestamp": "2026-08-28T09:39:23+0000",
+      "permalink": "https://www.instagram.com/p/DclD12Jo0eB/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "트랜스포머는 사실 단어 순서를 모릅니다.",
+      "like_count": 4,
+      "comments_count": 5,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18212730241345340",
+      "timestamp": "2026-08-27T16:06:17+0000",
+      "permalink": "https://www.instagram.com/p/DcjLU9mGZNm/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "어텐션 메커니즘, 한 장씩 뜯어봤습니다.",
+      "like_count": 2,
+      "comments_count": 1,
+      "insights": {
+        "_error": "HTTP Error 400: Bad Request"
+      },
+      "metrics_used": ""
+    }
+  ]
+}
