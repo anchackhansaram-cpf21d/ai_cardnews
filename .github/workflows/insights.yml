@@ -1,0 +1,54 @@
+name: 인스타 인사이트 수집
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+concurrency:
+  group: instagram-insights
+  cancel-in-progress: false
+
+jobs:
+  collect:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: 인사이트 수집
+        env:
+          IG_USER_ID: ${{ secrets.IG_USER_ID }}
+          IG_ACCESS_TOKEN: ${{ secrets.IG_ACCESS_TOKEN }}
+        run: |
+          mkdir -p analytics
+          python scripts/insights.py
+
+      - name: 결과 커밋
+        run: |
+          git config user.name  "cardnews-bot"
+          git config user.email "actions@github.com"
+          git add analytics/insights.json
+          if git diff --cached --quiet; then
+            echo "변경 없음"
+            exit 0
+          fi
+          git commit -m "analytics: insights $(date -u +%Y-%m-%d)"
+          ok=0
+          for i in 1 2 3 4 5; do
+            git fetch origin main \
+              && git rebase origin/main \
+              && git push origin HEAD:main \
+              && { ok=1; break; }
+            git rebase --abort 2>/dev/null || true
+            sleep $((RANDOM % 5 + 3))
+          done
+          [ "$ok" = "1" ] || { echo "::error::인사이트 푸시 실패"; exit 1; }

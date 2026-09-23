@@ -270,6 +270,7 @@ def render_card(card, idx, total, meta):
         title = esc(card.get("title", ""))
         for w in card.get("highlight", []) or []:
             title = title.replace(esc(w), f'<span class="hl">{esc(w)}</span>')
+        title = title.replace("\n", "<br>")   # 3줄 후킹 제목 지원
         body = (f'<div class="eyebrow">{esc(card.get("eyebrow","오늘의 AI 이론"))}</div>'
                 f'<h1 class="cover-title">{title}</h1>'
                 f'<div class="rule"></div>'
