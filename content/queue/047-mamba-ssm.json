@@ -1,0 +1,111 @@
+{
+  "series_no": 47,
+  "topic": "상태공간 모델 — Mamba와 SSM",
+  "source": "growth",
+  "cards": [
+    {
+      "type": "cover",
+      "eyebrow": "🔥 트랜스포머를 향한 선전포고",
+      "title": "Mamba-3가 온다\n트랜스포머의 시대는\n끝나간다",
+      "highlight": ["Mamba-3", "트랜스포머의 시대는 끝나간다"],
+      "subtitle": "GPT-6 Astra도 트랜스포머인데, 왜 Mamba가 대안으로 불릴까?"
+    },
+    {
+      "type": "visual",
+      "heading": "어텐션 vs SSM: 계산 복잡도",
+      "visual": {
+        "kind": "compare",
+        "items": [
+          {"label": "트랜스포머", "value": "O(N²)", "detail": "토큰 수의 제곱"},
+          {"label": "Mamba (SSM)", "value": "O(N)", "detail": "토큰 수에 비례"},
+          {"label": "Mamba-3 MIMO", "value": "O(N)", "detail": "추론도 선형"}
+        ]
+      },
+      "caption": "100K 토큰 처리: 트랜스포머 100억 회 vs SSM 10만 회. 차이는 5000배."
+    },
+    {
+      "type": "body",
+      "heading": "SSM의 핵심: 하나로 전부 압축한다",
+      "body": "SSM(State Space Model: 상태 공간 모델)은 모든 입력을 하나의 **상태 벡터(hidden state)**로 압축한다. 모든 과거 정보가 이 하나의 상태에 응축된다.\n\n비유: 트랜스포머는 회의록을 **전부 필사**하는 비서고, SSM은 **포스트잇 한 장**에 요약만 적는 비서다. 포스트잇 쪽이 훨씬 가볍고 빠르다.\n\n문제는 정보 손실이다. 하나의 상태에 다 담다 보니 세밀한 추적(state tracking: 패턴의 등장 횟수 계산)이 어려웠다. Mamba-3가 이 문제를 세 가지 혁신으로 정면돌파했다. 2026년 3월 발표된 Mamba-3는 1.5B 스케일에서 Transformer 대비 불과 1.8%포인트 차이로 따라붙었다 — **어텐션(attention)이 전혀 없이**."
+    },
+    {
+      "type": "visual",
+      "heading": "맥락 길이별 추론 비용 증가",
+      "visual": {
+        "kind": "bars",
+        "items": [
+          {"label": "1K", "attention": 1, "ssm": 1},
+          {"label": "10K", "attention": 100, "ssm": 10},
+          {"label": "100K", "attention": 10000, "ssm": 100},
+          {"label": "1M", "attention": 1000000, "ssm": 1000}
+        ]
+      },
+      "caption": "트랜스포머는 O(N²)로 제곱 증가, SSM은 O(N)으로 선형. 1M 토큰에서 1000배 차이."
+    },
+    {
+      "type": "body",
+      "heading": "혁신 ①: 지수-사다리꼴 이산화",
+      "body": "연속 미분방정식(ODE)을 딥러닝이 다루는 이산 재귀로 바꾸는 방식.\n\n기존 Mamba-1/2는 **오일러 방법**: $h_t = e^{\\Delta A} h_{t-1} + \\Delta B x_t$. '지금 발 위치만 보고' 다음 걸음을 결정하는 것과 같다.\n\nMamba-3는 **지수-사다리꼴(exponential-trapezoidal)** 방법: 이전 스텝 $x_{t-1}$과 현재 $x_t$를 모두 고려한다. '직전 걸음과 지금 발을 함께 본다.' 더 정확하고, Mamba-2에 필수적이던 **짧은 컨볼루션(short causal conv)** 레이어가 필요 없어졌다."
+    },
+    {
+      "type": "body",
+      "heading": "혁신 ②: 복소수 상태 공간",
+      "body": "트랜스포머가 잘하는 작업 중 하나는 **패리티 계산(parity computation)** — 특정 패턴이 몇 번 나왔는지 세는 것이다. Mamba-2는 이게 안 됐다. 실수(real) 상태 전이는 회전(rotation)을 표현할 수 없기 때문이다.\n\nMamba-3는 상태 전이 행렬을 복소수로 만들었다: $A' = e^{A + i\\Theta}$. $i\\Theta$가 회전을 담당하며, **데이터 의존적 로터리 임베딩(RoPE, Rotary Position Embedding: 위치 정보를 각도 회전으로 인코딩)**과 동일하게 작동한다.\n\n결과: 문자 등장 횟수 추적에서 Mamba-2는 랜덤 수준, Mamba-3는 95%+. **고정된 상태 크기로 더 많은 정보를 압축**할 수 있게 됐다."
+    },
+    {
+      "type": "visual",
+      "heading": "Mamba-2 vs Mamba-3: 상태 추적 능력",
+      "visual": {
+        "kind": "compare",
+        "items": [
+          {"label": "Mamba-2 (실수 상태)", "value": "랜덤 수준", "detail": "패리티·산술 추적 불가"},
+          {"label": "Mamba-3 (복소수 상태)", "value": "95%+", "detail": "산술·패턴 추적 가능"}
+        ]
+      },
+      "caption": "복소수 상태는 단순 위치를 넘어 패턴의 위상(topology: 반복 구조)까지 학습. 이전 SSM의 결정적 약점이 해결됐다."
+    },
+    {
+      "type": "body",
+      "heading": "혁신 ③: MIMO — GPU를 제대로 활용하다",
+      "body": "Mamba-2까지는 SISO(Single-Input Single-Output: 하나의 입력이 하나의 출력)였다. 스칼라 단위 업데이트라 GPU 텐서 코어 활용이 낮았다. **메모리 병목(memory-bound: 연산보다 메모리 읽기가 병목)** 상태였다.\n\nMamba-3는 MIMO(Multi-Input Multi-Output: 여러 입력이 여러 출력)로 전환. 입력을 벡터로, $B$를 행렬로 확장했다.\n\n계산량 **4배 증가**했지만 행렬 곱(matmul)으로 바뀌면서 GPU 텐서 코어를 최대 활용, **지연시간은 거의 동일**. 비유: 1차선→4차선 도로. 차는 4배지만 정체(메모리 접근)는 같아서 처리량만 4배 증가."
+    },
+    {
+      "type": "visual",
+      "heading": "Mamba-3 성능 (1.5B, Transformer 대비 %p)",
+      "visual": {
+        "kind": "bars",
+        "items": [
+          {"label": "Mamba-2", "value": 0},
+          {"label": "GDN", "value": 0.6},
+          {"label": "Mamba-3 SISO", "value": 1.2},
+          {"label": "Mamba-3 MIMO", "value": 1.8},
+          {"label": "Transformer", "value": 2.2}
+        ]
+      },
+      "caption": "Mamba-3 MIMO는 state 크기 64로 Mamba-2 state 128과 동등 퍼플렉서티(perplexity). 즉 절반 상태로 같은 성능을 내면서 추론도 2배 빠름."
+    },
+    {
+      "type": "insight",
+      "kicker": "🎯 현실적 판단",
+      "kicker_label": "그래서 뭘 써야 하나",
+      "bullets": [
+        "GPT-6 Astra 같은 초거대 모델은 계속 트랜스포머 — SSM 생태계가 아직 안 맞는다",
+        "소형 모델(7B 이하) 서빙에서는 Mamba 계열이 훨씬 경제적이다",
+        "현실 정답은 '하이브리드' — Jamba, Zamba처럼 SSM + Attention을 섞는 구조가 실전 최다 채택",
+        "Mamba-3의 의미: '추론 비용 1/10' 가능성을 현실로 만들었다"
+      ],
+      "cta": "💾 저장하고, 다음 편에서는 하이브리드 구조의 실제 구현을 파헤칩니다"
+    }
+  ],
+  "caption": "트랜스포머의 시대가 끝나간다고? 🧠\n\nMamba-3가 방정식을 뒤흔들었다. 어텐션 없이 O(N²) → O(N)으로, 성능은 근접.\n\n세 가지 핵심:\n① 지수-사다리꼴 이산화 — 더 정확한 상태 추정\n② 복소수 상태 공간 — 패리티·산술 추적 가능\n③ MIMO — GPU 100% 활용 + 4배 계산량\n\n결론: 하이브리드가 대세다. SSM + Attention의 조합이 LLM의 미래.\n\n💾 저장하고 다음 편도 확인하세요 🔔",
+  "hashtags": [
+    "#인공지능", "#AI", "#머신러닝", "#딥러닝",
+    "#LLM", "#Mamba", "#SSM", "#StateSpaceModel",
+    "#트랜스포머", "#어텐션", "#Mamba3",
+    "#AI이론", "#AI공부", "#AI개발자",
+    "#하이브리드", "#추론최적화", "#효율적인AI",
+    "#AITrend", "#LLM뉴스", "#AI트렌드",
+    "#LinearAttention", "#GPT6Astra", "#AI아키텍처",
+    "#테크트렌드", "#딥러닝뉴스"
+  ]
+}
