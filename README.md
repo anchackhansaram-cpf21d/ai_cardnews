@@ -65,6 +65,7 @@ python scripts/md.py 001-attention
 | 16 | 2026-09-23 | 📝 045-chain-of-thought 생성 (CoT — 생각을 적으면 정답률이 오르는 이유) | — |
 | 17 | 2026-09-24 | 📝 046-ensemble-always-wins 생성 (앙상블이 거의 항상 이기는 이유) | — |
 | 18 | 2026-09-25 | 📝 047-mamba-ssm 생성 (상태공간 모델 — Mamba와 SSM) | — |
+| 19 | 2026-09-26 | 📝 048-self-supervised-learning 생성 (자기지도학습 — SSL) | — |
 | ... | ... | ... | ... |
 | 100 | 2026-12-19 | 🏁 1000명 달성 | 0/1000 |
 
