@@ -66,6 +66,7 @@ python scripts/md.py 001-attention
 | 17 | 2026-09-24 | 📝 046-ensemble-always-wins 생성 (앙상블이 거의 항상 이기는 이유) | — |
 | 18 | 2026-09-25 | 📝 047-mamba-ssm 생성 (상태공간 모델 — Mamba와 SSM) | — |
 | 19 | 2026-09-26 | 📝 048-self-supervised-learning 생성 (자기지도학습 — SSL) | — |
+| 20 | 2026-09-27 | 📝 049-batch-inference-continuous-batching 생성 (배치 추론과 연속 배칭) | — |
 | ... | ... | ... | ... |
 | 100 | 2026-12-19 | 🏁 1000명 달성 | 0/1000 |
 
