@@ -132,7 +132,7 @@
 - [ ] INT8·INT4와 GPTQ/AWQ
 - [ ] 가지치기(pruning)와 희소성
 - [ ] 추측 디코딩(speculative decoding)
-- [ ] 배치 추론과 연속 배칭
+- [x] 배치 추론과 연속 배칭 — GPU 활용률 20%→87%의 비밀
 - [ ] 데이터·텐서·파이프라인 병렬화
 - [ ] ZeRO와 FSDP
 - [ ] GPU 메모리 계산법
