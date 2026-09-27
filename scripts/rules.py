@@ -156,6 +156,70 @@ def blocking(data, rules=None):
     return [v for v in evaluate(data, rules) if v["severity"] == "high"]
 
 
+# ── 릴스(가십) 전용 규칙 ────────────────────────────────────
+
+REEL_KINDS = ("hook", "fact", "why", "use", "cta")
+REEL_RULES = [
+    {"id": "reel-scenes", "check": "reel_scenes", "severity": "high",
+     "text": "릴스는 5씬 (hook·fact·why·use·cta) 정확히"},
+    {"id": "reel-visual", "check": "reel_visual", "severity": "high",
+     "text": "모든 씬에 시각화(visual) 필수 — 글만 있는 씬 금지"},
+    {"id": "reel-sources", "check": "reel_sources", "severity": "high",
+     "text": "뉴스는 출처 URL 2개 이상 (1개면 kind=rumor)"},
+    {"id": "reel-use", "check": "reel_use", "severity": "high",
+     "text": "'use' 씬 필수 — 얻어가는 것(적용 포인트)"},
+    {"id": "reel-text-min", "check": "reel_text_min", "severity": "medium",
+     "text": "화면 텍스트 최소: label 10자·takeaway 22자 이내"},
+    {"id": "reel-korean", "check": "reel_korean", "severity": "high",
+     "text": "한국어만 (일본어·중국어 금지)"},
+]
+
+
+def _reel_scenes(d):
+    return d.get("scenes") or []
+
+
+def _reel_text(sc):
+    return " ".join(str(sc.get(k, "") or "")
+                    for k in ("label", "takeaway", "narration"))
+
+
+def reel_evaluate(d):
+    out = []
+    scenes = _reel_scenes(d)
+    kinds = [s.get("kind") for s in scenes]
+
+    if len(scenes) != 5 or set(kinds) != set(REEL_KINDS):
+        out.append({"rule": "reel-scenes", "severity": "high", "card": 0,
+                    "detail": f"씬 {len(scenes)}개 / kind={kinds} — 5씬(hook·fact·why·use·cta) 필요"})
+
+    for i, s in enumerate(scenes, 1):
+        if not s.get("visual"):
+            out.append({"rule": "reel-visual", "severity": "high", "card": i,
+                        "detail": f"{i}번 씬({s.get('kind')})에 visual 이 없습니다"})
+        if any(CJK_RE.match(ch) for ch in _reel_text(s)):
+            out.append({"rule": "reel-korean", "severity": "high", "card": i,
+                        "detail": f"{i}번 씬에 일본어/중국어 문자가 있습니다"})
+        lab, tk = str(s.get("label", "") or ""), str(s.get("takeaway", "") or "")
+        if len(lab) > 10 or len(tk) > 22:
+            out.append({"rule": "reel-text-min", "severity": "medium", "card": i,
+                        "detail": f"{i}번 씬 텍스트 과다 (label {len(lab)}자 / takeaway {len(tk)}자)"})
+
+    if "use" not in kinds:
+        out.append({"rule": "reel-use", "severity": "high", "card": 0,
+                    "detail": "'use' 씬이 없습니다 — 얻어가는 것이 빠짐"})
+
+    src = d.get("sources") or []
+    if d.get("kind") != "rumor" and len(src) < 2:
+        out.append({"rule": "reel-sources", "severity": "high", "card": 0,
+                    "detail": f"출처 {len(src)}개 — 뉴스는 2개 이상 필요 (아니면 kind=rumor)"})
+    return out
+
+
+def reel_blocking(d):
+    return [v for v in reel_evaluate(d) if v["severity"] == "high"]
+
+
 # ── 승격 (feedback → pending → active) ─────────────────────
 
 def promote(text, check=None, severity="medium", source="feedback"):
@@ -219,6 +283,8 @@ def main():
     sub.add_parser("briefing")
     c = sub.add_parser("check")
     c.add_argument("slug")
+    cr = sub.add_parser("check-reel")
+    cr.add_argument("path")
     a = sub.add_parser("approve"); a.add_argument("rule_id")
     r = sub.add_parser("reject"); r.add_argument("rule_id")
     p = sub.add_parser("promote")
@@ -245,6 +311,23 @@ def main():
         v = evaluate(data)
         if not v:
             print(f"✅ {args.slug} — 규칙 위반 없음")
+            return
+        for x in v:
+            print(f"[{x['severity']}] {x['rule']}: {x['detail']}")
+        sys.exit(1 if any(x["severity"] == "high" for x in v) else 0)
+
+    elif args.cmd == "check-reel":
+        p = pathlib.Path(args.path)
+        if not p.is_absolute():
+            p = (ROOT / "content" / "queue" / "reels" / args.path)
+            if not p.exists() and not p.suffix:
+                p = p.with_suffix(".json")
+        if not p.exists():
+            sys.exit(f"파일 없음: {p}")
+        data = json.loads(p.read_text(encoding="utf-8"))
+        v = reel_evaluate(data)
+        if not v:
+            print(f"✅ {p.name} — 릴스 규칙 위반 없음")
             return
         for x in v:
             print(f"[{x['severity']}] {x['rule']}: {x['detail']}")

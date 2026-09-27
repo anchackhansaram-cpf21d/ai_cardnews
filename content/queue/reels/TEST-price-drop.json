@@ -1,0 +1,59 @@
+{
+  "_test": true,
+  "_note": "파이프라인 테스트용 샘플. 발행 대상 아님. 수치는 OpenRouter 모델 카탈로그에서 실제 조회한 값.",
+  "topic": "추론 모델 가격이 1/5로 떨어졌다",
+  "kind": "news",
+  "sources": [
+    "https://openrouter.ai/api/v1/models",
+    "https://openrouter.ai/models"
+  ],
+  "handle": "@dora_studyzy",
+  "voice": "ko-KR-SunHiNeural",
+  "source_line": "출처: OpenRouter 모델 카탈로그",
+  "scenes": [
+    {
+      "kind": "hook",
+      "label": "가격 붕괴",
+      "narration": "같은 성능인데 가격이 5분의 1로 떨어졌습니다.",
+      "visual": {"kind": "stat", "value": "$0.047", "caption": "100만 토큰당 입력", "sub": "이전 세대 $0.25"},
+      "takeaway": "**5배** 싸졌다"
+    },
+    {
+      "kind": "fact",
+      "label": "무슨 일",
+      "narration": "플래시 계열 모델이 토큰당 가격을 확 낮췄어요.",
+      "visual": {"kind": "vbar", "unit": "$", "title": "100만 토큰당 입력 가격", "items": [
+        {"label": "구세대", "value": 0.25},
+        {"label": "신세대 flash", "value": 0.047, "highlight": true}
+      ]},
+      "takeaway": "**입력** 가격 기준"
+    },
+    {
+      "kind": "why",
+      "label": "왜 중요",
+      "narration": "컨텍스트가 백만 토큰까지 늘어서 긴 문서를 통째로 넣을 수 있습니다.",
+      "visual": {"kind": "compare",
+        "left": {"title": "예전", "points": ["컨텍스트 16만", "긴 문서 쪼개기", "요약 손실"]},
+        "right": {"title": "지금", "points": ["컨텍스트 100만", "통째로 투입", "손실 없음"]}},
+      "takeaway": "**쪼개기**가 필요 없어짐"
+    },
+    {
+      "kind": "use",
+      "label": "얻어가는 것",
+      "narration": "여러분 프로젝트에 이렇게 적용하세요. 배치를 돌려서 비용을 더 줄일 수 있습니다.",
+      "visual": {"kind": "flow", "steps": [
+        {"title": "1. 모델 교체", "desc": "flash 계열로"},
+        {"title": "2. 배치 모드", "desc": "$0.112/M"},
+        {"title": "3. 캐싱 켜기", "desc": "재요청 무료"}
+      ]},
+      "takeaway": "**배치 + 캐싱**까지 켜라"
+    },
+    {
+      "kind": "cta",
+      "label": "다음 편",
+      "narration": "저장해두고 다음 편에서 캐싱 설정법을 보세요.",
+      "visual": {"kind": "stat", "value": "저장", "caption": "다음 편: 프롬프트 캐싱", "sub": "@dora_studyzy"},
+      "takeaway": "**팔로우**하면 바로 받아요"
+    }
+  ]
+}

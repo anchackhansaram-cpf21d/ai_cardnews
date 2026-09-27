@@ -123,6 +123,70 @@ def bars(s):
     return _wrap("".join(out), int(H))
 
 
+# ── 3-1. 큰 숫자 (릴스 훅/임팩트용) ──────────────────────────────
+def stat(s):
+    """값 하나를 화면 가득 크게. caption=무엇, sub=보조 설명."""
+    value = str(s.get("value", "") or "")
+    caption = str(s.get("caption", "") or "")
+    sub = str(s.get("sub", "") or "")
+    size = 250 if len(value) <= 5 else (176 if len(value) <= 8 else 120)
+    H = 900
+    out = [f'<text x="{CW/2:.0f}" y="470" text-anchor="middle" font-size="{size}" '
+           f'font-weight="900" fill="var(--warm)" letter-spacing="-0.03em">{esc(value)}</text>']
+    if caption:
+        out.append(f'<text x="{CW/2:.0f}" y="620" text-anchor="middle" font-size="62" '
+                   f'font-weight="800" fill="var(--ink)">{esc(caption)}</text>')
+    if sub:
+        out.append(f'<text x="{CW/2:.0f}" y="720" text-anchor="middle" font-size="40" '
+                   f'font-weight="500" fill="var(--muted)">{esc(sub)}</text>')
+    return _wrap("".join(out), H)
+
+
+# ── 3-2. 세로 막대 (릴스 세로 화면용) ───────────────────────────
+def vbar(s):
+    """세로 막대. items:[{label,value,highlight}] · 세로 화면에 꽉 찬다."""
+    items = s.get("items") or s.get("bars") or []
+    norm = []
+    for it in items:
+        if not isinstance(it, dict):
+            continue
+        try:
+            val = float(it.get("value", it.get("v", it.get("val"))))
+        except (TypeError, ValueError):
+            continue
+        norm.append({"label": it.get("label") or it.get("name") or "",
+                     "value": val, "highlight": it.get("highlight")})
+    if not norm:
+        raise ValueError("vbar: no numeric items")
+    unit = s.get("unit", "")
+    H = 880
+    pad_b, pad_t = 190, 120
+    n = len(norm)
+    gap = 46
+    bw = (CW - gap * (n - 1) - 40) / n
+    track = H - pad_b - pad_t
+    vmax = s.get("max") or (max(i["value"] for i in norm) * 1.18) or 1
+    out = []
+    for k, it in enumerate(norm):
+        x = 20 + k * (bw + gap)
+        bh = max(14, track * it["value"] / vmax)
+        y = pad_t + (track - bh)
+        col = "var(--warm)" if it.get("highlight") else "var(--accent)"
+        out.append(f'<rect x="{x:.0f}" y="{pad_t}" width="{bw:.0f}" height="{track}" '
+                   f'rx="16" fill="var(--ink)" fill-opacity=".06"/>')
+        out.append(f'<rect x="{x:.0f}" y="{y:.0f}" width="{bw:.0f}" height="{bh:.0f}" '
+                   f'rx="16" fill="{col}" fill-opacity=".88"/>')
+        vs = f'{it["value"]:g}{unit}'
+        out.append(f'<text x="{x+bw/2:.0f}" y="{y-26:.0f}" text-anchor="middle" '
+                   f'font-size="58" font-weight="900" fill="{col}">{esc(vs)}</text>')
+        out.append(f'<text x="{x+bw/2:.0f}" y="{pad_t+track+58:.0f}" text-anchor="middle" '
+                   f'font-size="34" font-weight="600" fill="var(--ink)">{esc(it["label"])}</text>')
+    if s.get("title"):
+        out.append(f'<text x="{CW/2:.0f}" y="58" text-anchor="middle" font-size="34" '
+                   f'font-weight="700" fill="var(--muted)">{esc(s["title"])}</text>')
+    return _wrap("".join(out), H)
+
+
 # ── 3. 꺾은선 / 곡선 ────────────────────────────────────────────
 def line(s):
     series = s["series"]
@@ -181,7 +245,7 @@ def flow(s):
     vertical = s.get("direction", "h") == "v"
     out = []
     if vertical:
-        bh, gap = 104, 46
+        bh, gap = 152, 58
         H = len(steps) * (bh + gap) - gap + 10
         bw = CW - 130
         for k, st in enumerate(steps):
@@ -269,6 +333,10 @@ def formula(s):
 # ── 6. 좌우 비교 ────────────────────────────────────────────────
 def compare(s):
     L, R = s["left"], s["right"]
+    # items | points 둘 다 허용 (릴스 대본은 points 로 오는 경우가 있음)
+    for side in (L, R):
+        if not side.get("items"):
+            side["items"] = side.get("points") or []
     gap = 30
     w = (CW - gap) / 2
     rows = max(len(L["items"]), len(R["items"]))
@@ -486,7 +554,8 @@ def table(s):
 # BUILDERS (모든 draw 함수가 정의된 후에 위치해야 함)
 BUILDERS = {"heatmap": heatmap, "bars": bars, "line": line,
             "flow": flow, "formula": formula, "compare": compare,
-            "arch": arch, "venn": venn, "list": fallback, "table": table}
+            "arch": arch, "venn": venn, "list": fallback, "table": table,
+            "stat": stat, "vbar": vbar}
 
 
 def build(spec):
