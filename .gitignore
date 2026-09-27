@@ -2,3 +2,11 @@ __pycache__/
 *.pyc
 out/**/_preview.html
 .DS_Store
+
+# 크래시 덤프
+core
+core.*
+out/*/clip*.mp4
+out/*/scene*.png
+out/*/_*.html
+out/review_suggestions/

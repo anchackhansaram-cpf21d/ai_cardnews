@@ -6,8 +6,11 @@
     {
       "type": "cover",
       "eyebrow": "2026년 충격 실험 ⚠️",
-      "title": "온도 0으로 해도 결과가 다르다?",
-      "highlight": ["온도 0", "30% 차이"],
+      "title": "온도 0으로\n해도\n결과가 다르다?",
+      "highlight": [
+        "온도 0",
+        "30% 차이"
+      ],
       "subtitle": "개발자 90%가 모르는 Temperature의 함정"
     },
     {
@@ -23,8 +26,15 @@
       "visual": {
         "kind": "bars",
         "items": [
-          {"label": "동시 1개 (순차)", "value": 100, "highlight": true},
-          {"label": "동시 4개 (병렬)", "value": 70.5}
+          {
+            "label": "동시 1개 (순차)",
+            "value": 100,
+            "highlight": true
+          },
+          {
+            "label": "동시 4개 (병렬)",
+            "value": 70.5
+          }
         ],
         "unit": "% 출력 일치율",
         "max": 105
@@ -39,11 +49,27 @@
         "kind": "flow",
         "direction": "v",
         "steps": [
-          {"label": "요청 4개 동시 도착", "sub": "서버가 한 배치로 묶음", "highlight": true},
-          {"label": "CUDA 병렬 합산", "sub": "FP16은 (a+b)+c ≠ a+(b+c)"},
-          {"label": "logit 미세 변화", "sub": "14.000002 → 14.000000"},
-          {"label": "argmax 선택 뒤집힘", "sub": "apple → banana"},
-          {"label": "이후 전체 출력 변경", "sub": "토큰 하나로 문장이 달라짐"}
+          {
+            "label": "요청 4개 동시 도착",
+            "sub": "서버가 한 배치로 묶음",
+            "highlight": true
+          },
+          {
+            "label": "CUDA 병렬 합산",
+            "sub": "FP16은 (a+b)+c ≠ a+(b+c)"
+          },
+          {
+            "label": "logit 미세 변화",
+            "sub": "14.000002 → 14.000000"
+          },
+          {
+            "label": "argmax 선택 뒤집힘",
+            "sub": "apple → banana"
+          },
+          {
+            "label": "이후 전체 출력 변경",
+            "sub": "토큰 하나로 문장이 달라짐"
+          }
         ]
       },
       "caption": "GPU는 여러 요청을 한 배치로 묶어 처리합니다. 배치 구성이 바뀌면 부동소수점 연산 순서가 바뀌고 마지막 자릿수가 달라지는데, 이 미세한 차이가 argmax의 선택을 뒤집을 수 있습니다."
@@ -56,9 +82,17 @@
         "kind": "formula",
         "title": "온도가 추가된 소프트맥스",
         "parts": [
-          {"text": "P(x_i)"},
-          {"text": " = "},
-          {"text": " e^(x_i / T) / Σ e^(x_j / T) ", "note": "T가 분모에!\nT↓ = 정답만 선택\nT↑ = 다양하게 탐색", "color": "warm"}
+          {
+            "text": "P(x_i)"
+          },
+          {
+            "text": " = "
+          },
+          {
+            "text": " e^(x_i / T) / Σ e^(x_j / T) ",
+            "note": "T가 분모에!\nT↓ = 정답만 선택\nT↑ = 다양하게 탐색",
+            "color": "warm"
+          }
         ]
       },
       "caption": "온도 T는 소프트맥스의 분모에 들어갑니다. T→0이면 argmax(가장 높은 점수만), T=1.0이면 확률 비례, T→∞이면 균등 분포가 됩니다. '창의성 다이얼'의 실체가 바로 이 수식입니다."
@@ -70,10 +104,23 @@
       "visual": {
         "kind": "bars",
         "items": [
-          {"label": "low", "value": 800},
-          {"label": "medium", "value": 3000, "highlight": true},
-          {"label": "high", "value": 12000},
-          {"label": "xhigh", "value": 30000}
+          {
+            "label": "low",
+            "value": 800
+          },
+          {
+            "label": "medium",
+            "value": 3000,
+            "highlight": true
+          },
+          {
+            "label": "high",
+            "value": 12000
+          },
+          {
+            "label": "xhigh",
+            "value": 30000
+          }
         ],
         "unit": " 추론 토큰 수 (예시)",
         "max": 32000
@@ -100,13 +147,32 @@
   ],
   "caption": "온도(Temperature)를 0으로 설정하면 출력이 항상 같다고 믿고 계신가요? 2026년 9월 실측 결과, 동시 요청 수에 따라 최대 30%의 출력 차이가 발생했습니다. 범인은 샘플링이 아니라 GPU의 동적 배칭(dynamic batching)과 부동소수점 연산의 비가환성(non-associativity)입니다.\n\n소프트맥스(Softmax)에 온도 T가 분모로 들어가면서 확률 분포의 형태가 결정됩니다. T→0은 argmax(가장 확실한 정답), T=1.0은 확률 비례 샘플링, T→∞는 균등 분포. 이것이 AI '창의성 다이얼'의 정체입니다.\n\n실무 팁: ① 진짜 결정성이 필요하면 seed 고정 + concurrency 1 + FP32. ② 추출·분류는 T 0.0~0.3, 창작은 0.7~1.0, 발산은 1.0+. ③ 온도와 top-p를 동시에 바꾸지 말 것. ④ Reasoning 모델(GPT-5, Claude thinking)은 온도 파라미터를 지원하지 않으니 reasoning effort로 제어하세요.\n\n💾 저장하고 다음 편도 보려면 팔로우! 댓글로 'AI 모델 설정할 때 온도 몇으로 쓰시나요?' 알려주세요 👇",
   "hashtags": [
-    "#인공지능", "#AI", "#머신러닝", "#딥러닝",
-    "#LLM", "#Temperature", "#온도",
-    "#AI이론", "#AI공부", "#AI개발자", "#개발자",
-    "#재현성", "#Deterministic", "#GPU",
-    "#추론최적화", "#생성AI", "#AI엔지니어",
-    "#AI트렌드", "#오늘의AI", "#AI뉴스",
-    "#LLM파라미터", "#프롬프트엔지니어링", "#AI최적화",
-    "#소프트맥스", "#코딩팁"
-  ]
+    "#인공지능",
+    "#AI",
+    "#머신러닝",
+    "#딥러닝",
+    "#LLM",
+    "#Temperature",
+    "#온도",
+    "#AI이론",
+    "#AI공부",
+    "#AI개발자",
+    "#개발자",
+    "#재현성",
+    "#Deterministic",
+    "#GPU",
+    "#추론최적화",
+    "#생성AI",
+    "#AI엔지니어",
+    "#AI트렌드",
+    "#오늘의AI",
+    "#AI뉴스",
+    "#LLM파라미터",
+    "#프롬프트엔지니어링",
+    "#AI최적화",
+    "#소프트맥스",
+    "#코딩팁"
+  ],
+  "handle": "@dora_studyzy",
+  "series_label": "AI 이론 한 장 정리"
 }

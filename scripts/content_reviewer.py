@@ -188,6 +188,37 @@ def llm_review(data, timeout=120):
         return None, f"LLM 검수 실패: {type(e).__name__}: {str(e)[:160]}"
 
 
+def rule_fixes(data):
+    """결정적으로 안전한 수정만. (LLM 패치는 절대 여기서 적용하지 않는다)"""
+    patches = []
+    cards = data.get("cards", [])
+    if cards and cards[0].get("type") == "cover":
+        title = (cards[0].get("title") or "").strip()
+        if title and "\n" not in title and len(title) > 10:
+            words = title.split()
+            if len(words) >= 4:
+                n = len(words)
+                a, b = round(n / 3), round(2 * n / 3)
+                new = "\n".join([" ".join(words[:a]), " ".join(words[a:b]),
+                                 " ".join(words[b:])]).strip()
+                if new.count("\n") == 2:
+                    patches.append({"card": 1, "set": {"title": new},
+                                    "why": "커버 제목 3줄 분할 (기계적)"})
+    return patches
+
+
+def save_suggestions(slug, patches, summary):
+    """LLM 패치는 적용하지 않고 제안 파일로만 남긴다."""
+    if not patches:
+        return None
+    dest = ROOT / "out" / "review_suggestions" / f"{slug}.json"
+    dest.parent.mkdir(parents=True, exist_ok=True)
+    dest.write_text(json.dumps({"slug": slug, "summary": summary,
+                                "suggested_patches": patches},
+                               ensure_ascii=False, indent=2), encoding="utf-8")
+    return dest
+
+
 def apply_patches(data, patches):
     applied = []
     cards = data.get("cards", [])
@@ -230,17 +261,27 @@ def review(slug, fix=False, rules_only=False):
 
     issues += llm_issues
 
+    # LLM 패치는 자동 적용하지 않는다 (환각 위험) — 제안 파일로만 남긴다.
+    sug = save_suggestions(slug, patches, summary) if (llm and patches) else None
+
     applied = []
-    if fix and patches and verdict != "block":
-        applied = apply_patches(data, patches)
-        if applied:
+    if fix and verdict != "block":
+        rp = rule_fixes(data)
+        if rp:
+            applied = apply_patches(data, rp)
             path = ROOT / "content" / "queue" / f"{slug}.json"
-            backup = path.with_suffix(".json.reviewbak")
-            backup.write_text(path.read_text(encoding="utf-8"), encoding="utf-8")
-            path.write_text(json.dumps(data, ensure_ascii=False, indent=2), encoding="utf-8")
+            path.write_text(json.dumps(data, ensure_ascii=False, indent=2),
+                            encoding="utf-8")
+            # 적용 후 재검사
+            rule_issues = rule_check(data)
+            verdict = ("block" if any(i["severity"] == "high" for i in rule_issues)
+                       else "fix" if rule_issues or (llm and llm.get("verdict") == "fix")
+                       else "pass")
+            issues = rule_issues + llm_issues
 
     return {"slug": slug, "verdict": verdict, "summary": summary,
-            "issues": issues, "patches": patches, "applied": applied, "llm_error": err}
+            "issues": issues, "patches": patches, "applied": applied,
+            "suggestions_file": str(sug) if sug else None, "llm_error": err}
 
 
 def report(res, verbose=True):
@@ -256,6 +297,8 @@ def report(res, verbose=True):
             print(f"    {tag}[{i['severity']}] {c}{i['type']}: {i['detail']}")
         for a in res.get("applied", []):
             print(f"    ✏️  적용됨: {a}")
+        if res.get("suggestions_file"):
+            print(f"    📄 LLM 제안 저장됨(미적용): {res['suggestions_file']}")
 
 
 def main():
