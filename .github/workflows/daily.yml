@@ -79,6 +79,27 @@ jobs:
       - name: 원고 형식 검사
         run: cd scripts && python validate.py "${{ steps.pick.outputs.slug }}"
 
+      - name: 원고 LLM 검수 (contentreviewer)
+        env:
+          OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
+          REVIEW_MODEL: ${{ vars.REVIEW_MODEL }}
+        run: |
+          cd scripts
+          set +e
+          python content_reviewer.py --slug "${{ steps.pick.outputs.slug }}" | tee /tmp/review.txt
+          RC=${PIPESTATUS[0]}
+          {
+            echo "## 🧐 contentreviewer — ${{ steps.pick.outputs.slug }}"
+            echo '```'
+            cat /tmp/review.txt
+            echo '```'
+          } >> "$GITHUB_STEP_SUMMARY"
+          if [ "$RC" = "1" ]; then
+            echo "::error::검수 차단(block) — 고칠 때까지 발행하지 않습니다."
+            exit 1
+          fi
+          echo "검수 코드 $RC (0=통과, 2=수정권장) — 계속 진행"
+
       - name: 카드 이미지 렌더링
         run: cd scripts && python render.py --slug "${{ steps.pick.outputs.slug }}"
 
