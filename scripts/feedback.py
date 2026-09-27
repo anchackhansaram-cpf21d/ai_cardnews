@@ -77,6 +77,26 @@ def summary():
             "bad_notes": [f"{r['slug']}: {r['note']}" for r in recent_bad if r["note"]]}
 
 
+def promote_candidates(threshold=3):
+    """같은 ❌ 사유가 threshold 회 이상 반복되면 규칙 후보로 승격한다 (L3)."""
+    import re as _re
+    rows = [r for r in read_all() if r["vote"] == "bad" and r.get("note")]
+    norm = {}
+    for r in rows:
+        key = _re.sub(r"[\s\.,!?…'\"]+", "", r["note"]).lower()
+        norm.setdefault(key, []).append(r["note"])
+    out = []
+    try:
+        import rules as R
+    except ImportError:
+        return out, "rules.py 없음"
+    for key, notes in norm.items():
+        if len(notes) >= threshold:
+            rec = R.promote(notes[-1], severity="medium", source="feedback")
+            out.append(rec)
+    return out, None
+
+
 def main():
     ap = argparse.ArgumentParser()
     sub = ap.add_subparsers(dest="cmd", required=True)
@@ -92,6 +112,8 @@ def main():
 
     sub.add_parser("summary")
     sub.add_parser("lessons")
+    pc = sub.add_parser("promote-candidates")
+    pc.add_argument("--threshold", type=int, default=3)
 
     args = ap.parse_args()
 
@@ -125,6 +147,17 @@ def main():
                 print("최근 ❌ 사유:")
                 for n in s["bad_notes"]:
                     print(f"  - {n}")
+
+    elif args.cmd == "promote-candidates":
+        recs, err = promote_candidates(args.threshold)
+        if err:
+            sys.exit(err)
+        if not recs:
+            print(f"승격 후보 없음 (같은 ❌ 사유 {args.threshold}회 미만)")
+        for r in recs:
+            print(f"⬆️  규칙 후보 등록: {r['id']} — {r['text']} (위반 {r.get('hits')}회)")
+        if recs:
+            print("\n승인: python rules.py approve <id>")
 
     elif args.cmd == "lessons":
         s = summary()

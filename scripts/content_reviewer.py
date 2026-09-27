@@ -62,50 +62,10 @@ def card_text(card):
 
 
 def rule_check(data):
-    issues = []
-    cards = data.get("cards", [])
-
-    for i, c in enumerate(cards, 1):
-        text = card_text(c).strip()
-        # 빈 카드
-        if not text and not has_visual(c):
-            issues.append({"card": i, "type": "empty_card", "severity": "high",
-                           "detail": "제목·본문·데이터가 모두 비어 있습니다."})
-        # 언어 오염
-        bad = sorted({ch for ch in text if CJK_RE.match(ch)} - ALLOWED_CJK)
-        if bad:
-            issues.append({"card": i, "type": "language", "severity": "high",
-                           "detail": f"일본어/중국어 문자 발견: {' '.join(bad[:10])}"})
-        # visual 타입인데 실제 데이터 없음
-        if c.get("type") in VISUAL_TYPES and not has_visual(c):
-            issues.append({"card": i, "type": "visual_no_data", "severity": "high",
-                           "detail": f"type={c.get('type')} 인데 data/diagram 이 없어 빈 카드로 렌더됩니다."})
-        # heading 길이
-        if c.get("type") not in ("cover", "insight", "cta", "outro") and not c.get("heading"):
-            issues.append({"card": i, "type": "no_heading", "severity": "low",
-                           "detail": "heading 이 없습니다."})
-
-    # 커버 후킹 (3줄 도발형)
-    if cards and cards[0].get("type") == "cover":
-        title = cards[0].get("title", "")
-        if "\n" not in title:
-            issues.append({"card": 1, "type": "hook_weak", "severity": "medium",
-                           "detail": "커버 제목이 한 줄입니다. 3줄 도발형(\\n 2개) 권장."})
-
-    # 시각화 비율
-    if cards:
-        n_visual = sum(1 for c in cards
-                       if c.get("type") in VISUAL_TYPES and has_visual(c))
-        ratio = n_visual / len(cards)
-        if ratio < MIN_VISUAL_RATIO:
-            issues.append({"card": 0, "type": "visual_ratio", "severity": "medium",
-                           "detail": f"시각화 {n_visual}/{len(cards)}장 ({ratio:.0%}) — 최소 {MIN_VISUAL_RATIO:.0%} 권장"})
-
-    for f in ("topic", "handle", "caption"):
-        if not data.get(f):
-            issues.append({"card": 0, "type": "missing_field", "severity": "high",
-                           "detail": f"필수 필드 누락: {f}"})
-    return issues
+    """규칙 검사는 rules.py(단일 진실 출처)에 위임한다."""
+    import rules as R
+    return [{"card": v["card"], "type": v["rule"], "severity": v["severity"],
+             "detail": v["detail"]} for v in R.evaluate(data)]
 
 
 # ── 2단계: LLM 검수 ────────────────────────────────────────

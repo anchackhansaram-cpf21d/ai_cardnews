@@ -62,8 +62,19 @@ def unpicked_topics(topic_file):
 
     return picked
 
-def add_manuscript(number, slug, content_dict):
-    """Queue에 새 원고 추가. content_dict는 JSON-serializable dict."""
+def add_manuscript(number, slug, content_dict, force=False):
+    """Queue에 새 원고 추가. content_dict는 JSON-serializable dict.
+
+    규칙 게이트(L3): high 위반이면 추가를 거부한다.
+    """
+    import rules as R
+    bad = R.blocking(content_dict)
+    if bad and not force:
+        lines = [f"  - [{v['severity']}] {v['rule']}: {v['detail']}" for v in bad]
+        raise SystemExit(
+            "❌ 규칙 위반으로 추가 거부 (발행 파이프라인에서도 차단됩니다)\n"
+            + "\n".join(lines)
+            + "\n\n고칠 수 없으면 --force 로 강제 추가 (비권장)")
     filename = f"{number}-{slug}.json"
     path = QUEUE / filename
     path.write_text(
@@ -80,13 +91,28 @@ if __name__ == "__main__":
     cmd = sys.argv[1]
     if cmd == "next_number":
         print(next_episode_number())
+    elif cmd == "briefing":
+        # L3 → L1: 원고 생성 전에 반드시 읽어야 하는 규칙/교훈
+        import rules as R
+        print(R.briefing())
+        try:
+            import feedback as F
+            s = F.summary()
+            if s.get("bad_notes"):
+                print("\n## 최근 ❌ 사유 (반복 금지)")
+                for n in s["bad_notes"]:
+                    print(f"- {n}")
+        except Exception:                                   # noqa: BLE001
+            pass
     elif cmd == "add":
-        if len(sys.argv) < 5:
-            print("Usage: growth_generate.py add <number> <slug> <json_string>", file=sys.stderr)
+        args = [a for a in sys.argv[2:] if a != "--force"]
+        force = "--force" in sys.argv[2:]
+        if len(args) < 3:
+            print("Usage: growth_generate.py add <number> <slug> <json_string> [--force]", file=sys.stderr)
             sys.exit(1)
-        num, slug, json_str = sys.argv[2], sys.argv[3], sys.argv[4]
+        num, slug, json_str = args[0], args[1], args[2]
         content = json.loads(json_str)
-        fn = add_manuscript(num, slug, content)
+        fn = add_manuscript(num, slug, content, force=force)
         print(f"Added: {fn}")
     elif cmd == "unpicked":
         picked = unpicked_topics(ROOT / "content" / "TOPICS.md")
