@@ -79,10 +79,11 @@ jobs:
       - name: 원고 형식 검사
         run: cd scripts && python validate.py "${{ steps.pick.outputs.slug }}"
 
-      - name: 원고 LLM 검수 (contentreviewer)
+      - name: 원고 LLM 검수 (contentreviewer — 진보/보수 2리뷰어)
         env:
           OPENROUTER_API_KEY: ${{ secrets.OPENROUTER_API_KEY }}
-          REVIEW_MODEL: ${{ vars.REVIEW_MODEL }}
+          REVIEW_MODEL_PROGRESSIVE: ${{ vars.REVIEW_MODEL_PROGRESSIVE }}
+          REVIEW_MODEL_CONSERVATIVE: ${{ vars.REVIEW_MODEL_CONSERVATIVE }}
         run: |
           cd scripts
           set +e

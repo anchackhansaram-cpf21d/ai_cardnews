@@ -32,9 +32,16 @@ import requests
 import postqueue as q
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-MODEL = os.environ.get("REVIEW_MODEL") or "google/gemini-2.5-flash"
 MIN_VISUAL_RATIO = 0.4          # 시각화 카드 최소 비율
 VISUAL_TYPES = ("visual", "diagram", "table", "chart", "compare", "flow")
+
+# 1 빌더 + 2 리뷰어 구조 (영상: Claude=진보 / OpenRouter·NVIDIA=보수 게이트키퍼)
+REVIEWERS = {
+    "progressive": os.environ.get("REVIEW_MODEL_PROGRESSIVE")
+    or os.environ.get("REVIEW_MODEL") or "anthropic/claude-sonnet-4",
+    "conservative": os.environ.get("REVIEW_MODEL_CONSERVATIVE")
+    or "deepseek/deepseek-v4-flash",
+}
 
 # 일본어 가나 / 한자 (한글과 코드 범위가 겹치지 않음)
 CJK_RE = re.compile(r"[\u3040-\u309f\u30a0-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uff66-\uff9f]")
@@ -103,16 +110,17 @@ def rule_check(data):
 
 # ── 2단계: LLM 검수 ────────────────────────────────────────
 
-REVIEW_PROMPT = """당신은 한국어 AI 교육 카드뉴스의 수석 리뷰어입니다.
-아래 원고(JSON)를 검수하고, 발견한 문제를 JSON으로만 답하세요.
+PROGRESSIVE_PROMPT = """당신은 한국어 AI 교육 카드뉴스의 수석 리뷰어입니다.
+역할: **진보적 리뷰어** — 오류 지적뿐 아니라 "어떻게 하면 더 좋아지는가"를 적극 제안합니다.
 
 검수 기준:
 1. 사실 정확성 — AI/ML 개념 설명이 틀렸거나 과장됐는지
 2. 설명 충분성 — 그림만 있고 설명이 빈약하지 않은지
 3. 후킹 — 커버 제목이 3줄 도발·단정형인지
 4. 언어 — 한국어만 사용(일본어/중국어 금지)
-5. 카드 완결성 — type=visual 인데 data/diagram 이 비어 있지 않은지
+5. 카드 완결성 — type=visual 인데 시각화 페이로드가 비어 있지 않은지
 6. 캡션 — 첫 문장이 후킹인지
+7. 개선 제안 — 더 좋은 비유, 더 강한 수치 예시, 빠진 관점
 
 출력 형식(JSON만, 다른 텍스트 금지):
 {
@@ -125,6 +133,24 @@ REVIEW_PROMPT = """당신은 한국어 AI 교육 카드뉴스의 수석 리뷰�
 - patches 는 실제로 고칠 수 있는 것만 (문구 교정, 빈 heading 채우기 등).
 - 개념 자체가 틀렸으면 verdict=block, patches 없이 이유만.
 """
+
+CONSERVATIVE_PROMPT = """당신은 한국어 AI 교육 카드뉴스의 **보수적 게이트키퍼 리뷰어**입니다.
+역할: 관대하게 넘기지 말고, 발행을 막아야 할 결함을 찾아내는 것이 임무입니다.
+확신이 없으면 지적하지 말고, 근거를 대라 수 있는 결함만 보고하세요.
+
+검수 기준(엄격):
+1. 사실 정확성 — 논문/연도/버전/모델명 등 출처 표기가 틀렸거나 검증 불가능하면 지적
+2. 과장·단정 — 근거 없는 최상급·절대 표현("무조건", "100%", "역대 최고") 지적
+3. 내부 모순 — 카드 간 수치·서술이 서로 어긋나는지
+4. 설명 충분성 — 그림만 있고 설명이 부족한 카드
+5. 언어 — 한국어만 (일본어/중국어 금지)
+6. 시각화 카드에 렌더 가능한 페이로드가 있는지
+
+출력: JSON 객체 하나만. 사고 과정·설명·마크다운·영어/중국어 금지.
+{"verdict":"pass|fix|block","summary":"한 줄","issues":[{"card":<번호>,"type":"<종류>","severity":"high|medium|low","detail":"<근거 포함 설명>"}]}
+문제 없으면 issues를 빈 배열로. patches 는 출력하지 마라 (게이트키퍼는 판정만 한다)."""
+
+PROMPTS = {"progressive": PROGRESSIVE_PROMPT, "conservative": CONSERVATIVE_PROMPT}
 
 
 def _loads_lenient(txt):
@@ -152,21 +178,23 @@ def _loads_lenient(txt):
     return None
 
 
-def llm_review(data, timeout=120):
+def llm_review(data, role="progressive", timeout=180):
     key = os.environ.get("OPENROUTER_API_KEY")
     if not key:
         return None, "OPENROUTER_API_KEY 없음 (룰 검사만 수행)"
 
+    model = REVIEWERS.get(role)
+    prompt = PROMPTS.get(role, PROGRESSIVE_PROMPT)
     payload = {
-        "model": MODEL,
+        "model": model,
         "messages": [
-            {"role": "system", "content": REVIEW_PROMPT},
+            {"role": "system", "content": prompt},
             {"role": "user", "content": json.dumps(
                 {k: v for k, v in data.items() if k != "user_profile"},
                 ensure_ascii=False)[:14000]},
         ],
-        "temperature": 0.2,
-        "max_tokens": 2000,
+        "temperature": 0.1 if role == "conservative" else 0.3,
+        "max_tokens": 3000,
         "response_format": {"type": "json_object"},
     }
     try:
@@ -175,17 +203,18 @@ def llm_review(data, timeout=120):
                           headers={"Authorization": f"Bearer {key}",
                                    "Content-Type": "application/json"})
         if r.status_code != 200:
-            return None, f"LLM HTTP {r.status_code}: {r.text[:200]}"
+            return None, f"[{role}] {model} HTTP {r.status_code}: {r.text[:160]}"
         txt = r.json()["choices"][0]["message"]["content"]
         parsed = _loads_lenient(txt)
         if parsed is None:
-            dbg = ROOT / "out" / "_review_raw.txt"
+            dbg = ROOT / "out" / f"_review_raw_{role}.txt"
             dbg.parent.mkdir(parents=True, exist_ok=True)
             dbg.write_text(txt, encoding="utf-8")
-            return None, f"JSON 파싱 실패 (원문 저장: {dbg})"
+            return None, f"[{role}] JSON 파싱 실패 (원문: {dbg})"
+        parsed["_model"] = model
         return parsed, None
     except Exception as e:                                  # noqa: BLE001
-        return None, f"LLM 검수 실패: {type(e).__name__}: {str(e)[:160]}"
+        return None, f"[{role}] LLM 검수 실패: {type(e).__name__}: {str(e)[:140]}"
 
 
 def rule_fixes(data):
@@ -234,35 +263,49 @@ def apply_patches(data, patches):
 
 # ── 오케스트레이션 ────────────────────────────────────────
 
-def review(slug, fix=False, rules_only=False):
+def review(slug, fix=False, rules_only=False, roles=None):
+    roles = roles or ["progressive", "conservative"]
     data = q.load(slug)
     rule_issues = rule_check(data)
-    llm, err = (None, None) if rules_only else llm_review(data)
 
-    issues = list(rule_issues)
-    patches = []
-    summary = ""
-    llm_issues = []
-    if llm:
-        llm_issues = llm.get("issues", []) or []
-        for i in llm_issues:
-            i["source"] = "llm"
-        patches = llm.get("patches", []) or []
-        summary = llm.get("summary", "")
+    llm_issues, patches, summaries, errors, models = [], [], {}, [], {}
+    if not rules_only:
+        for role in roles:
+            parsed, err = llm_review(data, role=role)
+            if err or not isinstance(parsed, dict):
+                errors.append(err or f"[{role}] 빈 응답")
+                continue
+            models[role] = parsed.get("_model", REVIEWERS.get(role))
+            summaries[role] = parsed.get("summary", "")
+            for i in (parsed.get("issues") or []):
+                i["source"] = role
+                llm_issues.append(i)
+            if role == "progressive":
+                patches = parsed.get("patches") or []
 
-    # 룰 검사만 verdict 를 결정한다 (LLM 은 자문).
-    # LLM 환각으로 정상 원고를 차단하지 않기 위함.
-    if any(i["severity"] == "high" for i in rule_issues):
+    # 합의(consensus): 두 리뷰어가 같은 카드를 지적 → 신뢰도 상승
+    by_card = {}
+    for i in llm_issues:
+        by_card.setdefault(i.get("card"), set()).add(i.get("source"))
+    for i in llm_issues:
+        if len(by_card.get(i.get("card"), ())) > 1:
+            i["consensus"] = True
+
+    # verdict 는 룰 검사가 결정한다. LLM 차단은 기본 OFF
+    # (두 모델이 같은 학습 컷오프로 같은 환각을 낼 수 있음 — 예: "2026년은 미래")
+    llm_block = os.environ.get("REVIEW_LLM_BLOCK", "").lower() in ("1", "true", "yes")
+    consensus_high = any(i.get("consensus") and i.get("severity") == "high" for i in llm_issues)
+    if any(i["severity"] == "high" for i in rule_issues) or (llm_block and consensus_high):
         verdict = "block"
-    elif rule_issues or (llm and llm.get("verdict") in ("fix", "block")):
+    elif rule_issues or llm_issues:
         verdict = "fix"
     else:
         verdict = "pass"
 
-    issues += llm_issues
+    issues = rule_issues + llm_issues
 
     # LLM 패치는 자동 적용하지 않는다 (환각 위험) — 제안 파일로만 남긴다.
-    sug = save_suggestions(slug, patches, summary) if (llm and patches) else None
+    sug = save_suggestions(slug, patches, summaries.get("progressive", "")) if patches else None
 
     applied = []
     if fix and verdict != "block":
@@ -272,29 +315,44 @@ def review(slug, fix=False, rules_only=False):
             path = ROOT / "content" / "queue" / f"{slug}.json"
             path.write_text(json.dumps(data, ensure_ascii=False, indent=2),
                             encoding="utf-8")
-            # 적용 후 재검사
             rule_issues = rule_check(data)
-            verdict = ("block" if any(i["severity"] == "high" for i in rule_issues)
-                       else "fix" if rule_issues or (llm and llm.get("verdict") == "fix")
-                       else "pass")
+            if any(i["severity"] == "high" for i in rule_issues):
+                verdict = "block"
+            elif rule_issues or llm_issues:
+                verdict = "fix"
+            else:
+                verdict = "pass"
             issues = rule_issues + llm_issues
 
-    return {"slug": slug, "verdict": verdict, "summary": summary,
-            "issues": issues, "patches": patches, "applied": applied,
-            "suggestions_file": str(sug) if sug else None, "llm_error": err}
+    return {"slug": slug, "verdict": verdict, "summaries": summaries,
+            "summary": " / ".join(f"[{k}] {v}" for k, v in summaries.items() if v),
+            "models": models, "issues": issues, "patches": patches,
+            "applied": applied, "suggestions_file": str(sug) if sug else None,
+            "llm_errors": errors, "llm_error": " ; ".join(errors) if errors else None}
+
+
+ROLE_LABEL = {"progressive": "진보", "conservative": "보수"}
 
 
 def report(res, verbose=True):
     icon = {"pass": "✅", "fix": "🟡", "block": "❌"}.get(res["verdict"], "❓")
-    print(f"{icon} {res['slug']} — {res['verdict'].upper()}"
-          + (f" · {res['summary']}" if res["summary"] else ""))
+    print(f"{icon} {res['slug']} — {res['verdict'].upper()}")
+    for role, model in (res.get("models") or {}).items():
+        print(f"    {ROLE_LABEL.get(role, role)} 리뷰어: {model}")
+    if res.get("summary"):
+        print(f"    총평: {res['summary']}")
     if res.get("llm_error"):
         print(f"    (LLM 생략: {res['llm_error']})")
     if verbose:
         for i in res["issues"]:
             c = f"{i['card']}번 " if i.get("card") else ""
-            tag = "[LLM·검증필요] " if i.get("source") == "llm" else ""
-            print(f"    {tag}[{i['severity']}] {c}{i['type']}: {i['detail']}")
+            src = ROLE_LABEL.get(i.get("source"), "")
+            tags = ""
+            if src:
+                tags = f"[{src}] "
+            if i.get("consensus"):
+                tags += "[합의⭐] "
+            print(f"    {tags}[{i['severity']}] {c}{i['type']}: {i['detail']}")
         for a in res.get("applied", []):
             print(f"    ✏️  적용됨: {a}")
         if res.get("suggestions_file"):
@@ -307,8 +365,15 @@ def main():
     ap.add_argument("--all", action="store_true")
     ap.add_argument("--fix", action="store_true", help="LLM 패치를 원고에 적용")
     ap.add_argument("--rules-only", action="store_true", help="LLM 없이 룰 검사만")
+    ap.add_argument("--reviewer", default="both",
+                    choices=["both", "progressive", "conservative"],
+                    help="LLM 리뷰어 선택 (기본 both: 진보+보수)")
     ap.add_argument("--quiet", action="store_true")
     a = ap.parse_args()
+
+    roles = {"both": ["progressive", "conservative"],
+             "progressive": ["progressive"],
+             "conservative": ["conservative"]}[a.reviewer]
 
     slugs = q.all_slugs() if a.all else [a.slug or q.next_slug()]
     slugs = [s for s in slugs if s]
@@ -318,7 +383,7 @@ def main():
     worst = 0
     for s in slugs:
         try:
-            res = review(s, fix=a.fix, rules_only=a.rules_only)
+            res = review(s, fix=a.fix, rules_only=a.rules_only, roles=roles)
         except Exception as e:                              # noqa: BLE001
             print(f"❌ {s} — 검수 중 예외: {type(e).__name__}: {e}")
             worst = max(worst, 1)
