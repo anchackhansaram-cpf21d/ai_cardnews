@@ -14,8 +14,7 @@
     "012-dpo",
     "013-rlvr",
     "014-synthetic-data",
-    "015-embedding",
-    "050-activation-functions"
+    "015-embedding"
   ],
   "last_run": "2026-09-28T12:33:08+09:00",
   "log": [
@@ -84,12 +83,6 @@
       "posted_at": "2026-09-09T16:32:41+09:00",
       "media_id": "18097734950131705",
       "permalink": null
-    },
-    {
-      "slug": "050-activation-functions",
-      "posted_at": "2026-09-28T12:33:08+09:00",
-      "media_id": "18109606859234425",
-      "permalink": "https://www.instagram.com/p/Dd0OjMtl3Ep/"
     }
   ]
 }
