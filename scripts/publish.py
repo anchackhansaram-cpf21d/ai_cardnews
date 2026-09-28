@@ -44,21 +44,32 @@ def build_caption(data):
     return f"{cap}\n\n.\n.\n.\n{tags}".strip()
 
 
-def post(url, params, tries=4):
-    """Graph API 호출 + 지수 백오프 재시도."""
-    delay = 5
+# 재시도해도 되는 400 (일시적) — 반대로 진짜 잘못된 요청은 즉시 중단한다
+RETRYABLE_400 = ("rate limit", '"code":9007', "2207027", "not available",
+                 "준비가 완료되지 않아", "please wait", "media id is not available")
+
+
+def post(url, params, tries=6):
+    """Graph API 호출 + 지수 백오프 재시도.
+
+    Instagram 은 컨테이너 처리 직후 media_publish 를 부르면
+    "Media ID is not available"(code 9007 / subcode 2207027) 로 거절한다.
+    이건 일시적 오류이므로 재시도해야 한다 (2026-09-25~28 발행 실패의 원인).
+    """
+    delay = 8
     last = None
     for attempt in range(1, tries + 1):
         r = requests.post(url, data=params, timeout=90)
         if r.status_code == 200:
             return r.json()
         last = f"HTTP {r.status_code}: {r.text[:500]}"
-        # 4xx 중 재시도가 무의미한 것은 즉시 중단
-        if r.status_code == 400 and "rate limit" not in r.text.lower():
-            break
-        print(f"  재시도 {attempt}/{tries} ({last})")
+        low = r.text.lower()
+        retryable = r.status_code >= 500 or any(k in low for k in RETRYABLE_400)
+        if not retryable:
+            break                      # 진짜 잘못된 요청 — 재시도 무의미
+        print(f"  재시도 {attempt}/{tries} (일시적 오류) {last[:220]}")
         time.sleep(delay)
-        delay *= 2
+        delay = min(delay * 2, 60)
     sys.exit(f"Graph API 호출 실패 -> {url}\n{last}")
 
 
@@ -286,11 +297,15 @@ def main():
                      "caption": caption,
                      "access_token": token})["id"]
 
-    # 3) 처리 완료 대기 후 발행
+    # 3) 자식 → 캐러셀 순서로 처리 완료 대기 (9007 방지)
+    for c in children:
+        wait_ready(c, token, timeout=180)
     wait_ready(carousel, token)
+    time.sleep(12)          # 캐러셀 조립 여유
     print("발행 중")
     media_id = post(f"{API}/{ig_user}/media_publish",
-                    {"creation_id": carousel, "access_token": token})["id"]
+                    {"creation_id": carousel, "access_token": token},
+                    tries=8)["id"]
 
     permalink = None
     try:
