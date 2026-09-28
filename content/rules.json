@@ -8,6 +8,125 @@
       "source": "builtin"
     },
     {
+      "id": "visual-renderable",
+      "check": "visual_renderable",
+      "severity": "high",
+      "text": "visual 스펙이 실제로 렌더돼야 한다 (폴백/빈 라벨 금지)",
+      "source": "builtin"
+    },
+    {
+      "id": "korean-only",
+      "check": "cjk_free",
+      "severity": "high",
+      "text": "한국어만. 일본어·중국어 문자 금지",
+      "source": "builtin"
+    },
+    {
+      "id": "required-fields",
+      "check": "required_fields",
+      "severity": "high",
+      "text": "topic·handle·caption 필수",
+      "source": "builtin"
+    },
+    {
+      "id": "card-count",
+      "check": "card_count",
+      "severity": "high",
+      "text": "카드 5~10장",
+      "source": "builtin"
+    },
+    {
+      "id": "cover-3line",
+      "check": "cover_3line",
+      "severity": "medium",
+      "text": "커버 제목은 3줄 도발·단정형",
+      "source": "builtin"
+    },
+    {
+      "id": "body-length",
+      "check": "body_length",
+      "severity": "high",
+      "text": "본문은 230자 이하 — 넘으면 자동축소로 글씨가 작아져 읽기 나빠진다",
+      "source": "builtin"
+    },
+    {
+      "id": "visual-ratio",
+      "check": "visual_ratio",
+      "severity": "medium",
+      "text": "시각화 카드 비율 40% 이상",
+      "source": "builtin"
+    },
+    {
+      "id": "heading-length",
+      "check": "heading_length",
+      "severity": "low",
+      "text": "heading 26자 이하",
+      "source": "builtin"
+    },
+    {
+      "id": "visual-payload",
+      "check": "visual_payload",
+      "severity": "high",
+      "text": "visual 카드에는 렌더 가능한 페이로드(visual/data/diagram)가 있어야 한다",
+      "source": "builtin"
+    },
+    {
+      "id": "visual-renderable",
+      "check": "visual_renderable",
+      "severity": "high",
+      "text": "visual 스펙이 실제로 렌더돼야 한다 (폴백/빈 라벨 금지)",
+      "source": "builtin"
+    },
+    {
+      "id": "korean-only",
+      "check": "cjk_free",
+      "severity": "high",
+      "text": "한국어만. 일본어·중국어 문자 금지",
+      "source": "builtin"
+    },
+    {
+      "id": "required-fields",
+      "check": "required_fields",
+      "severity": "high",
+      "text": "topic·handle·caption 필수",
+      "source": "builtin"
+    },
+    {
+      "id": "card-count",
+      "check": "card_count",
+      "severity": "high",
+      "text": "카드 5~10장",
+      "source": "builtin"
+    },
+    {
+      "id": "cover-3line",
+      "check": "cover_3line",
+      "severity": "medium",
+      "text": "커버 제목은 3줄 도발·단정형",
+      "source": "builtin"
+    },
+    {
+      "id": "visual-ratio",
+      "check": "visual_ratio",
+      "severity": "medium",
+      "text": "시각화 카드 비율 40% 이상",
+      "source": "builtin"
+    },
+    {
+      "id": "heading-length",
+      "check": "heading_length",
+      "severity": "low",
+      "text": "heading 26자 이하",
+      "source": "builtin"
+    },
+    {
+      "id": "visual-payload",
+      "check": "visual_payload",
+      "severity": "high",
+      "text": "visual 카드에는 렌더 가능한 페이로드(visual/data/diagram)가 있어야 한다",
+      "source": "builtin"
+    },
+    {
       "id": "korean-only",
       "check": "cjk_free",
       "severity": "high",

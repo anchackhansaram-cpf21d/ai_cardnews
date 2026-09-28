@@ -10,3 +10,4 @@ out/*/clip*.mp4
 out/*/scene*.png
 out/*/_*.html
 out/review_suggestions/
+out/*/katex/

@@ -116,6 +116,9 @@ jobs:
         run: |
           git config user.name  "cardnews-bot"
           git config user.email "actions@github.com"
+          # 추적 중인 파일의 수정분도 모두 스테이징한다.
+          # (content/rules.json 등이 unstaged 로 남으면 아래 rebase 가 거부된다)
+          git add -u
           git add out/
           if git diff --cached --quiet; then
             echo "커밋할 이미지 변경 없음 (기존 커밋 재사용)"
@@ -124,6 +127,7 @@ jobs:
           fi
           ok=0
           for i in 1 2 3 4 5; do
+            git stash push -u -q -m "wip-$i" >/dev/null 2>&1 || true
             git fetch origin "$MAIN_BRANCH" \
               && git rebase "origin/$MAIN_BRANCH" \
               && git push origin "HEAD:$MAIN_BRANCH" \
