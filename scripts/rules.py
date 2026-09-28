@@ -24,12 +24,18 @@ import sys
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 STORE = ROOT / "content" / "rules.json"
 
+sys.path.insert(0, str(pathlib.Path(__file__).resolve().parent))
+import diagrams  # noqa: E402  (렌더 실패 감지용)
+
 CJK_RE = re.compile(r"[\u3040-\u309f\u30a0-\u30ff\u3400-\u4dbf\u4e00-\u9fff\uff66-\uff9f]")
 VISUAL_TYPES = ("visual", "diagram", "table", "chart", "compare", "flow")
 
 BUILTIN = [
     {"id": "visual-payload", "check": "visual_payload", "severity": "high",
      "text": "visual 카드에는 렌더 가능한 페이로드(visual/data/diagram)가 있어야 한다",
+     "source": "builtin"},
+    {"id": "visual-renderable", "check": "visual_renderable", "severity": "high",
+     "text": "visual 스펙이 실제로 렌더돼야 한다 (폴백/빈 라벨 금지)",
      "source": "builtin"},
     {"id": "korean-only", "check": "cjk_free", "severity": "high",
      "text": "한국어만. 일본어·중국어 문자 금지", "source": "builtin"},
@@ -39,6 +45,9 @@ BUILTIN = [
      "text": "카드 5~10장", "source": "builtin"},
     {"id": "cover-3line", "check": "cover_3line", "severity": "medium",
      "text": "커버 제목은 3줄 도발·단정형", "source": "builtin"},
+    {"id": "body-length", "check": "body_length", "severity": "high",
+     "text": "본문은 230자 이하 — 넘으면 자동축소로 글씨가 작아져 읽기 나빠진다",
+     "source": "builtin"},
     {"id": "visual-ratio", "check": "visual_ratio", "severity": "medium",
      "text": "시각화 카드 비율 40% 이상", "source": "builtin"},
     {"id": "heading-length", "check": "heading_length", "severity": "low",
@@ -90,6 +99,27 @@ def _has_visual(c):
     return bool(c.get("visual") or c.get("data") or c.get("diagram"))
 
 
+def _render_problem(c):
+    """시각화가 실제로 렌더되는지 확인. 문제 있으면 사유 문자열, 없으면 ''.
+
+    050 발행 사고의 원인: 규칙이 'visual 키가 있는가'만 봤고
+    '실제로 그려지는가'는 안 봐서, 폴백으로 깨진 카드가 통과했다.
+    """
+    spec = c.get("visual") or c.get("data") or c.get("diagram")
+    if not isinstance(spec, dict):
+        return "스펙이 dict 가 아닙니다"
+    kind = spec.get("kind")
+    try:
+        svg = diagrams.build(spec)
+    except Exception as e:                      # noqa: BLE001
+        return f"렌더 중 예외 ({kind}): {e}"
+    if diagrams.FALLBACK_MARKER in svg:
+        return f"빌더 실패→폴백 렌더 (kind={kind}). 스펙 형태를 빌더에 맞춰라"
+    if "<text" not in svg:
+        return f"라벨 텍스트가 0개 (kind={kind}) — 빈 그림"
+    return ""
+
+
 def _text(c):
     parts = [c.get("title"), c.get("heading"), c.get("body"), c.get("lead")]
     parts += list(c.get("bullets") or [])
@@ -102,6 +132,12 @@ CHECKS = {
         for i, c in enumerate(_cards(d), 1)
         if c.get("type") in VISUAL_TYPES and not _has_visual(c)],
 
+    "visual_renderable": lambda d: [
+        {"card": i, "detail": f"{i}번 카드 시각화 {why}"}
+        for i, c in enumerate(_cards(d), 1)
+        if c.get("type") in VISUAL_TYPES
+        for why in [_render_problem(c)] if why],
+
     "cjk_free": lambda d: [
         {"card": i, "detail": f"{i}번 카드에 일본어/중국어: "
                              f"{' '.join(sorted({ch for ch in _text(c) if CJK_RE.match(ch)})[:8])}"}
@@ -111,6 +147,12 @@ CHECKS = {
     "required_fields": lambda d: [
         {"card": 0, "detail": f"필수 필드 누락: {f}"}
         for f in ("topic", "handle", "caption") if not d.get(f)],
+
+    "body_length": lambda d: [
+        {"card": i, "detail": f"{i}번 카드 본문 {len(c.get('body') or '')}자 "
+                             f"(230자 이하 권장) — 글을 줄이고 시각화로 채워라"}
+        for i, c in enumerate(_cards(d), 1)
+        if len(c.get("body") or "") > 230],
 
     "card_count": lambda d: (
         [] if 5 <= len(_cards(d)) <= 10

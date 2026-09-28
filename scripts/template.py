@@ -10,11 +10,23 @@ W, H = 1080, 1350
 MATH_INLINE = re.compile(r"\$(.+?)\$")
 MATH_BLOCK = re.compile(r"\$\$(.+?)\$\$")
 
-KATEX_CSS = '<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">'
+# KaTeX 로컬 내장 (assets/katex/) — CDN 미로딩으로 $...$ 가 원문 노출되던 문제 제거.
+# render.py 가 assets/katex 를 out/<slug>/katex 로 복사한다.
+KATEX_CSS = '<link rel="stylesheet" href="katex/katex.min.css">'
 KATEX_JS = (
-    '<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>'
-    '<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"'
-    ' onload="renderMathInElement(document.body,{delimiters:[{left:\'$$\',right:\'$$\',display:true},{left:\'$\',right:\'$\',display:false}]})"></script>'
+    '<script src="katex/katex.min.js"></script>'
+    '<script src="katex/auto-render.min.js"></script>'
+    "<script>"
+    "window.__katexDone=false;"
+    "window.__renderMath=function(){"
+    "if(!window.katex||!window.renderMathInElement){return false;}"
+    "renderMathInElement(document.body,{delimiters:["
+    "{left:'$$',right:'$$',display:true},{left:'$',right:'$',display:false}],"
+    "throwOnError:false});"
+    "window.__katexDone=true;return true;};"
+    "document.addEventListener('DOMContentLoaded',window.__renderMath);"
+    "window.addEventListener('load',window.__renderMath);"
+    "</script>"
 )
 
 CSS = """\
@@ -224,9 +236,35 @@ def esc(t):
     return "".join(out)
 
 
+def _split_chunks(t, per=2):
+    """긴 문단을 문장 2개씩 묶어 나눈다 (벽돌 텍스트 → 읽히는 문단).
+
+    수식($...$)이 섞이면 문장 경계 판단이 위험하므로 나누지 않는다.
+    """
+    if "$" in t:
+        return [t]
+    parts = re.split(r"(?<=[.!?])\s+", t.strip())
+    chunks, cur, n = [], "", 0
+    for s in parts:
+        cur = (cur + " " + s).strip()
+        n += 1
+        if n >= per:
+            chunks.append(cur)
+            cur, n = "", 0
+    if cur:
+        chunks.append(cur)
+    return chunks or [t]
+
+
 def paras(text):
-    return "".join(f'<p class="para">{esc(p.strip())}</p>'
-                   for p in str(text).split("\n") if p.strip())
+    out = []
+    for p in str(text).split("\n"):
+        p = p.strip()
+        if not p:
+            continue
+        for chunk in (_split_chunks(p) if len(p) > 240 else [p]):
+            out.append(f'<p class="para">{esc(chunk)}</p>')
+    return "".join(out)
 
 
 def parse_md_table(text):

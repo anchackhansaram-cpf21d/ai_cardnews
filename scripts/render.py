@@ -9,6 +9,7 @@
 
 import argparse
 import pathlib
+import shutil
 import sys
 
 from playwright.sync_api import sync_playwright
@@ -27,6 +28,12 @@ def render(slug: str) -> list:
     html_path = out_dir / "_preview.html"
     html_path.write_text(build_html(data), encoding="utf-8")
 
+    # KaTeX 로컬 자산 복사 (CDN 미로딩 → $...$ 원문 노출 방지)
+    katex_src = ROOT / "assets" / "katex"
+    katex_dst = out_dir / "katex"
+    if katex_src.is_dir() and not katex_dst.is_dir():
+        shutil.copytree(katex_src, katex_dst)
+
     files = []
     with sync_playwright() as p:
         browser = p.chromium.launch(args=["--force-color-profile=srgb",
@@ -34,7 +41,18 @@ def render(slug: str) -> list:
         page = browser.new_page(viewport={"width": W, "height": H},
                                 device_scale_factor=1)
         page.goto(html_path.as_uri())
-        page.wait_for_timeout(700)  # 폰트 로드 + autofit 안정화
+        page.wait_for_load_state("load")
+        # KaTeX 로컬 로딩 대기 후 수식 렌더 (실패하면 원문 노출로 잡는다)
+        try:
+            page.wait_for_function("window.__katexDone === true", timeout=15000)
+        except Exception:                       # noqa: BLE001
+            print(f"⚠️  [{slug}] KaTeX 로딩 실패 — 수식이 원문으로 남을 수 있습니다")
+        raw = page.evaluate(
+            "() => { const t = document.body.innerText || '';"
+            "  return (t.match(/\\$[^$\\n]{1,80}\\$/g) || []).slice(0, 5); }")
+        if raw:
+            print(f"⚠️  [{slug}] 렌더 안 된 수식 {len(raw)}개 → {raw}")
+        page.wait_for_timeout(500)  # 폰트 로드 + autofit 안정화
         cards = page.query_selector_all(".card")
         if not cards:
             browser.close()

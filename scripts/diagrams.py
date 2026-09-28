@@ -23,6 +23,26 @@ def _wrap(inner, height, extra=""):
 
 # ── 1. 히트맵 / 행렬 ─────────────────────────────────────────────
 def heatmap(s):
+    # 관용: items:[{x,y,value}] 형태를 rows/cols/values 로 변환
+    if "rows" not in s and isinstance(s.get("items"), list):
+        pts = [p for p in s["items"] if isinstance(p, dict)]
+
+        def gx(p):
+            return p.get("x") or p.get("col") or p.get("colLabel") or ""
+
+        def gy(p):
+            return p.get("y") or p.get("row") or p.get("rowLabel") or ""
+
+        xs, ys = [], []
+        for p in pts:
+            if gx(p) not in xs:
+                xs.append(gx(p))
+            if gy(p) not in ys:
+                ys.append(gy(p))
+        if xs and ys:
+            vals = [[next((float(p.get("value", 0)) for p in pts
+                           if gx(p) == x and gy(p) == y), 0.0) for x in xs] for y in ys]
+            s = {**s, "rows": ys, "cols": xs, "values": vals}
     rows, cols = s["rows"], s["cols"]
     vals = s["values"]
     lab_w = 200 if any(rows) else 0
@@ -189,6 +209,15 @@ def vbar(s):
 
 # ── 3. 꺾은선 / 곡선 ────────────────────────────────────────────
 def line(s):
+    # 관용: data:[{x,y}] / points:[[x,y]] 형태를 series 로 변환
+    if "series" not in s:
+        pts = s.get("data") or s.get("points")
+        if isinstance(pts, list) and pts:
+            if isinstance(pts[0], dict):
+                pts = [[p.get("x"), p.get("y")] for p in pts
+                       if p.get("y") is not None and p.get("x") is not None]
+            s = {**s, "series": [{"name": s.get("name") or s.get("title") or "",
+                                  "points": pts}]}
     series = s["series"]
     H = 486
     pad_l, pad_r, pad_t, pad_b = 104, 40, 34, 86
@@ -209,6 +238,10 @@ def line(s):
                f'stroke="var(--ink)" stroke-opacity=".26" stroke-width="2"/>')
 
     cols = ["var(--accent)", "var(--warm)"]
+    # 계열 이름이 없으면 끝점의 값을 라벨로 (빈 그림 방지) — 그리기 전에 채워야 한다
+    for sr in series:
+        if not sr.get("label"):
+            sr["label"] = sr.get("name") or f"{sr['points'][-1][1]:g}"
     for k, sr in enumerate(series):
         col = cols[k % 2]
         pts = " ".join(f"{sx(p[0]):.1f},{sy(p[1]):.1f}" for p in sr["points"])
@@ -229,11 +262,17 @@ def line(s):
         out.append(f'<text x="{pad_l+w/2:.0f}" y="{H-10}" text-anchor="middle" '
                    f'font-size="22" font-weight="500" fill="var(--muted)">'
                    f'{esc(s["xlabel"])}</text>')
-    if s.get("ylabel"):
+    if s.get("ylabel") or s.get("unit"):
         out.append(f'<text transform="translate(34,{pad_t+h/2:.0f}) rotate(-90)" '
                    f'text-anchor="middle" font-size="22" font-weight="500" '
-                   f'fill="var(--muted)">{esc(s["ylabel"])}</text>')
-    for a in s.get("ticks", []):
+                   f'fill="var(--muted)">{esc(s.get("ylabel") or s["unit"])}</text>')
+    # x축 눈금: 없으면 데이터에서 자동 생성 (라벨 0개 = 빈 그림 방지)
+    ticks = s.get("ticks")
+    if not ticks and xs:
+        n = len(xs)
+        ticks = [[xs[i], str(xs[i])] for i in sorted({0, n // 2, n - 1})]
+    # 계열 이름이 없으면 끝점의 값을 라벨로 (빈 그림 방지)
+    for a in ticks:
         out.append(f'<text x="{sx(a[0]):.0f}" y="{pad_t+h+32}" text-anchor="middle" '
                    f'font-size="21" fill="var(--muted)">{esc(a[1])}</text>')
     return _wrap("".join(out), H)
@@ -332,6 +371,18 @@ def formula(s):
 
 # ── 6. 좌우 비교 ────────────────────────────────────────────────
 def compare(s):
+    # 관용: items:[{label,values:[...]}] → left/right 로 변환
+    if "left" not in s and isinstance(s.get("items"), list):
+        its = [i for i in s["items"] if isinstance(i, dict)]
+        if len(its) >= 2:
+            def mk(it):
+                vals = it.get("values") or it.get("points") or []
+                # 이 빌더는 items 를 문자열 목록으로 그린다 (dict 를 넣으면 dict 원문이 출력됨)
+                rows = [f"층 {k+1}: {v:g}" for k, v in enumerate(vals) if isinstance(v, (int, float))][:7]
+                if not rows:
+                    rows = [str(x) for x in (it.get("items") or [])][:7]
+                return {"title": it.get("label") or it.get("title") or "", "items": rows}
+            s = {**s, "left": mk(its[0]), "right": mk(its[1])}
     L, R = s["left"], s["right"]
     # items | points 둘 다 허용 (릴스 대본은 points 로 오는 경우가 있음)
     for side in (L, R):
@@ -575,4 +626,8 @@ def build(spec):
     try:
         return fn(spec)
     except (KeyError, TypeError, ValueError, IndexError):
-        return fallback(spec)
+        return FALLBACK_MARKER + fallback(spec)
+
+
+# 폴백 렌더 표식 — rules.py 가 "렌더 실패"를 감지하는 데 쓴다
+FALLBACK_MARKER = "<!--DIAGRAM_FALLBACK-->"
