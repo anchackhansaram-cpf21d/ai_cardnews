@@ -14,9 +14,10 @@
     "012-dpo",
     "013-rlvr",
     "014-synthetic-data",
-    "015-embedding"
+    "015-embedding",
+    "050-activation-functions"
   ],
-  "last_run": "2026-09-28T12:33:08+09:00",
+  "last_run": "2026-09-28T12:50:51+09:00",
   "log": [
     {
       "slug": "004-rag-retrieval",
@@ -83,6 +84,12 @@
       "posted_at": "2026-09-09T16:32:41+09:00",
       "media_id": "18097734950131705",
       "permalink": null
+    },
+    {
+      "slug": "050-activation-functions",
+      "posted_at": "2026-09-28T12:50:51+09:00",
+      "media_id": "18103978499210316",
+      "permalink": "https://www.instagram.com/p/Dd0Qk6EjFsp/"
     }
   ]
 }
