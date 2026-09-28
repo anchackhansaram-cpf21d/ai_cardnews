@@ -1,7 +1,59 @@
 {
-  "collected_at": "2026-09-23T02:32:47.689737+00:00",
-  "count": 26,
+  "collected_at": "2026-09-28T01:00:46.038494+00:00",
+  "count": 30,
   "media": [
+    {
+      "id": "18160843570436172",
+      "timestamp": "2026-09-27T02:17:42+0000",
+      "permalink": "https://www.instagram.com/p/DdxhJ8FjcIk/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "같은 GPU, 같은 모델, 같은 가격. 그런데 22배 차이가 난다. 이유는 단 하나: 배치 스케줄링(batch scheduling)이다.",
+      "like_count": 0,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18093272069161991",
+      "timestamp": "2026-09-26T02:18:22+0000",
+      "permalink": "https://www.instagram.com/p/Ddu8bWPGIiT/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "아이에게 '고양이'를 가르칠 때마다 '이건 고양이입니다'라고 수천 번 말해주지 않는다. 아이는 스스로 개념을 익힌다. AI도 같은 방식으로 배우",
+      "like_count": 0,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18216260941344093",
+      "timestamp": "2026-09-25T02:17:15+0000",
+      "permalink": "https://www.instagram.com/p/DdsXhC0mNRc/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "트랜스포머의 시대가 끝나간다고? 🧠",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18342621418265018",
+      "timestamp": "2026-09-24T02:18:55+0000",
+      "permalink": "https://www.instagram.com/p/Ddpy52gjIiQ/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "여러 모델의 평균이 하나보다 정확하다는 건 통계학이 증명한 사실입니다 🤔",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+      },
+      "metrics_used": ""
+    },
     {
       "id": "18032570390665143",
       "timestamp": "2026-09-23T02:19:03+0000",
@@ -50,7 +102,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -73,7 +125,7 @@
       "permalink": "https://www.instagram.com/p/DdaW4o-jZKl/",
       "type": "CAROUSEL_ALBUM",
       "caption_head": "2021년 등장 당시 'CLIP 하나로 분류기를 대체할 수 있다'는 말은 과장처럼 들렸습니다. 하지만 ImageNet 제로샷 76.2%는 실제였",
-      "like_count": 0,
+      "like_count": 1,
       "comments_count": 0,
       "insights": {
         "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
@@ -219,7 +271,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -323,7 +375,7 @@
       "like_count": 4,
       "comments_count": 5,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
