@@ -48,6 +48,9 @@ BUILTIN = [
     {"id": "body-length", "check": "body_length", "severity": "high",
      "text": "본문은 230자 이하 — 넘으면 자동축소로 글씨가 작아져 읽기 나빠진다",
      "source": "builtin"},
+    {"id": "numeric-consistency", "check": "numeric_consistency", "severity": "high",
+     "text": "커버 숫자와 차트 숫자가 일치해야 한다 ('격차'는 실제 계산값과 같아야 한다)",
+     "source": "builtin"},
     {"id": "visual-ratio", "check": "visual_ratio", "severity": "medium",
      "text": "시각화 카드 비율 40% 이상", "source": "builtin"},
     {"id": "heading-length", "check": "heading_length", "severity": "low",
@@ -75,11 +78,27 @@ def save_store(d):
 
 
 def ensure_builtins():
+    """내장 룰을 저장소에 반영한다.
+
+    과거 버그: `d["rules"] = BUILTIN + d["rules"]` 로 매 실행마다 전체를
+    다시 앞에 붙여서 룰이 4중복까지 쌓였다(같은 규칙이 4번 검사·4번 보고됨).
+    id 기준으로 병합하고, 사람이 정한 status 는 보존한다.
+    """
     d = load_store()
-    have = {r["id"] for r in d["rules"]}
-    added = [r for r in BUILTIN if r["id"] not in have]
-    if added:
-        d["rules"] = BUILTIN + d["rules"]
+    existing = {r.get("id"): r for r in d["rules"] if isinstance(r, dict) and r.get("id")}
+    builtin_ids = {r["id"] for r in BUILTIN}
+    CODE_OWNED = ("text", "check", "severity", "source")
+
+    merged = []
+    for r in BUILTIN:
+        cur = existing.get(r["id"]) or {}
+        merged.append({**cur, **{k: r[k] for k in CODE_OWNED if k in r},
+                       "id": r["id"]})
+    merged += [r for r in d["rules"]
+               if isinstance(r, dict) and r.get("id") not in builtin_ids]
+
+    if merged != d["rules"]:
+        d["rules"] = merged
         save_store(d)
     return d
 
@@ -126,6 +145,79 @@ def _text(c):
     return " ".join(str(p) for p in parts if p)
 
 
+def _pct_numbers(text):
+    """텍스트에서 퍼센트 숫자만 뽑는다. (97%, 94 등)"""
+    return [float(x) for x in re.findall(r"(\d+(?:\.\d+)?)\s*%", str(text or ""))]
+
+
+def _visual_numbers(card):
+    """시각화(차트)가 담고 있는 숫자들 — 데이터의 정본으로 취급한다."""
+    v = card.get("visual") or card.get("data") or card.get("diagram") or {}
+    if not isinstance(v, dict):
+        return []
+    out = []
+    for it in (v.get("items") or []):
+        if isinstance(it, dict) and isinstance(it.get("value"), (int, float)):
+            out.append(float(it["value"]))
+    for row in (v.get("values") or []):
+        if isinstance(row, list):
+            out += [float(x) for x in row if isinstance(x, (int, float))]
+    for sr in (v.get("series") or []):
+        if isinstance(sr, dict):
+            for p in (sr.get("points") or []):
+                if isinstance(p, list) and len(p) > 1 and isinstance(p[1], (int, float)):
+                    out.append(float(p[1]))
+    return out
+
+
+def _numeric_problems(d):
+    """커버 숫자 ↔ 차트 숫자 불일치, 그리고 '격차' 항목의 계산 오류를 잡는다.
+
+    051 사고: 커버는 97%/60%/37%, 차트는 94/59/37(94-59=35) 였다.
+    규칙이 '키가 있는가'만 봐서 이걸 못 잡았다.
+    """
+    out = []
+    cards = _cards(d)
+    if not cards:
+        return out
+    vis = [n for c in cards for n in _visual_numbers(c)]
+    vis_nums = sorted(set(vis))
+
+    # 1) 커버 숫자가 차트 숫자와 '가까운데 다른' 경우 → 드리프트로 판정
+    cover = cards[0]
+    cover_text = f'{cover.get("title","")} {cover.get("subtitle","")} {cover.get("body","")}'
+    for n in _pct_numbers(cover_text):
+        if not vis_nums:
+            continue
+        near = [v for v in vis_nums if v and abs(n - v) / v <= 0.15]
+        if near and not any(abs(n - v) < 0.01 for v in vis_nums):
+            out.append({"card": 1, "detail":
+                        f"커버 숫자 {n:g}% 가 차트 값 {near} 와 불일치 "
+                        f"(차트를 정본으로 삼아 맞춰라)"})
+
+    # 2) '격차/차이' 항목 값이 나머지 값들의 차와 다른 경우
+    for i, c in enumerate(cards, 1):
+        v = c.get("visual") or c.get("data") or c.get("diagram") or {}
+        if not isinstance(v, dict):
+            continue
+        items = [x for x in (v.get("items") or []) if isinstance(x, dict)]
+        gaps, others = [], []
+        for x in items:
+            val = x.get("value")
+            if re.search(r"격차|차이|gap", str(x.get("label", ""))):
+                gaps.append((x.get("label"), val))
+            elif isinstance(val, (int, float)):
+                others.append(float(val))
+        if gaps and len(others) >= 2:
+            want = abs(max(others) - min(others))
+            for glabel, gv in gaps:
+                if isinstance(gv, (int, float)) and abs(float(gv) - want) > 0.5:
+                    out.append({"card": i, "detail":
+                                f"{i}번 차트 '{glabel}' 값 {float(gv):g} 이 "
+                                f"실제 계산값 {want:g} 과 다름 ({max(others):g}-{min(others):g})"})
+    return out
+
+
 CHECKS = {
     "visual_payload": lambda d: [
         {"card": i, "detail": f"{i}번 카드 type={c.get('type')} 인데 페이로드가 없습니다"}
@@ -153,6 +245,8 @@ CHECKS = {
                              f"(230자 이하 권장) — 글을 줄이고 시각화로 채워라"}
         for i, c in enumerate(_cards(d), 1)
         if len(c.get("body") or "") > 230],
+
+    "numeric_consistency": lambda d: _numeric_problems(d),
 
     "card_count": lambda d: (
         [] if 5 <= len(_cards(d)) <= 10
