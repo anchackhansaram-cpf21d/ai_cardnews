@@ -11,3 +11,4 @@ out/*/scene*.png
 out/*/_*.html
 out/review_suggestions/
 out/*/katex/
+out/_review_raw_*.txt
