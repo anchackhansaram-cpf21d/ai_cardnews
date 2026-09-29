@@ -1,0 +1,137 @@
+{
+  "series_no": 52,
+  "topic": "혼합 정밀도 학습(FP16/BF16) — GPU 메모리와 속도를 2배로",
+  "source": "growth",
+  "cards": [
+    {
+      "type": "cover",
+      "eyebrow": "🔥 학습 최적화",
+      "title": "GPT-3 학습 1년 걸릴 일을\n40일로 줄인\n단순한 트릭",
+      "highlight": ["혼합 정밀도"],
+      "subtitle": "코드 한 줄로 GPU 메모리 절반, 속도 2배"
+    },
+    {
+      "type": "body",
+      "heading": "충격적인 숫자: 1년→40일",
+      "body": "GPT-3 175B를 FP32로 학습하면 **1년 이상** 걸린다. FP16 혼합 정밀도를 쓰면 **40일**. 차이는 GPU가 FP16에서 **최대 8배 더 많은 연산**을 처리하기 때문이다. 메모리도 절반이라 더 큰 배치 사이즈도 가능하다. 이 차이가 9배 속도 차이를 만든다."
+    },
+    {
+      "type": "visual",
+      "heading": "정밀도 포맷 비교",
+      "visual": {
+        "kind": "arch",
+        "items": [
+          {"title": "FP32", "note": "1+8+23비트\n범위 넓음·정밀 높음\n메모리 2배"},
+          {"title": "FP16", "note": "1+5+10비트\n범위 좁음·정밀 중간\n메모리 절반"},
+          {"title": "BF16", "note": "1+8+7비트\n범위 FP32 동일\n정밀 낮음"}
+        ]
+      },
+      "caption": "같은 16비트지만 FP16은 지수 5비트(범위 제한), BF16은 지수 8비트(FP32와 동일 범위). 범위가 중요한 학습에서는 BF16이 유리하다."
+    },
+    {
+      "type": "visual",
+      "heading": "정밀도별 GPU 연산 속도",
+      "visual": {
+        "kind": "bars",
+        "items": [
+          {"label": "FP32", "value": 312, "detail": "19.5 TFLOPS"},
+          {"label": "TF32", "value": 156, "detail": "39 TFLOPS"},
+          {"label": "FP16", "value": 78, "detail": "78 TFLOPS"},
+          {"label": "BF16", "value": 78, "detail": "78 TFLOPS"},
+          {"label": "INT8", "value": 39, "detail": "156 TFLOPS"}
+        ],
+        "unit": "ms/step"
+      },
+      "caption": "A100 기준. FP16/BF16은 FP32 대비 1/4 수준 시간으로 같은 작업을 끝낸다. 텐서 코어 가속까지 받으면 차이는 더 벌어진다."
+    },
+    {
+      "type": "body",
+      "heading": "모든 걸 FP16으로? 천만에",
+      "body": "FP16의 지수는 5비트 — 최대값 65,504까지다. 그라이언트가 이 범위를 넘으면 오버플로(Inf)로 폭발한다. 반대로 너무 작은 값은 0이 된다(언더플로). 해결법: **혼합**한다. 행렬곱은 FP16, 손실 계산·레이어 노름은 FP32. PyTorch AMP가 알아서 분배한다."
+    },
+    {
+      "type": "visual",
+      "heading": "AMP의 자동 판단 로직",
+      "visual": {
+        "kind": "flow",
+        "steps": [
+          {"title": "연산 분류", "note": "FP16 안전? 위험?"},
+          {"title": "FP16 실행", "note": "Conv, Linear, Matmul"},
+          {"title": "FP32 유지", "note": "Softmax, LayerNorm, Loss"},
+          {"title": "GradScaler", "note": "FP16 언더플로 방지"}
+        ]
+      },
+      "caption": "AMP가 각 연산에 적합한 정밀도를 자동 할당. `torch.amp.autocast()` 한 줄이면 된다. GradScaler가 FP16 언더플로도 차단."
+    },
+    {
+      "type": "visual",
+      "heading": "BF16이 FP16보다 나은 이유",
+      "visual": {
+        "kind": "compare",
+        "left": {
+          "title": "FP16 (구세대)",
+          "items": [
+            "지수 5비트 → 범위 좁음",
+            "가수 10비트 → 정밀 높음",
+            "손실 스케일링 필수",
+            "오버플로 위험",
+            "V100 시대 표준"
+          ]
+        },
+        "right": {
+          "title": "BF16 (현대 표준)",
+          "items": [
+            "지수 8비트 → FP32와 동일",
+            "가수 7비트 → 정밀 낮음",
+            "손실 스케일링 불필요",
+            "오버플로 없음",
+            "A100 이후 표준"
+          ]
+        }
+      },
+      "caption": "BF16은 FP32와 동일한 지수 범위. 손실 스케일링이 필요 없어 구현이 간단하다. DeepSeek-V3·Llama-3 등 최신 LLM은 모두 BF16으로 학습한다."
+    },
+    {
+      "type": "visual",
+      "heading": "정밀도 포맷 스펙트럼",
+      "visual": {
+        "kind": "table",
+        "headers": ["포맷", "비트", "지수", "가수", "범위"],
+        "rows": [
+          ["FP32", "32", "8", "23", "±3.4×10³⁸"],
+          ["TF32", "19", "8", "10", "±3.4×10³⁸"],
+          ["BF16", "16", "8", "7", "±3.4×10³⁸"],
+          ["FP16", "16", "5", "10", "±65,504"],
+          ["FP8(E4M3)", "8", "4", "3", "±448"]
+        ]
+      },
+      "caption": "포맷마다 범위와 정밀도의 트레이드오프가 다르다. H100부터는 FP8(E4M3·E5M2)도 지원. NVIDIA Transformer Engine이 자동 조합한다."
+    },
+    {
+      "type": "body",
+      "heading": "텐서 코어를 100% 쓰는 법",
+      "body": "혼합 정밀도의 진짜 가속은 **텐서 코어**에서 나온다. FP16 행렬곱을 FP32 누산으로 한 번에 처리하는 전용 하드웨어다. 조건: 행렬 차원(M·N·K)이 8의 배수여야 한다. 배치 사이즈를 8·16·32·64로 맞추고, Linear 입출력 차원도 8의 배수로 설정하자."
+    },
+    {
+      "type": "insight",
+      "kicker": "바로 써먹는 체크리스트",
+      "kicker_label": "실전 요약",
+      "bullets": [
+        "PyTorch: `torch.amp.autocast()` + `GradScaler`로 FP16 적용",
+        "A100/H100은 BF16이 기본. FP32는 GPU 성능 50%만 씀",
+        "BF16에선 GradScaler 생략 가능 — 손실 스케일링 불필요",
+        "마스터 웨이트는 반드시 FP32 유지 — 누적 오차 방지",
+        "H100+라면 Transformer Engine으로 FP8 학습도 가능"
+      ],
+      "cta": "💾 저장하고 내일 학습 코드에 적용해보세요"
+    }
+  ],
+  "caption": "GPT-3를 FP32로 학습하면 1년, 혼합 정밀도면 40일. 이 차이가 바로 FP16/BF16의 힘이다. AMP 한 줄이면 모든 연산이 자동으로 최적 정밀도로 실행된다. A100·H100 시대엔 BF16이 표준 — FP32로 돌리면 GPU 성능을 절반만 쓰는 셈이다.\n내일 파이토치 코드에 `torch.amp.autocast()` 한 줄 추가해보자. 다음 편은 그래디언트 누적과 체크포인팅 — 같은 GPU로 더 큰 모델을 학습하는 법이다.",
+  "hashtags": [
+    "#인공지능", "#AI", "#머신러닝", "#딥러닝", "#LLM",
+    "#혼합정밀도", "#MixedPrecision", "#FP16", "#BF16", "#FP8",
+    "#PyTorch", "#AMP", "#GPUMemory", "#AI개발자", "#AI공부",
+    "#GPT3", "#TensorCore", "#GradScaler", "#H100", "#A100",
+    "#LLM학습", "#학습최적화", "#딥러닝팁", "#개발자팁"
+  ]
+}
