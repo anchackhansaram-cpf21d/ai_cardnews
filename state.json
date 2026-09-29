@@ -15,9 +15,10 @@
     "013-rlvr",
     "014-synthetic-data",
     "015-embedding",
-    "050-activation-functions"
+    "050-activation-functions",
+    "051-overfitting-generalization"
   ],
-  "last_run": "2026-09-28T12:50:51+09:00",
+  "last_run": "2026-09-29T11:20:16+09:00",
   "log": [
     {
       "slug": "004-rag-retrieval",
@@ -90,6 +91,12 @@
       "posted_at": "2026-09-28T12:50:51+09:00",
       "media_id": "18103978499210316",
       "permalink": "https://www.instagram.com/p/Dd0Qk6EjFsp/"
+    },
+    {
+      "slug": "051-overfitting-generalization",
+      "posted_at": "2026-09-29T11:20:16+09:00",
+      "media_id": "18129159391808827",
+      "permalink": "https://www.instagram.com/p/Dd2rAKAGLEK/"
     }
   ]
 }
