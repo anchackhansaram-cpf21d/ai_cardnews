@@ -69,6 +69,7 @@ python scripts/md.py 001-attention
 | 20 | 2026-09-27 | 📝 049-batch-inference-continuous-batching 생성 (배치 추론과 연속 배칭) | — |
 | 21 | 2026-09-28 | 📝 050-activation-functions 생성 (활성화 함수 — ReLU가 이긴 이유) | — |
 | 22 | 2026-09-29 | 📝 051-overfitting-generalization 생성 (과적합과 일반화) | — |
+| 23 | 2026-09-30 | 📝 052-mixed-precision 생성 (혼합 정밀도 — FP16/BF16) | — |
 | ... | ... | ... | ... |
 | 100 | 2026-12-19 | 🏁 1000명 달성 | 0/1000 |
 
