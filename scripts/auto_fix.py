@@ -205,7 +205,7 @@ def llm_fix_card(card: dict, issues: list, timeout=120):
 
 
 def llm_pass(data, issues, max_cards=3) -> tuple[list, list]:
-    """지적이 있는 카드만 LLM으로 고친다.
+    """리뷰어가 지적한 카드를 LLM으로 고친다.
 
     적용 후 '그 카드의 위반이 실제로 줄었는지'를 결정론적으로 확인한다.
     줄지 않았으면 되돌린다 — 안 고쳐진 카드를 그대로 두면 발행까지 흘러간다.
@@ -216,6 +216,9 @@ def llm_pass(data, issues, max_cards=3) -> tuple[list, list]:
         return {x.get("detail") for x in R.evaluate(data)
                 if x.get("severity") == "high" and x.get("card") == no}
 
+    def all_high():
+        return {x.get("detail") for x in R.evaluate(data) if x.get("severity") == "high"}
+
     by_card: dict[int, list] = {}
     for i in issues:
         c = i.get("card")
@@ -225,7 +228,7 @@ def llm_pass(data, issues, max_cards=3) -> tuple[list, list]:
     for card_no, card_issues in list(by_card.items())[:max_cards]:
         idx = card_no - 1
         original = copy.deepcopy(data["cards"][idx])
-        before = card_high(card_no)
+        before_card, before_all = card_high(card_no), all_high()
 
         new_card, err = llm_fix_card(original, card_issues)
         if err or not isinstance(new_card, dict):
@@ -234,14 +237,69 @@ def llm_pass(data, issues, max_cards=3) -> tuple[list, list]:
 
         new_card.setdefault("type", original.get("type"))
         data["cards"][idx] = new_card
-        after = card_high(card_no)
+        after_card, after_all = card_high(card_no), all_high()
 
-        if after and len(after) >= len(before):
+        new_violation = bool(after_all - before_all)
+        unresolved = bool(before_card and after_card and len(after_card) >= len(before_card))
+        if new_violation or unresolved:
             data["cards"][idx] = original
-            notes.append(f"{card_no}번 LLM 수정이 결함을 못 고쳐 되돌림")
+            why = "새 위반을 만들어" if new_violation else "결함을 못 고쳐"
+            notes.append(f"{card_no}번 LLM 수정이 {why} 되돌림")
         else:
             applied.append(f"{card_no}번 카드 LLM 수정 적용 "
-                           f"(위반 {len(before)}→{len(after)})")
+                           f"(위반 {len(before_card)}→{len(after_card)})")
+    return applied, notes
+
+
+# ── 리뷰어(진보/보수)의 리뷰를 수정에 반영 ───────────────────
+
+def run_reviewer(slug: str):
+    """content_reviewer 를 돌려 진보/보수 리뷰 결과를 가져온다.
+
+    반환: (llm_issues, patches, summaries)
+      llm_issues — 리뷰어가 지적한 것 (source=progressive|conservative)
+      patches    — 진보 리뷰어가 제안한 카드 패치
+    """
+    try:
+        import content_reviewer as CR
+    except Exception as e:                                      # noqa: BLE001
+        return [], [], {"error": f"리뷰어 로드 실패: {e}"}
+    try:
+        res = CR.review(slug, fix=False, roles=["progressive", "conservative"])
+    except Exception as e:                                      # noqa: BLE001
+        return [], [], {"error": f"리뷰 실행 실패: {type(e).__name__}: {e}"}
+    llm_issues = [i for i in (res.get("issues") or []) if i.get("source")]
+    patches = res.get("patches") or []
+    return llm_issues, patches, res.get("summaries") or {}
+
+
+def apply_reviewer_patches(data, patches) -> tuple[list, list]:
+    """진보 리뷰어가 제안한 패치를 원고에 적용한다.
+
+    가드: 적용 후 **새로운** high 위반이 생기면 되돌린다.
+    (리뷰 패치는 개선 제안이라 기존 위반을 고치지 않을 수도 있다 —
+     '위반이 줄었는가'로 판정하면 정당한 개선까지 되돌리게 된다)
+    """
+    applied, notes = [], []
+    for p in patches or []:
+        card_no = p.get("card")
+        setter = p.get("set") or {}
+        if not isinstance(card_no, int) or not isinstance(setter, dict) or not setter:
+            continue
+        idx = card_no - 1
+        if not (0 <= idx < len(data.get("cards", []))):
+            continue
+        before = {x.get("detail") for x in R.evaluate(data) if x.get("severity") == "high"}
+        original = copy.deepcopy(data["cards"][idx])
+        for k, v in setter.items():
+            data["cards"][idx][k] = v
+        after = {x.get("detail") for x in R.evaluate(data) if x.get("severity") == "high"}
+        new_violations = after - before
+        if new_violations:
+            data["cards"][idx] = original
+            notes.append(f"{card_no}번 리뷰 패치가 새 위반을 만들어 되돌림")
+        else:
+            applied.append(f"{card_no}번 리뷰 패치 적용 ({', '.join(setter.keys())})")
     return applied, notes
 
 
@@ -254,42 +312,77 @@ def run(slug: str, rounds=2, use_llm=True, verbose=True):
     data = json.loads(path.read_text(encoding="utf-8"))
 
     history = []
-    for rnd in range(1, rounds + 1):
-        issues = R.evaluate(data)
-        high = [i for i in issues if i.get("severity") == "high"]
+    llm_issues, reviewer_patches, summaries = [], [], {}
+
+    # ── 1) 리뷰 — 진보/보수 리뷰어 ──────────────────────────
+    if use_llm:
         if verbose:
-            print(f"— 라운드 {rnd}: high 위반 {len(high)}건")
+            print("── 1) 리뷰 (진보/보수 2리뷰어) ──")
+        llm_issues, reviewer_patches, summaries = run_reviewer(slug)
+        for k, v in summaries.items():
+            if v:
+                print(f"    [{k}] {v}")
+        if verbose:
+            print(f"    → 지적 {len(llm_issues)}건 · 카드 패치 {len(reviewer_patches)}건")
+
+    # ── 2) 리뷰 반영 — 진보 리뷰어의 카드 패치 적용 ─────────
+    if reviewer_patches:
+        if verbose:
+            print("── 2) 리뷰 반영 (제안 패치 적용) ──")
+        ap, nt = apply_reviewer_patches(data, reviewer_patches)
+        for a in ap:
+            print(f"    ✏️  {a}")
+        for n in nt:
+            print(f"    ⚠️  {n}")
+        history.append({"round": 0, "reviewer_patches": ap, "notes": nt})
+
+    # ── 3) 결정론 수정 + 룰 위반 해소 ───────────────────────
+    for rnd in range(1, rounds + 1):
+        high = [i for i in R.evaluate(data) if i.get("severity") == "high"]
+        if verbose:
+            print(f"── 3) 라운드 {rnd}: high 위반 {len(high)}건 ──")
         if not high:
             break
 
         applied = deterministic_pass(data)
-        if applied and verbose:
-            for a in applied:
-                print(f"    ✏️  {a}")
+        for a in applied:
+            print(f"    ✏️  {a}")
 
         remaining = [i for i in R.evaluate(data) if i.get("severity") == "high"]
         llm_applied, notes = [], []
         if remaining and use_llm:
-            # 오판은 수정 대상에서 제외
             real = [i for i in remaining if not is_false_positive(i)]
-            skipped = [i for i in remaining if is_false_positive(i)]
-            for s in skipped:
+            for s in [i for i in remaining if is_false_positive(i)]:
                 if verbose:
                     print(f"    🚫 오판 제외: {s.get('detail','')[:70]}")
             if real:
                 llm_applied, notes = llm_pass(data, real)
-                if verbose:
-                    for a in llm_applied:
-                        print(f"    🤖 {a}")
-                    for n in notes:
-                        print(f"    ⚠️  {n}")
+                for a in llm_applied:
+                    print(f"    🤖 {a}")
+                for n in notes:
+                    print(f"    ⚠️  {n}")
 
         history.append({"round": rnd, "deterministic": applied,
                         "llm": llm_applied, "notes": notes})
         if not applied and not llm_applied:
             if verbose:
-                print("    (더 고칠 것이 없음 — 루프 종료)")
+                print("    (더 고칠 것이 없음)")
             break
+
+    # ── 4) 리뷰어 지적 카드 수정 (룰 위반이 없어도 반영) ────
+    if use_llm and llm_issues:
+        real = [i for i in llm_issues if not is_false_positive(i)]
+        if verbose:
+            print(f"── 4) 리뷰 지적 반영 ({len(real)}건) ──")
+        ap, nt = llm_pass(data, real)
+        for a in ap:
+            print(f"    🤖 {a}")
+        for n in nt:
+            print(f"    ⚠️  {n}")
+        for s in [i for i in llm_issues if is_false_positive(i)]:
+            if verbose:
+                print(f"    🚫 오판 제외: {s.get('detail','')[:70]}")
+        history.append({"round": "review-fix", "llm": ap, "notes": nt})
 
     final = R.evaluate(data)
     high_left = [i for i in final if i.get("severity") == "high"]

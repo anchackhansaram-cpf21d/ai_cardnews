@@ -87,32 +87,23 @@ jobs:
         run: |
           cd scripts
           set +e
-          echo "── 1) 리뷰 (진보/보수 2리뷰어 + 룰) ──"
-          python content_reviewer.py --slug "${{ steps.pick.outputs.slug }}" | tee /tmp/review.txt
-          RC=${PIPESTATUS[0]}
-
-          echo "── 2) 리뷰 지적 반영 자동 수정 ──"
+          # auto_fix 가 리뷰(진보/보수) → 수정 → 재검증을 한 번에 수행한다.
           python auto_fix.py --slug "${{ steps.pick.outputs.slug }}" --rounds 3 | tee /tmp/fix.txt
           FC=${PIPESTATUS[0]}
 
           {
-            echo "## 🧐 검수 → 수정 — ${{ steps.pick.outputs.slug }}"
-            echo "### 1. 리뷰 (코드 $RC)"
-            echo '```'
-            cat /tmp/review.txt
-            echo '```'
-            echo "### 2. 자동 수정"
+            echo "## 🧐 리뷰 → 수정 — ${{ steps.pick.outputs.slug }}"
             echo '```'
             cat /tmp/fix.txt
             echo '```'
           } >> "$GITHUB_STEP_SUMMARY"
 
-          # 차단하지 않는다. 수정이 끝나면 발행한다.
+          # 차단하지 않는다. 리뷰를 반영해 수정이 끝나면 발행한다.
           if [ "$FC" != "0" ]; then
-            echo "::error::자동 수정으로도 해결 못 한 high 위반이 남아 보류합니다."
+            echo "::error::리뷰 반영으로도 해결 못 한 high 위반이 남아 보류합니다."
             exit 1
           fi
-          echo "수정 완료 — 발행을 진행합니다. (리뷰 코드 $RC)"
+          echo "리뷰 반영 완료 — 발행을 진행합니다."
 
       - name: 수정된 원고 재검증
         run: cd scripts && python validate.py "${{ steps.pick.outputs.slug }}"
