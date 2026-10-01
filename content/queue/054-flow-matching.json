@@ -1,0 +1,104 @@
+{
+  "series_no": 54,
+  "topic": "플로우 매칭(Flow Matching) — 확산의 다음 세대",
+  "source": "growth",
+  "cards": [
+    {
+      "type": "cover",
+      "eyebrow": "⚡ 생성모델 시장 지각변동",
+      "title": "SD3·Flux가\n확산을 버렸다\n끝나간 것이 분명하다",
+      "highlight": ["확산을 버렸다"],
+      "subtitle": "매출 1위 모델들의 선택, 플로우 매칭의 모든 것"
+    },
+    {
+      "type": "visual",
+      "heading": "샘플링 속도 비교 — 플로우 매칭의 압승",
+      "visual": {
+        "kind": "vbar",
+        "unit": "초",
+        "items": [
+          {"label": "SDXL","value": 7.5,"detail":"확산"},
+          {"label": "SD3","value": 2.8,"detail":"플로우"},
+          {"label": "Flux","value": 1.5,"detail":"플로우"},
+          {"label": "SD3.5","value": 2.2,"detail":"플로우"}
+        ]
+      },
+      "caption": "같은 GPU(RTX 4090) 기준. SD3는 SDXL 대비 2.7배, Flux는 5배 빠르다."
+    },
+    {
+      "type": "body",
+      "heading": "비유: 안개 속 길 찾기 vs 지도 따라 걷기",
+      "body": "확산 모델은 안개 속에서 길을 찾는 것과 같다. 과거로 돌아가는 확률을 하나하나 계산해야 한다(수백 단계).\n\n플로우 매칭은 출발지와 목적지가 찍힌 지도를 받은 것과 같다. 이 방향으로 가면 된다는 속도 벡터 하나면 충분하다(수 단계).\n\nSD3는 28단계면 고품질 이미지를 생성하고, Flux는 4단계로 실용적인 결과를 낸다."
+    },
+    {
+      "type": "visual",
+      "heading": "파라미터 크기별 주요 모델 현황",
+      "visual": {
+        "kind": "bars",
+        "items": [
+          {"label": "SD3","value": 8,"detail":"8B·플로우"},
+          {"label": "Flux","value": 12,"detail":"12B·플로우"},
+          {"label": "Play. v3","value": 8,"detail":"8B·플로우"},
+          {"label": "DALL-E 3","value": 10,"detail":"확산"},
+          {"label": "Midjourney","value": 8,"detail":"확산"},
+          {"label": "Imagen 4","value": 10,"detail":"플로우"}
+        ]
+      },
+      "caption": "2025~2026년 출시된 주요 이미지 생성 모델 중 60% 이상이 플로우 매칭을 채택했다."
+    },
+    {
+      "type": "body",
+      "heading": "렉티파이드 플로우 — 1단계 생성의 비밀",
+      "body": "OpenAI가 제안한 렉티파이드 플로우(Rectified Flow)는 출발과 도착을 직선으로 잇는 속도장(velocity field)을 학습한다.\n\n직선 경로는 단순해 보이지만, 고차원 공간에서 서로 다른 궤적이 교차하지 않는 비교차성(non-crossing)이 자동 보장된다. 덕분에 ODE solver가 적은 스텝으로도 정확한 적분을 한다.\n\n결과적으로 1~2단계만으로 기존 확산의 50단계급 품질을 낸다."
+    },
+    {
+      "type": "visual",
+      "heading": "단계별 FID 비교",
+      "visual": {
+        "kind": "line",
+        "xlabel": "샘플링 단계",
+        "unit": "FID 낮을수록 좋음",
+        "ticks": [[1,"1"],[2,"2"],[5,"5"],[10,"10"],[20,"20"]],
+        "series": [
+          {"name":"확산","points":[[1,75],[2,52],[5,22],[10,13],[20,8.5]]},
+          {"name":"Rectified Flow","points":[[1,27],[2,16],[5,10],[10,8],[20,7.8]]}
+        ]
+      },
+      "caption": "1단계 RF(FID 27)가 확산 5단계(FID 22)에 근접. 2단계면 확산 10단계를 이긴다."
+    },
+    {
+      "type": "body",
+      "heading": "그래도 확산이 필요한 경우",
+      "body": "플로우 매칭이 완벽한 건 아니다. 아직 확산이 유리한 분야가 있다.\n\n① 텍스트 생성: AR 모델은 여전히 next-token prediction이 지배적\n② 4K 이상 초고해상도: 확산의 점진적 생성 방식이 유리\n③ 생태계: 플로우 매칭의 커뮤니티 도구가 확산보다 작음\n\n하지만 이미지 생성의 주류는 이미 플로우 매칭으로 넘어왔다."
+    },
+    {
+      "type": "visual",
+      "heading": "확산→플로우 4년의 역사",
+      "visual": {
+        "kind": "bars",
+        "items": [
+          {"label":"2022","value":1,"detail":"Flow Matching 논문"},
+          {"label":"2023","value":2,"detail":"Rectified Flow"},
+          {"label":"2024","value":5,"detail":"SD3·Flux 채택"},
+          {"label":"2025","value":10,"detail":"CurveFlow·FlowInOne"},
+          {"label":"2026","value":14,"detail":"업계 표준"}
+        ]
+      },
+      "caption": "고작 4년 만에 이론→산업 표준으로. 생성모델 역사상 가장 빠른 전환이다."
+    },
+    {
+      "type": "insight",
+      "kicker": "💡 실무자를 위한 요약",
+      "kicker_label": "TAKEAWAY",
+      "bullets": [
+        "새 이미지 생성 모델 고를 때: 플로우 매칭 기반인지 먼저 확인",
+        "API 비용: 확산 모델 대비 3~5배 저렴 (샘플링 단계 차이)",
+        "온디바이스: 4단계 생성으로 모바일 추론이 현실화됨",
+        "학습 난이도: MSE 손실 하나면 되니 파인튜닝도 쉽다"
+      ],
+      "cta": "💾 저장하세요 — 생성모델 패러다임 전환, 지금이 기회입니다"
+    }
+  ],
+  "caption": "2024년 SD3를 시작으로, Flux, Imagen 4, Playground v3까지 — 주요 이미지 생성 모델이 확산에서 플로우 매칭(Flow Matching)으로 대거 이동했다. 이유는 단순하다. 확산 대비 5배 빠르고, 1~4단계면 실용적인 품질이 나오며, 손실 함수는 MSE 하나다.\n\n이 전환은 단순한 학술적 트렌드가 아니다. GPU 비용이 1/5로 줄었고, 모바일 실시간 생성이 가능해졌으며, API 가격도 급락했다. 만약 새 이미지 생성 파이프라인을 구축한다면, 확산 모델 대신 플로우 매칭을 먼저 고려해야 한다.\n\n렉티파이드 플로우(Rectified Flow), OT-CFM, CurveFlow — 이 이름들이 낯설다면 이 카드뉴스를 저장하세요. 생성모델 교과서가 바뀌고 있습니다.",
+  "hashtags": ["#AI", "#인공지능", "#생성형AI", "#생성모델", "#이미지생성", "#플로우매칭", "#FlowMatching", "#StableDiffusion3", "#Flux", "#RectifiedFlow", "#SD3", "#AI트렌드", "#기술트렌드", "#머신러닝", "#딥러닝", "#생성AI비교", "#확산모델", "#DiffusionModel", "#GPU최적화", "#AItool"]
+}
