@@ -146,7 +146,8 @@
                 20,
                 8.5
               ]
-            ]
+            ],
+            "label": "확산"
           },
           {
             "name": "Rectified Flow",
@@ -171,7 +172,8 @@
                 20,
                 7.8
               ]
-            ]
+            ],
+            "label": "Rectified Flow"
           }
         ]
       },
