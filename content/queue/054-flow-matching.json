@@ -7,7 +7,9 @@
       "type": "cover",
       "eyebrow": "⚡ 생성모델 시장 지각변동",
       "title": "SD3·Flux가\n확산을 버렸다\n끝나간 것이 분명하다",
-      "highlight": ["확산을 버렸다"],
+      "highlight": [
+        "확산을 버렸다"
+      ],
       "subtitle": "매출 1위 모델들의 선택, 플로우 매칭의 모든 것"
     },
     {
@@ -17,10 +19,26 @@
         "kind": "vbar",
         "unit": "초",
         "items": [
-          {"label": "SDXL","value": 7.5,"detail":"확산"},
-          {"label": "SD3","value": 2.8,"detail":"플로우"},
-          {"label": "Flux","value": 1.5,"detail":"플로우"},
-          {"label": "SD3.5","value": 2.2,"detail":"플로우"}
+          {
+            "label": "SDXL",
+            "value": 7.5,
+            "detail": "확산"
+          },
+          {
+            "label": "SD3",
+            "value": 2.8,
+            "detail": "플로우"
+          },
+          {
+            "label": "Flux",
+            "value": 1.5,
+            "detail": "플로우"
+          },
+          {
+            "label": "SD3.5",
+            "value": 2.2,
+            "detail": "플로우"
+          }
         ]
       },
       "caption": "같은 GPU(RTX 4090) 기준. SD3는 SDXL 대비 2.7배, Flux는 5배 빠르다."
@@ -36,12 +54,36 @@
       "visual": {
         "kind": "bars",
         "items": [
-          {"label": "SD3","value": 8,"detail":"8B·플로우"},
-          {"label": "Flux","value": 12,"detail":"12B·플로우"},
-          {"label": "Play. v3","value": 8,"detail":"8B·플로우"},
-          {"label": "DALL-E 3","value": 10,"detail":"확산"},
-          {"label": "Midjourney","value": 8,"detail":"확산"},
-          {"label": "Imagen 4","value": 10,"detail":"플로우"}
+          {
+            "label": "SD3",
+            "value": 8,
+            "detail": "8B·플로우"
+          },
+          {
+            "label": "Flux",
+            "value": 12,
+            "detail": "12B·플로우"
+          },
+          {
+            "label": "Play. v3",
+            "value": 8,
+            "detail": "8B·플로우"
+          },
+          {
+            "label": "DALL-E 3",
+            "value": 10,
+            "detail": "확산"
+          },
+          {
+            "label": "Midjourney",
+            "value": 8,
+            "detail": "확산"
+          },
+          {
+            "label": "Imagen 4",
+            "value": 10,
+            "detail": "플로우"
+          }
         ]
       },
       "caption": "2025~2026년 출시된 주요 이미지 생성 모델 중 60% 이상이 플로우 매칭을 채택했다."
@@ -58,10 +100,79 @@
         "kind": "line",
         "xlabel": "샘플링 단계",
         "unit": "FID 낮을수록 좋음",
-        "ticks": [[1,"1"],[2,"2"],[5,"5"],[10,"10"],[20,"20"]],
+        "ticks": [
+          [
+            1,
+            "1"
+          ],
+          [
+            2,
+            "2"
+          ],
+          [
+            5,
+            "5"
+          ],
+          [
+            10,
+            "10"
+          ],
+          [
+            20,
+            "20"
+          ]
+        ],
         "series": [
-          {"name":"확산","points":[[1,75],[2,52],[5,22],[10,13],[20,8.5]]},
-          {"name":"Rectified Flow","points":[[1,27],[2,16],[5,10],[10,8],[20,7.8]]}
+          {
+            "name": "확산",
+            "points": [
+              [
+                1,
+                75
+              ],
+              [
+                2,
+                52
+              ],
+              [
+                5,
+                22
+              ],
+              [
+                10,
+                13
+              ],
+              [
+                20,
+                8.5
+              ]
+            ]
+          },
+          {
+            "name": "Rectified Flow",
+            "points": [
+              [
+                1,
+                27
+              ],
+              [
+                2,
+                16
+              ],
+              [
+                5,
+                10
+              ],
+              [
+                10,
+                8
+              ],
+              [
+                20,
+                7.8
+              ]
+            ]
+          }
         ]
       },
       "caption": "1단계 RF(FID 27)가 확산 5단계(FID 22)에 근접. 2단계면 확산 10단계를 이긴다."
@@ -77,11 +188,31 @@
       "visual": {
         "kind": "bars",
         "items": [
-          {"label":"2022","value":1,"detail":"Flow Matching 논문"},
-          {"label":"2023","value":2,"detail":"Rectified Flow"},
-          {"label":"2024","value":5,"detail":"SD3·Flux 채택"},
-          {"label":"2025","value":10,"detail":"CurveFlow·FlowInOne"},
-          {"label":"2026","value":14,"detail":"업계 표준"}
+          {
+            "label": "2022",
+            "value": 1,
+            "detail": "Flow Matching 논문"
+          },
+          {
+            "label": "2023",
+            "value": 2,
+            "detail": "Rectified Flow"
+          },
+          {
+            "label": "2024",
+            "value": 5,
+            "detail": "SD3·Flux 채택"
+          },
+          {
+            "label": "2025",
+            "value": 10,
+            "detail": "CurveFlow·FlowInOne"
+          },
+          {
+            "label": "2026",
+            "value": 14,
+            "detail": "업계 표준"
+          }
         ]
       },
       "caption": "고작 4년 만에 이론→산업 표준으로. 생성모델 역사상 가장 빠른 전환이다."
@@ -100,5 +231,27 @@
     }
   ],
   "caption": "2024년 SD3를 시작으로, Flux, Imagen 4, Playground v3까지 — 주요 이미지 생성 모델이 확산에서 플로우 매칭(Flow Matching)으로 대거 이동했다. 이유는 단순하다. 확산 대비 5배 빠르고, 1~4단계면 실용적인 품질이 나오며, 손실 함수는 MSE 하나다.\n\n이 전환은 단순한 학술적 트렌드가 아니다. GPU 비용이 1/5로 줄었고, 모바일 실시간 생성이 가능해졌으며, API 가격도 급락했다. 만약 새 이미지 생성 파이프라인을 구축한다면, 확산 모델 대신 플로우 매칭을 먼저 고려해야 한다.\n\n렉티파이드 플로우(Rectified Flow), OT-CFM, CurveFlow — 이 이름들이 낯설다면 이 카드뉴스를 저장하세요. 생성모델 교과서가 바뀌고 있습니다.",
-  "hashtags": ["#AI", "#인공지능", "#생성형AI", "#생성모델", "#이미지생성", "#플로우매칭", "#FlowMatching", "#StableDiffusion3", "#Flux", "#RectifiedFlow", "#SD3", "#AI트렌드", "#기술트렌드", "#머신러닝", "#딥러닝", "#생성AI비교", "#확산모델", "#DiffusionModel", "#GPU최적화", "#AItool"]
+  "hashtags": [
+    "#AI",
+    "#인공지능",
+    "#생성형AI",
+    "#생성모델",
+    "#이미지생성",
+    "#플로우매칭",
+    "#FlowMatching",
+    "#StableDiffusion3",
+    "#Flux",
+    "#RectifiedFlow",
+    "#SD3",
+    "#AI트렌드",
+    "#기술트렌드",
+    "#머신러닝",
+    "#딥러닝",
+    "#생성AI비교",
+    "#확산모델",
+    "#DiffusionModel",
+    "#GPU최적화",
+    "#AItool"
+  ],
+  "handle": "054-flow-matching"
 }
