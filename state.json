@@ -17,9 +17,10 @@
     "015-embedding",
     "050-activation-functions",
     "051-overfitting-generalization",
-    "053-lr-scheduling-warmup"
+    "053-lr-scheduling-warmup",
+    "054-flow-matching"
   ],
-  "last_run": "2026-10-01T11:27:39+09:00",
+  "last_run": "2026-10-02T11:22:15+09:00",
   "log": [
     {
       "slug": "004-rag-retrieval",
@@ -104,6 +105,12 @@
       "posted_at": "2026-10-01T11:27:39+09:00",
       "media_id": "18126186499884124",
       "permalink": "https://www.instagram.com/p/Dd71cMeFLF6/"
+    },
+    {
+      "slug": "054-flow-matching",
+      "posted_at": "2026-10-02T11:22:15+09:00",
+      "media_id": "18100381598331496",
+      "permalink": "https://www.instagram.com/p/Dd-ZnPKGIqb/"
     }
   ]
 }
