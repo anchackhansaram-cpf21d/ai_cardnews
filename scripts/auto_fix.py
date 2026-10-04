@@ -286,17 +286,34 @@ def apply_reviewer_patches(data, patches) -> tuple[list, list]:
         setter = p.get("set") or {}
         if not isinstance(card_no, int) or not isinstance(setter, dict) or not setter:
             continue
+        if card_no < 1:
+            notes.append(f"리뷰 패치 카드번호 무효({card_no}) — 1-based 여야 함, 건너뜀")
+            continue
         idx = card_no - 1
         if not (0 <= idx < len(data.get("cards", []))):
+            notes.append(f"리뷰 패치 카드번호 범위 초과({card_no}) — 건너뜀")
             continue
-        before = {x.get("detail") for x in R.evaluate(data) if x.get("severity") == "high"}
-        original = copy.deepcopy(data["cards"][idx])
+        def _high():
+            return {f"{x.get('rule')}|{x.get('detail')}"
+                    for x in R.evaluate(data) if x.get("severity") == "high"}
+
+        before = _high()
+        original_cards = copy.deepcopy(data["cards"])
         for k, v in setter.items():
             data["cards"][idx][k] = v
-        after = {x.get("detail") for x in R.evaluate(data) if x.get("severity") == "high"}
-        new_violations = after - before
+        new_violations = _high() - before
+
+        # 새 위반이 '숫자 불일치'뿐이면 패치를 버리지 말고 결정론 fixer 로 교정한다.
+        # (진보 리뷰어가 좋은 후킹을 냈는데 차트에 없는 숫자 하나 때문에 통째로
+        #  버려지는 낭비를 막는다 — 예: 커버 90% → 차트 정본 93% 로 치환)
+        if new_violations and all(v.startswith("numeric-consistency|") for v in new_violations):
+            fixed = fix_cover_numbers(data) + fix_gap_values(data)
+            if fixed and not (_high() - before):
+                new_violations = set()
+                notes.append(f"{card_no}번 리뷰 패치 — 숫자를 차트 정본으로 교정: {', '.join(fixed)}")
+
         if new_violations:
-            data["cards"][idx] = original
+            data["cards"] = original_cards
             notes.append(f"{card_no}번 리뷰 패치가 새 위반을 만들어 되돌림")
         else:
             applied.append(f"{card_no}번 리뷰 패치 적용 ({', '.join(setter.keys())})")

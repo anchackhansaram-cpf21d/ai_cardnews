@@ -70,28 +70,51 @@ def rule_check(data):
 
 # ── 2단계: LLM 검수 ────────────────────────────────────────
 
-PROGRESSIVE_PROMPT = """당신은 한국어 AI 교육 카드뉴스의 수석 리뷰어입니다.
-역할: **진보적 리뷰어** — 오류 지적뿐 아니라 "어떻게 하면 더 좋아지는가"를 적극 제안합니다.
+PROGRESSIVE_PROMPT = """당신은 한국어 AI 교육 카드뉴스의 **진보적 리뷰어**입니다.
 
-검수 기준:
-1. 사실 정확성 — AI/ML 개념 설명이 틀렸거나 과장됐는지
+당신의 주 임무는 오류를 찾는 것이 **아닙니다**.
+**이 원고를 지금보다 확실히 더 좋게 만드는 제안을 내는 것**이 임무입니다.
+"문제가 없다"는 판정이나 "고품질 콘텐츠" 같은 총평은 당신의 일이 아닙니다.
+
+## 최우선 — 능동적 개선 제안 (매번 반드시 수행)
+아래 항목을 스스로 찾아 **직접 고쳐서 제안**한다:
+- **커버 후킹** — 3줄 도발·단정형인가? 더 강한 제목을 실제로 써서 제안
+- **비유·문장** — 더 직관적인 비유, 더 짧고 센 문장으로 교체
+- **수치·사례** — 더 강한 실수치, 구체적 모델명·연도·벤치마크 추가
+- **빠진 관점** — 독자가 당연히 궁금해할 반대론·한계·trade-off
+- **시각화 종류** — compare/flow/stat/vbar/line 중 더 맞는 게 있는 카드
+- **구조** — 카드 분할·병합·순서 재배치 (set 으로 표현 불가 → issues 에만)
+
+## 그 외 검수 기준
+1. 사실 정확성 — 개념 설명이 틀렸거나 과장됐는지
 2. 설명 충분성 — 그림만 있고 설명이 빈약하지 않은지
-3. 후킹 — 커버 제목이 3줄 도발·단정형인지
-4. 언어 — 한국어만 사용(일본어/중국어 금지)
-5. 카드 완결성 — type=visual 인데 시각화 페이로드가 비어 있지 않은지
-6. 캡션 — 첫 문장이 후킹인지
-7. 개선 제안 — 더 좋은 비유, 더 강한 수치 예시, 빠진 관점
+3. 언어 — 한국어만 (일본어/중국어 금지)
+4. 카드 완결성 — type=visual 인데 시각화 페이로드가 비어 있지 않은지
+
+## 절대 규칙 (위반 금지)
+- **patches 를 최소 3건 내라.** 완벽한 원고라도 **1건은 반드시** 낸다. **0건 금지.**
+- **summary 에 "고품질", "훌륭", "문제없음", "뛰어난" 같은 무내용 금지.**
+  대신 **가장 큰 남은 개선점 하나**를 구체적으로 쓴다.
+  예) "커버 후킹이 약함 — '90% 압축' 수치를 앞세워야 함"
+- 각 issue 에 **"왜 그게 더 나은가"**를 반드시 포함 (근거 없는 지적 금지).
+- patches 의 set 은 카드에 **실재하는 필드만** (body/title/heading/bullets/lead/visual 등).
+- **card 번호는 1부터 시작한다. 첫 카드(커버) = 1.** 0번은 존재하지 않는다.
+  예) 커버를 고치려면 `{"card": 1, "set": {"title": "..."}}`
+- **숫자를 새로 만들지 마라. 이건 가장 중요한 규칙이다.**
+  커버·본문에 쓰는 모든 수치는 **시각화(차트) 데이터의 값을 정본**으로 삼는다.
+  - 제안하려는 퍼센트가 `visual`/`data` 안에 **없으면 그 제안은 폐기된다** (`numeric-consistency` high 위반 → 가드가 되돌림).
+  - 커버에 퍼센트를 쓰려면 **차트 값 중 하나를 그대로 골라라.** 차트가 [85, 93, 98, 99.5, 100] 이면 90%가 아니라 **93%** 를 쓴다.
+  - 차트에 맞는 숫자가 없으면 **숫자를 빼고** 문장·비유로 후킹을 만들어라. (예: "재학습 없이 몇 분 만에")
+- **verdict=pass 여도 patches 는 낸다** (개선 제안과 오류 판정은 별개다).
+- 개념 자체가 틀렸으면 verdict=block, patches 없이 이유만.
 
 출력 형식(JSON만, 다른 텍스트 금지):
 {
   "verdict": "pass" | "fix" | "block",
-  "summary": "한 줄 총평",
-  "issues": [{"card": <번호>, "type": "<종류>", "severity": "high|medium|low", "detail": "<설명>"}],
+  "summary": "가장 큰 남은 개선점 한 줄",
+  "issues": [{"card": <번호>, "type": "<종류>", "severity": "high|medium|low", "detail": "<설명 + 왜 더 나은가>"}],
   "patches": [{"card": <번호>, "set": {"<필드>": "<새 값>"}}]
 }
-- 문제가 없으면 issues/patches 를 빈 배열로.
-- patches 는 실제로 고칠 수 있는 것만 (문구 교정, 빈 heading 채우기 등).
-- 개념 자체가 틀렸으면 verdict=block, patches 없이 이유만.
 """
 
 CONSERVATIVE_PROMPT = """당신은 한국어 AI 교육 카드뉴스의 **보수적 게이트키퍼 리뷰어**입니다.
@@ -154,7 +177,10 @@ def llm_review(data, role="progressive", timeout=180):
                 ensure_ascii=False)[:14000]},
         ],
         "temperature": 0.1 if role == "conservative" else 0.3,
-        "max_tokens": 3000,
+        # ⚠️ 보수 리뷰어(deepseek-v4-flash)는 reasoning 토큰이 응답을 잠식한다.
+        #    056 실측: completion 2,636 중 reasoning 2,226 → 3,000이면 content가
+        #    비어 JSON 파싱 실패 → 리뷰어가 조용히 생략되는 사고가 났다.
+        "max_tokens": 8000 if role == "conservative" else 4000,
         "response_format": {"type": "json_object"},
     }
     try:
@@ -164,13 +190,19 @@ def llm_review(data, role="progressive", timeout=180):
                                    "Content-Type": "application/json"})
         if r.status_code != 200:
             return None, f"[{role}] {model} HTTP {r.status_code}: {r.text[:160]}"
-        txt = r.json()["choices"][0]["message"]["content"]
+        j = r.json()
+        ch = j["choices"][0]
+        txt = ch["message"].get("content") or ""
+        if not txt.strip():
+            rt = ((j.get("usage") or {}).get("completion_tokens_details") or {}).get("reasoning_tokens")
+            return None, (f"[{role}] 빈 응답 — finish={ch.get('finish_reason')}, "
+                          f"reasoning_tokens={rt} (max_tokens 상향 필요)")
         parsed = _loads_lenient(txt)
         if parsed is None:
             dbg = ROOT / "out" / f"_review_raw_{role}.txt"
             dbg.parent.mkdir(parents=True, exist_ok=True)
             dbg.write_text(txt, encoding="utf-8")
-            return None, f"[{role}] JSON 파싱 실패 (원문: {dbg})"
+            return None, f"[{role}] JSON 파싱 실패 (원문: {dbg}) finish={ch.get('finish_reason')}"
         parsed["_model"] = model
         return parsed, None
     except Exception as e:                                  # noqa: BLE001
