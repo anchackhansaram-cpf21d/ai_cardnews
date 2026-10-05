@@ -20,9 +20,10 @@
     "053-lr-scheduling-warmup",
     "054-flow-matching",
     "055-bert-vs-gpt",
-    "056-pruning-and-sparsity"
+    "056-pruning-and-sparsity",
+    "057-gradient-vanishing-explosion"
   ],
-  "last_run": "2026-10-04T11:23:57+09:00",
+  "last_run": "2026-10-05T11:20:50+09:00",
   "log": [
     {
       "slug": "004-rag-retrieval",
@@ -125,6 +126,12 @@
       "posted_at": "2026-10-04T11:23:57+09:00",
       "media_id": "18105158429112749",
       "permalink": "https://www.instagram.com/p/DeDjY9VFcjy/"
+    },
+    {
+      "slug": "057-gradient-vanishing-explosion",
+      "posted_at": "2026-10-05T11:20:50+09:00",
+      "media_id": "17908865955474974",
+      "permalink": "https://www.instagram.com/p/DeGH1tLjwMM/"
     }
   ]
 }
