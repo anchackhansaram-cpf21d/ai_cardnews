@@ -1,7 +1,85 @@
 {
-  "collected_at": "2026-09-28T01:00:46.038494+00:00",
-  "count": 30,
+  "collected_at": "2026-10-05T01:01:23.560412+00:00",
+  "count": 36,
   "media": [
+    {
+      "id": "18105158429112749",
+      "timestamp": "2026-10-04T02:23:48+0000",
+      "permalink": "https://www.instagram.com/p/DeDjY9VFcjy/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "LLM 추론 비용이 폭등하고 있다. 하루 수천만 원이 추론에 사라진다. 해결책은 생각보다 단순하다: 필요 없는 가중치를 자르는 것. 이것이 가지",
+      "like_count": 2,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18341547226250939",
+      "timestamp": "2026-10-03T02:24:59+0000",
+      "permalink": "https://www.instagram.com/p/DeA-uwHkbg-/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "BERT vs GPT, 10년 대립의 결론은 '둘 다'입니다. GPT는 생성에서 압도적이지만, BERT는 이해와 검색에서 독보적입니다. 2026",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18100381598331496",
+      "timestamp": "2026-10-02T02:22:10+0000",
+      "permalink": "https://www.instagram.com/p/Dd-ZnPKGIqb/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "2024년 SD3를 시작으로, Flux, Imagen 4, Playground v3까지 — 주요 이미지 생성 모델이 확산에서 플로우 매칭(Flo",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18126186499884124",
+      "timestamp": "2026-10-01T02:27:35+0000",
+      "permalink": "https://www.instagram.com/p/Dd71cMeFLF6/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "학습률 스케줄링, 특히 워밍업(warmup)은 모든 트랜스포머 학습의 첫걸음이다. 2025~2026년 이론적 토대가 완성되면서 워밍업이 gene",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18129159391808827",
+      "timestamp": "2026-09-29T02:20:12+0000",
+      "permalink": "https://www.instagram.com/p/Dd2rAKAGLEK/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "2026년 9월, AI 업계를 뒤흔든 한 보고서가 발표됐다. 최신 AI 모델들의 벤치마크 성능과 실제 배포 성능 사이에 최대 37%의 격차가 존",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18103978499210316",
+      "timestamp": "2026-09-28T03:50:47+0000",
+      "permalink": "https://www.instagram.com/p/Dd0Qk6EjFsp/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "활성화 함수(activation function) 하나가 AI의 운명을 결정했다. 2012년 ReLU가 시그모이드를 몰아내면서 딥러닝 혁명이 시",
+      "like_count": 0,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
+      },
+      "metrics_used": ""
+    },
     {
       "id": "18160843570436172",
       "timestamp": "2026-09-27T02:17:42+0000",
@@ -11,7 +89,7 @@
       "like_count": 0,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -24,7 +102,7 @@
       "like_count": 0,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -37,7 +115,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -50,7 +128,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -63,7 +141,7 @@
       "like_count": 0,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -76,7 +154,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -89,7 +167,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -115,7 +193,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -128,7 +206,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -141,7 +219,7 @@
       "like_count": 0,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -154,7 +232,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -167,7 +245,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -180,7 +258,7 @@
       "like_count": 1,
       "comments_count": 1,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -193,7 +271,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -206,7 +284,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -219,7 +297,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -232,7 +310,7 @@
       "like_count": 1,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -245,7 +323,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -258,7 +336,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -284,7 +362,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -297,7 +375,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -310,7 +388,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -323,7 +401,7 @@
       "like_count": 3,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -336,7 +414,7 @@
       "like_count": 2,
       "comments_count": 0,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -349,7 +427,7 @@
       "like_count": 4,
       "comments_count": 4,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -362,7 +440,7 @@
       "like_count": 3,
       "comments_count": 3,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     },
@@ -388,7 +466,7 @@
       "like_count": 2,
       "comments_count": 1,
       "insights": {
-        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"type\":\"OAuthException\",\"code"
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
       },
       "metrics_used": ""
     }
