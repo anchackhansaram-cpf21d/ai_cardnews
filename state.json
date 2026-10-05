@@ -23,7 +23,7 @@
     "056-pruning-and-sparsity",
     "057-gradient-vanishing-explosion"
   ],
-  "last_run": "2026-10-05T11:20:50+09:00",
+  "last_run": "2026-10-05T11:15:00+09:00",
   "log": [
     {
       "slug": "004-rag-retrieval",
@@ -129,8 +129,8 @@
     },
     {
       "slug": "057-gradient-vanishing-explosion",
-      "posted_at": "2026-10-05T11:20:50+09:00",
-      "media_id": "17908865955474974",
+      "posted_at": "2026-10-05T11:15:00+09:00",
+      "media_id": "GHA_CONFIRMED",
       "permalink": "https://www.instagram.com/p/DeGH1tLjwMM/"
     }
   ]
