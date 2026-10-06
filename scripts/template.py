@@ -44,6 +44,8 @@ CSS = """\
 }
 
 body{
+  margin:0;                 /* 기본 8px margin 이 카드를 밀어내 오른쪽/아래가 잘리던 문제 */
+  padding:0;
   background:#050710;
   font-family:"Noto Sans CJK KR","Noto Sans KR",sans-serif;
   -webkit-font-smoothing:antialiased;
@@ -93,17 +95,27 @@ body{
 .topbar,.bottombar{
   position:relative; z-index:2;
   display:flex; align-items:center; justify-content:space-between;
+  gap:24px;
   font-size:23px; letter-spacing:.01em; color:var(--muted);
   flex:0 0 auto;
+  min-width:0; overflow:hidden;
 }
 .topbar{ padding-bottom:30px; border-bottom:1px solid var(--line); }
 .bottombar{ padding-top:26px; border-top:1px solid var(--line); font-size:22px; }
-.series{ display:flex; align-items:center; gap:14px; font-weight:500; }
+.series{ display:flex; align-items:center; gap:14px; font-weight:500; min-width:0; }
 .series .dot{ width:11px; height:11px; border-radius:50%; background:var(--accent); box-shadow:0 0 18px var(--accent); }
-.pager{ font-variant-numeric:tabular-nums; font-weight:500; letter-spacing:.06em; }
+.pager{ font-variant-numeric:tabular-nums; font-weight:500; letter-spacing:.06em; flex:0 0 auto; }
 .pager b{ color:var(--ink); font-weight:700; }
-.handle{ font-weight:500; letter-spacing:.02em; }
-.tag{ color:var(--accent); font-weight:700; letter-spacing:.04em; }
+/* 좌우 하단 텍스트는 절대 카드 밖으로 잘리지 않게 — 넘치면 … 처리 */
+.handle{
+  font-weight:500; letter-spacing:.02em;
+  min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+}
+.tag{
+  color:var(--accent); font-weight:700; letter-spacing:.04em;
+  min-width:0; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;
+  text-align:right;
+}
 
 .stage{ position:relative; z-index:2; flex:1 1 auto; min-height:0; display:flex; overflow:hidden; }
 .stage.center{ align-items:center; }
