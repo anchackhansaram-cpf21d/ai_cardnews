@@ -42,7 +42,10 @@ BUILTIN = [
     {"id": "required-fields", "check": "required_fields", "severity": "high",
      "text": "topic·handle·caption 필수", "source": "builtin"},
     {"id": "card-count", "check": "card_count", "severity": "high",
-     "text": "카드 5~10장", "source": "builtin"},
+     "text": "카드 5~11장 (결론 카드 포함)", "source": "builtin"},
+    {"id": "conclusion-before-insight", "check": "conclusion_before_insight", "severity": "high",
+     "text": "마지막 '실무자 인사이트' 바로 앞에 '결론' 카드(type=conclusion)가 있어야 한다",
+     "source": "builtin"},
     {"id": "cover-3line", "check": "cover_3line", "severity": "medium",
      "text": "커버 제목은 3줄 도발·단정형", "source": "builtin"},
     {"id": "body-length", "check": "body_length", "severity": "high",
@@ -116,6 +119,29 @@ def _cards(d):
 
 def _has_visual(c):
     return bool(c.get("visual") or c.get("data") or c.get("diagram"))
+
+
+def _conclusion_problems(d):
+    """마지막 '실무자 인사이트'(insight) 바로 앞에 '결론'(conclusion) 카드가 있어야 한다.
+
+    사용자 요구: 발행 때마다 인사이트 전에 서머리 성격의 결론 카드를 둔다.
+    """
+    cards = _cards(d)
+    if not cards:
+        return []
+    insight_idx = next((i for i, c in enumerate(cards)
+                        if c.get("type") == "insight"), None)
+    if insight_idx is None:
+        return [{"card": 0, "detail": "insight 카드가 없어 결론 위치를 판정할 수 없습니다"}]
+    if insight_idx == 0:
+        return [{"card": 1, "detail": "insight 카드가 첫 장입니다 — 결론 카드를 앞에 둘 수 없습니다"}]
+    prev = cards[insight_idx - 1]
+    if prev.get("type") != "conclusion":
+        return [{"card": insight_idx,
+                 "detail": (f"인사이트({insight_idx + 1}번) 바로 앞 {insight_idx}번 카드가 "
+                            f"type='{prev.get('type', 'body')}' 입니다 — "
+                            "'결론'(type=conclusion) 카드를 넣어라")}]
+    return []
 
 
 def _render_problem(c):
@@ -249,8 +275,10 @@ CHECKS = {
     "numeric_consistency": lambda d: _numeric_problems(d),
 
     "card_count": lambda d: (
-        [] if 5 <= len(_cards(d)) <= 10
-        else [{"card": 0, "detail": f"카드 {len(_cards(d))}장 (5~10장 필요)"}]),
+        [] if 5 <= len(_cards(d)) <= 11
+        else [{"card": 0, "detail": f"카드 {len(_cards(d))}장 (5~11장 필요)"}]),
+
+    "conclusion_before_insight": lambda d: _conclusion_problems(d),
 
     "cover_3line": lambda d: (
         [] if _cards(d) and _cards(d)[0].get("type") == "cover"

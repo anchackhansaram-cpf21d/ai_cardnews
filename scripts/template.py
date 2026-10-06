@@ -79,6 +79,17 @@ body{
 .card.insight .glow.b{ background:#5B2E6E; opacity:.40; }
 .card.cover{ background:linear-gradient(160deg,#0C1226 0%,#0A0E1F 55%,#0D0A1C 100%); }
 
+/* 결론(서머리) 카드 — 인사이트 바로 앞. 초록 계열로 인사이트와 구분한다 */
+.card.conclusion{ --accent:#39D98A; --accent2:#39D98A; background:#08170F; }
+.card.conclusion .glow.a{ background:#2FBF7C; opacity:.20; }
+.card.conclusion .glow.b{ background:#16543C; opacity:.38; }
+.card.conclusion .badge{ background:#39D98A; color:#04210F; }
+.card.conclusion .bullets li::before{ background:#39D98A; }
+.card.conclusion .sumline{
+  font-size:2.05em; line-height:1.62; color:#E4F5EB; font-weight:500;
+  border-left:4px solid #39D98A; padding-left:1.1em; margin-bottom:.4em;
+}
+
 .topbar,.bottombar{
   position:relative; z-index:2;
   display:flex; align-items:center; justify-content:space-between;
@@ -286,7 +297,7 @@ def parse_md_table(text):
 
 def render_card(card, idx, total, meta):
     kind = card.get("type", "body")
-    klass = {"cover": "cover", "insight": "insight"}.get(kind, "body")
+    klass = {"cover": "cover", "insight": "insight", "conclusion": "conclusion"}.get(kind, "body")
     series = esc(meta.get("series_label", "AI 이론 한 장 정리"))
     no = meta.get("series_no")
     handle = esc(meta.get("handle", ""))
@@ -343,6 +354,17 @@ def render_card(card, idx, total, meta):
             body += paras(card.get("body", ""))
         align = "center"
 
+    elif kind == "conclusion":
+        # 결론(서머리) — 인사이트 바로 앞에서 글 전체를 한 장으로 접어준다
+        body = f'<div class="badge">{esc(card.get("label", "결론"))}</div>'
+        body += f'<h2 class="heading">{esc(card.get("heading", "한 장 정리"))}</h2>'
+        if card.get("body"):
+            body += f'<p class="sumline">{esc(card["body"])}</p>'
+        if card.get("bullets"):
+            body += '<ul class="bullets">' + "".join(
+                f"<li>{esc(b)}</li>" for b in card["bullets"]) + "</ul>"
+        align = "top"
+
     elif kind == "insight":
         body = f'<div class="badge">{esc(card.get("label","실무자 인사이트"))}</div>'
         body += f'<h2 class="heading">{esc(card.get("heading",""))}</h2>'
@@ -393,6 +415,9 @@ def has_content(card):
         return bool(card.get("visual") or card.get("heading","").strip() or card.get("lead","").strip())
     if t == "insight":
         return bool(card.get("body","").strip() or card.get("bullets") or card.get("cta","").strip())
+    if t == "conclusion":
+        return bool(card.get("body","").strip() or card.get("bullets")
+                    or card.get("heading","").strip())
     return bool(card.get("body","").strip() or card.get("heading","").strip())
 
 

@@ -9,7 +9,7 @@ import postqueue as q
 MAX_CAPTION = 2200      # 인스타 캡션 상한
 MAX_HASHTAGS = 30       # 인스타 해시태그 상한
 MIN_CARDS = 5
-MAX_CARDS = 10
+MAX_CARDS = 11          # 결론 카드 포함 (인사이트 바로 앞)
 
 # heading 없어도 되는 카드 타입
 NO_HEADING_TYPES = ("insight", "cta", "outro", "visual", "bullet", "diagram", "quote")
@@ -30,6 +30,11 @@ def check(slug):
         errs.append("첫 카드는 type이 'cover' 여야 합니다.")
     if not any(c.get("type") == "insight" for c in cards):
         warns.append("insight 카드가 없습니다.")
+
+    # 결론 카드(type=conclusion)는 인사이트 바로 앞에 온다 (서머리 역할)
+    ins_idx = next((i for i, c in enumerate(cards) if c.get("type") == "insight"), None)
+    if ins_idx is not None and (ins_idx == 0 or cards[ins_idx - 1].get("type") != "conclusion"):
+        errs.append("인사이트 카드 바로 앞에 '결론'(type=conclusion) 카드가 있어야 합니다.")
     if cards and not cards[-1].get("cta"):
         warns.append("마지막 카드에 cta(다음 편 예고)가 없습니다.")
 

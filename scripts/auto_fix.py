@@ -320,6 +320,107 @@ def apply_reviewer_patches(data, patches) -> tuple[list, list]:
     return applied, notes
 
 
+# ── 결론 카드 삽입 (인사이트 바로 앞) ────────────────────────
+#
+# 왜 필요한가: 사용자 요구로 발행 때마다 '실무자 인사이트' 앞에 서머리 성격의
+# '결론' 카드가 들어간다. 그런데 llm_pass / apply_reviewer_patches 는 **기존 카드의
+# 필드만** 고칠 수 있어서 '없는 카드를 넣는' 일은 못 한다. 그래서 삽입 전용 경로를 둔다.
+
+CONCLUSION_PROMPT = """당신은 한국어 AI 교육 카드뉴스의 편집자입니다.
+아래 원고 전체를 읽고, **마지막 '실무자 인사이트' 카드 바로 앞에 들어갈 '결론' 카드 하나**를 쓰세요.
+
+역할: 글 전체를 한 장으로 접어주는 서머리. 독자가 이 카드만 봐도 핵심을 다 얻어야 합니다.
+
+규칙:
+- 한국어만. 일본어/중국어 금지.
+- heading 은 **24자 이하** (25자를 넘으면 카드에서 잘려 보인다). 예: "한 장 정리", "그래서 결론은"
+- body 는 90자 이하 한 문장 — 글 전체를 관통하는 결론 한 줄.
+- bullets 는 3~4개. 각 55자 이하. 각 항목은 서로 다른 축(원리/수치/적용)을 담아라.
+- **원고에 없는 숫자를 새로 만들지 마라.** 원고에 나온 수치만 인용한다.
+- 원고에 있는 수치·개념을 쓰되, 본문을 그대로 복사하지는 마라. 요약이다.
+
+출력은 JSON 객체 하나만. 설명·마크다운·코드펜스 금지:
+{"type":"conclusion","label":"결론","heading":"<26자 이하>","body":"<90자 이하 한 문장>","bullets":["<55자 이하>","<55자 이하>","<55자 이하>"]}
+"""
+
+
+def llm_write_conclusion(data, timeout=150):
+    """원고를 읽고 결론 카드 하나를 LLM으로 작성한다. 실패 시 (None, 사유)."""
+    key = os.environ.get("OPENROUTER_API_KEY", "").strip()
+    if not key:
+        return None, "OPENROUTER_API_KEY 없음"
+    model = os.environ.get("REVIEW_MODEL_PROGRESSIVE") or "anthropic/claude-sonnet-4.5"
+    slim = {
+        "topic": data.get("topic"),
+        "cards": [{"i": i, "type": c.get("type", "body"),
+                   "heading": c.get("heading"), "title": c.get("title"),
+                   "body": c.get("body"), "lead": c.get("lead"),
+                   "subtitle": c.get("subtitle")}
+                  for i, c in enumerate(data.get("cards", []), 1)],
+    }
+    try:
+        import requests
+        r = requests.post(
+            "https://openrouter.ai/api/v1/chat/completions",
+            json={"model": model, "temperature": 0.2, "max_tokens": 1200,
+                  "messages": [{"role": "user", "content":
+                                CONCLUSION_PROMPT + "\n\n원고:\n"
+                                + json.dumps(slim, ensure_ascii=False, indent=1)[:9000]}]},
+            timeout=timeout,
+            headers={"Authorization": f"Bearer {key}", "Content-Type": "application/json"})
+        if r.status_code != 200:
+            return None, f"HTTP {r.status_code}: {r.text[:140]}"
+        txt = r.json()["choices"][0]["message"].get("content") or ""
+        txt = re.sub(r"^```(?:json)?|```$", "", txt.strip(), flags=re.M).strip()
+        i, j = txt.find("{"), txt.rfind("}")
+        if i < 0 or j <= i:
+            return None, "JSON 없음"
+        card = json.loads(txt[i:j + 1])
+        card["type"] = "conclusion"
+        card.setdefault("label", "결론")
+        if not (card.get("heading") or card.get("body") or card.get("bullets")):
+            return None, "빈 결론 카드"
+        return card, None
+    except Exception as e:                                      # noqa: BLE001
+        return None, f"{type(e).__name__}: {str(e)[:140]}"
+
+
+def insert_conclusion(data, verbose=True) -> tuple[list, list]:
+    """인사이트 바로 앞에 결론 카드를 삽입한다. 이미 있으면 아무것도 안 한다.
+
+    가드: 삽입 후 **새로운** high 위반이 생기면 되돌린다.
+    """
+    applied, notes = [], []
+    cards = data.get("cards", [])
+    ins_idx = next((i for i, c in enumerate(cards)
+                    if c.get("type") == "insight"), None)
+    if ins_idx is None or ins_idx == 0:
+        return applied, notes
+    if cards[ins_idx - 1].get("type") == "conclusion":
+        return applied, notes                       # 이미 있음
+
+    card, err = llm_write_conclusion(data)
+    if err or not card:
+        notes.append(f"결론 카드 생성 실패: {err}")
+        return applied, notes
+
+    before = {f"{x.get('rule')}|{x.get('detail')}"
+              for x in R.evaluate(data) if x.get("severity") == "high"}
+    original = copy.deepcopy(cards)
+    cards.insert(ins_idx, card)
+    new_high = {f"{x.get('rule')}|{x.get('detail')}"
+                for x in R.evaluate(data) if x.get("severity") == "high"} - before
+    if new_high:
+        data["cards"] = original
+        notes.append(f"결론 카드가 새 위반을 만들어 되돌림: {list(new_high)[0][:80]}")
+    else:
+        applied.append(f"{ins_idx}번 자리에 결론 카드 삽입 "
+                       f"(heading='{card.get('heading','')}')")
+        if verbose:
+            print(f"    ➕ 결론 카드 삽입: {card.get('heading','')}")
+    return applied, notes
+
+
 # ── 메인 루프 ────────────────────────────────────────────────
 
 def run(slug: str, rounds=2, use_llm=True, verbose=True):
@@ -330,6 +431,22 @@ def run(slug: str, rounds=2, use_llm=True, verbose=True):
 
     history = []
     llm_issues, reviewer_patches, summaries = [], [], {}
+
+    # ── 0) 결론 카드 삽입 — 인사이트 바로 앞 (반드시 리뷰보다 먼저) ──
+    # 리뷰 뒤에 넣으면 카드 인덱스가 밀려서 리뷰 패치가 엉뚱한 카드에 붙는다.
+    # 리뷰어는 디스크에서 원고를 다시 읽으므로, 삽입했으면 파일에 먼저 쓴다.
+    if use_llm:
+        if verbose:
+            print("── 0) 결론 카드 확인 (인사이트 바로 앞) ──")
+        ap0, nt0 = insert_conclusion(data, verbose=verbose)
+        for n in nt0:
+            print(f"    ⚠️  {n}")
+        if ap0:
+            path.write_text(json.dumps(data, ensure_ascii=False, indent=2),
+                            encoding="utf-8")
+            history.append({"round": "conclusion", "applied": ap0})
+        elif verbose:
+            print("    ✓ 결론 카드 있음 (또는 삽입 불필요)")
 
     # ── 1) 리뷰 — 진보/보수 리뷰어 ──────────────────────────
     if use_llm:

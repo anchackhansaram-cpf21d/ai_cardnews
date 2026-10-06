@@ -32,8 +32,15 @@
       "id": "card-count",
       "check": "card_count",
       "severity": "high",
-      "text": "카드 5~10장",
+      "text": "카드 5~11장 (결론 카드 포함)",
       "source": "builtin"
+    },
+    {
+      "text": "마지막 '실무자 인사이트' 바로 앞에 '결론' 카드(type=conclusion)가 있어야 한다",
+      "check": "conclusion_before_insight",
+      "severity": "high",
+      "source": "builtin",
+      "id": "conclusion-before-insight"
     },
     {
       "id": "cover-3line",
