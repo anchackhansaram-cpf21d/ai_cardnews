@@ -21,9 +21,10 @@
     "054-flow-matching",
     "055-bert-vs-gpt",
     "056-pruning-and-sparsity",
-    "057-gradient-vanishing-explosion"
+    "057-gradient-vanishing-explosion",
+    "058-scaling-laws"
   ],
-  "last_run": "2026-10-05T11:20:50+09:00",
+  "last_run": "2026-10-06T11:24:02+09:00",
   "log": [
     {
       "slug": "004-rag-retrieval",
@@ -132,6 +133,12 @@
       "posted_at": "2026-10-05T11:20:50+09:00",
       "media_id": "17908865955474974",
       "permalink": "https://www.instagram.com/p/DeGH1tLjwMM/"
+    },
+    {
+      "slug": "058-scaling-laws",
+      "posted_at": "2026-10-06T11:24:02+09:00",
+      "media_id": "18122775202926479",
+      "permalink": "https://www.instagram.com/p/DeIs_0NkyTf/"
     }
   ]
 }
