@@ -9,7 +9,7 @@ import postqueue as q
 MAX_CAPTION = 2200      # 인스타 캡션 상한
 MAX_HASHTAGS = 30       # 인스타 해시태그 상한
 MIN_CARDS = 5
-MAX_CARDS = 11          # 결론 카드 포함 (인사이트 바로 앞)
+MAX_CARDS = 10          # 결론 카드 포함 (인사이트 바로 앞)
 
 # heading 없어도 되는 카드 타입
 NO_HEADING_TYPES = ("insight", "cta", "outro", "visual", "bullet", "diagram", "quote")

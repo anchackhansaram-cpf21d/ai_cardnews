@@ -32,7 +32,7 @@
       "id": "card-count",
       "check": "card_count",
       "severity": "high",
-      "text": "카드 5~11장 (결론 카드 포함)",
+      "text": "카드 5~10장 (결론 카드 포함)",
       "source": "builtin"
     },
     {

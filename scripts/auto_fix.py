@@ -326,21 +326,25 @@ def apply_reviewer_patches(data, patches) -> tuple[list, list]:
 # '결론' 카드가 들어간다. 그런데 llm_pass / apply_reviewer_patches 는 **기존 카드의
 # 필드만** 고칠 수 있어서 '없는 카드를 넣는' 일은 못 한다. 그래서 삽입 전용 경로를 둔다.
 
+CONCLUSION_HEADING = "이것만 가져가시면 됩니다"   # 매회 고정 — 시리즈 인식용
+
 CONCLUSION_PROMPT = """당신은 한국어 AI 교육 카드뉴스의 편집자입니다.
 아래 원고 전체를 읽고, **마지막 '실무자 인사이트' 카드 바로 앞에 들어갈 '결론' 카드 하나**를 쓰세요.
 
-역할: 글 전체를 한 장으로 접어주는 서머리. 독자가 이 카드만 봐도 핵심을 다 얻어야 합니다.
+역할: 독자가 **가져갈 것만 딱 추려주는** 카드. 이 카드만 봐도 핵심을 다 얻어야 합니다.
+'글 전체 요약'이 아니라 **'이것만 가져가라'** 는 태도로 쓰세요.
 
 규칙:
 - 한국어만. 일본어/중국어 금지.
-- heading 은 **24자 이하** (25자를 넘으면 카드에서 잘려 보인다). 예: "한 장 정리", "그래서 결론은"
+- heading 은 **반드시 "이것만 가져가시면 됩니다"** 로 고정한다. 매회 동일하게 쓴다.
 - body 는 90자 이하 한 문장 — 글 전체를 관통하는 결론 한 줄.
 - bullets 는 3~4개. 각 55자 이하. 각 항목은 서로 다른 축(원리/수치/적용)을 담아라.
+  bullets 는 "독자가 들고 갈 것" 목록이므로 명사형/단정형으로 끊어 써라.
 - **원고에 없는 숫자를 새로 만들지 마라.** 원고에 나온 수치만 인용한다.
 - 원고에 있는 수치·개념을 쓰되, 본문을 그대로 복사하지는 마라. 요약이다.
 
 출력은 JSON 객체 하나만. 설명·마크다운·코드펜스 금지:
-{"type":"conclusion","label":"결론","heading":"<26자 이하>","body":"<90자 이하 한 문장>","bullets":["<55자 이하>","<55자 이하>","<55자 이하>"]}
+{"type":"conclusion","label":"결론","heading":"이것만 가져가시면 됩니다","body":"<90자 이하 한 문장>","bullets":["<55자 이하>","<55자 이하>","<55자 이하>"]}
 """
 
 
@@ -378,6 +382,7 @@ def llm_write_conclusion(data, timeout=150):
         card = json.loads(txt[i:j + 1])
         card["type"] = "conclusion"
         card.setdefault("label", "결론")
+        card["heading"] = CONCLUSION_HEADING      # 매회 고정 (LLM 이 다르게 써도 덮어씀)
         if not (card.get("heading") or card.get("body") or card.get("bullets")):
             return None, "빈 결론 카드"
         return card, None

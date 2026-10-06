@@ -357,7 +357,7 @@ def render_card(card, idx, total, meta):
     elif kind == "conclusion":
         # 결론(서머리) — 인사이트 바로 앞에서 글 전체를 한 장으로 접어준다
         body = f'<div class="badge">{esc(card.get("label", "결론"))}</div>'
-        body += f'<h2 class="heading">{esc(card.get("heading", "한 장 정리"))}</h2>'
+        body += f'<h2 class="heading">{esc(card.get("heading", "이것만 가져가시면 됩니다"))}</h2>'
         if card.get("body"):
             body += f'<p class="sumline">{esc(card["body"])}</p>'
         if card.get("bullets"):

@@ -42,7 +42,7 @@ BUILTIN = [
     {"id": "required-fields", "check": "required_fields", "severity": "high",
      "text": "topic·handle·caption 필수", "source": "builtin"},
     {"id": "card-count", "check": "card_count", "severity": "high",
-     "text": "카드 5~11장 (결론 카드 포함)", "source": "builtin"},
+     "text": "카드 5~10장 (결론 카드 포함)", "source": "builtin"},
     {"id": "conclusion-before-insight", "check": "conclusion_before_insight", "severity": "high",
      "text": "마지막 '실무자 인사이트' 바로 앞에 '결론' 카드(type=conclusion)가 있어야 한다",
      "source": "builtin"},
@@ -275,8 +275,8 @@ CHECKS = {
     "numeric_consistency": lambda d: _numeric_problems(d),
 
     "card_count": lambda d: (
-        [] if 5 <= len(_cards(d)) <= 11
-        else [{"card": 0, "detail": f"카드 {len(_cards(d))}장 (5~11장 필요)"}]),
+        [] if 5 <= len(_cards(d)) <= 10
+        else [{"card": 0, "detail": f"카드 {len(_cards(d))}장 (5~10장 필요)"}]),
 
     "conclusion_before_insight": lambda d: _conclusion_problems(d),
 

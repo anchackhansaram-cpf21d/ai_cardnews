@@ -33,12 +33,12 @@ RULES:
 2. English tech terms: write in Korean pronunciation first then (English) in parentheses.
    Example: "어텐션(Attention)". Exception: proper model names (GPT, BERT, CLIP) stay in English.
 3. Cover title must be exactly 3 lines, provocative, ending with ~다/~이다 assertion.
-4. Cards: 8-11 total. At least 40% (4+) must be type=visual with visual payload.
+4. Cards: 8-10 total (결론 카드 포함). At least 40% (4+) must be type=visual with visual payload.
 5. **CARD ORDER — 마지막 두 장은 반드시 이 순서다:**
    ... (본문/시각화 카드들) → {"type":"conclusion"} → {"type":"insight"}
    즉 **'실무자 인사이트'(insight) 바로 앞에 '결론'(conclusion) 카드**가 온다.
-   conclusion 카드는 글 전체를 한 장으로 접어주는 서머리다:
-   {"type":"conclusion","label":"결론","heading":"<26자 이하, 예: 한 장 정리>",
+   conclusion 카드는 "이것만 가져가라" 성격의 서머리다. **heading 은 매회 고정이다:**
+   {"type":"conclusion","label":"결론","heading":"이것만 가져가시면 됩니다",
     "body":"<90자 이하 한 문장 — 글 전체를 관통하는 결론>",
     "bullets":["<55자 이하>","<55자 이하>","<55자 이하>"]}
    bullets 는 서로 다른 축(원리/수치/적용)을 담고, 원고에 없는 숫자를 새로 만들지 마라.
