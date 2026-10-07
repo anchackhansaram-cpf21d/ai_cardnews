@@ -52,8 +52,8 @@
     {
       "id": "body-length",
       "check": "body_length",
-      "severity": "high",
-      "text": "본문은 230자 이하 — 넘으면 자동축소로 글씨가 작아져 읽기 나빠진다",
+      "severity": "medium",
+      "text": "본문은 230자 이하 권장 — 넘으면 자동축소로 글씨가 작아져 읽기 나빠진다",
       "source": "builtin"
     },
     {

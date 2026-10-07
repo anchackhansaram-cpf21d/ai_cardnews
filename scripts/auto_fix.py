@@ -432,7 +432,13 @@ def run(slug: str, rounds=2, use_llm=True, verbose=True):
     path = ROOT / "content" / "queue" / f"{slug}.json"
     if not path.exists():
         sys.exit(f"원고가 없습니다: {path}")
-    data = json.loads(path.read_text(encoding="utf-8"))
+    # validate.py 와 '같은 뷰'로 검사한다. postqueue.load() 는 config.json 의
+    # handle/series_label 을 주입한다. raw 로 읽으면 handle 이 없다고 오판해서
+    # required-fields(high) 위반이 생기고, validate 는 통과시키는데 auto_fix 만
+    # 차단하는 모순이 발생한다 (059 사례).
+    data = q.load(slug)
+    for k, v in q.config().items():
+        data.setdefault(k, v)          # 원고 파일에 없으면 파일에 남긴다
 
     history = []
     llm_issues, reviewer_patches, summaries = [], [], {}
@@ -476,10 +482,17 @@ def run(slug: str, rounds=2, use_llm=True, verbose=True):
         history.append({"round": 0, "reviewer_patches": ap, "notes": nt})
 
     # ── 3) 결정론 수정 + 룰 위반 해소 ───────────────────────
+    # body-length 는 severity=medium 이지만 '권장'일 뿐 막지는 않는다.
+    # 그래도 고칠 수 있으면 고친다 — 렌더에서 글씨가 작아지는 걸 줄이기 위해.
+    def targets():
+        return [i for i in R.evaluate(data)
+                if i.get("severity") == "high" or i.get("rule") == "body-length"]
+
     for rnd in range(1, rounds + 1):
-        high = [i for i in R.evaluate(data) if i.get("severity") == "high"]
+        high = targets()
         if verbose:
-            print(f"── 3) 라운드 {rnd}: high 위반 {len(high)}건 ──")
+            print(f"── 3) 라운드 {rnd}: high 위반 {len([i for i in high if i.get('severity')=='high'])}건"
+                  f" + body-length {len([i for i in high if i.get('rule')=='body-length'])}건 ──")
         if not high:
             break
 
@@ -487,7 +500,7 @@ def run(slug: str, rounds=2, use_llm=True, verbose=True):
         for a in applied:
             print(f"    ✏️  {a}")
 
-        remaining = [i for i in R.evaluate(data) if i.get("severity") == "high"]
+        remaining = targets()
         llm_applied, notes = [], []
         if remaining and use_llm:
             real = [i for i in remaining if not is_false_positive(i)]
