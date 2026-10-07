@@ -22,9 +22,10 @@
     "055-bert-vs-gpt",
     "056-pruning-and-sparsity",
     "057-gradient-vanishing-explosion",
-    "058-scaling-laws"
+    "058-scaling-laws",
+    "059-gradient-clipping"
   ],
-  "last_run": "2026-10-06T11:24:02+09:00",
+  "last_run": "2026-10-07T14:42:00+09:00",
   "log": [
     {
       "slug": "004-rag-retrieval",
@@ -139,6 +140,12 @@
       "posted_at": "2026-10-06T11:24:02+09:00",
       "media_id": "18122775202926479",
       "permalink": "https://www.instagram.com/p/DeIs_0NkyTf/"
+    },
+    {
+      "slug": "059-gradient-clipping",
+      "posted_at": "2026-10-07T14:42:00+09:00",
+      "media_id": "17988293708877314",
+      "permalink": "https://www.instagram.com/p/DeLocufEQuE/"
     }
   ]
 }
