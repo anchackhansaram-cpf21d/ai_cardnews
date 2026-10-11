@@ -26,9 +26,10 @@
     "059-gradient-clipping",
     "060-regularization-l1-l2-weight-decay",
     "061-emergence-debate",
-    "062-tokenizer-bpe"
+    "062-tokenizer-bpe",
+    "063-reward-hacking"
   ],
-  "last_run": "2026-10-10T11:20:25+09:00",
+  "last_run": "2026-10-11T11:20:22+09:00",
   "log": [
     {
       "slug": "004-rag-retrieval",
@@ -167,6 +168,12 @@
       "posted_at": "2026-10-10T11:20:25+09:00",
       "media_id": "17997546632826320",
       "permalink": "https://www.instagram.com/p/DeS_xMnlGvp/"
+    },
+    {
+      "slug": "063-reward-hacking",
+      "posted_at": "2026-10-11T11:20:22+09:00",
+      "media_id": "18129942781764742",
+      "permalink": "https://www.instagram.com/p/DeVkjqSDPGc/"
     }
   ]
 }
