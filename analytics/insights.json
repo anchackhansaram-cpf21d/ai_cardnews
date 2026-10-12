@@ -1,14 +1,105 @@
 {
-  "collected_at": "2026-10-05T01:01:23.560412+00:00",
-  "count": 36,
+  "collected_at": "2026-10-12T01:00:54.226061+00:00",
+  "count": 43,
   "media": [
+    {
+      "id": "18129942781764742",
+      "timestamp": "2026-10-11T02:20:18+0000",
+      "permalink": "https://www.instagram.com/p/DeVkjqSDPGc/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "🔍 FTC가 OpenAI와 Anthropic을 조사하는 이유는 '정렬 페이킹(Alignment Faking)' 때문입니다. 모델이 훈련 중에는 ",
+      "like_count": 0,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "17997546632826320",
+      "timestamp": "2026-10-10T02:20:21+0000",
+      "permalink": "https://www.instagram.com/p/DeS_xMnlGvp/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "GPT는 문장을 통째로 읽지 않습니다. '나는 고양이를 좋아한다'는 '나/는/고양이/를/좋아/한다'라는 여섯 개의 토큰(조각)으로 분해된 후에야",
+      "like_count": 0,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18140397193718066",
+      "timestamp": "2026-10-09T02:22:30+0000",
+      "permalink": "https://www.instagram.com/p/DeQbNnKGPyr/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "LLM이 갑자기 똑똑해지는 '창발(emergence)' 현상 — 과연 진짜일까요, 아니면 측정 방식이 만든 착시일까요? 🧠",
+      "like_count": 0,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18012229769763672",
+      "timestamp": "2026-10-08T02:20:10+0000",
+      "permalink": "https://www.instagram.com/p/DeN2JyJmLHm/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "과적합에 지긋지긋한 당신, 정규화(Regularization)라는 무기를 장착할 때입니다. L1 정규화는 가중치의 절댓값 합을 패널티로 줘 일부",
+      "like_count": 0,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "17988293708877314",
+      "timestamp": "2026-10-07T05:41:56+0000",
+      "permalink": "https://www.instagram.com/p/DeLocufEQuE/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "그래디언트 클리핑(Gradient Clipping), 모두 같은 비율로 자르는 게 정답일까요? 2026년 ACL에 발표된 AGGC(Adaptiv",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "18122775202926479",
+      "timestamp": "2026-10-06T02:23:58+0000",
+      "permalink": "https://www.instagram.com/p/DeIs_0NkyTf/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "스케일링 법칙은 더 이상 '모델 키우기'만을 말하지 않는다. 2026년 현재 AI 성능을 결정하는 세 가지 축은 프리트레이닝(모델+데이터+연산의",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
+      },
+      "metrics_used": ""
+    },
+    {
+      "id": "17908865955474974",
+      "timestamp": "2026-10-05T02:20:46+0000",
+      "permalink": "https://www.instagram.com/p/DeGH1tLjwMM/",
+      "type": "CAROUSEL_ALBUM",
+      "caption_head": "오늘의 주제는 딥러닝의 심장, '기울기 소실과 폭발'입니다. 1980년대부터 2015년까지 깊은 신경망의 꿈을 가로막았던 이 문제는 최근 더 흥",
+      "like_count": 1,
+      "comments_count": 0,
+      "insights": {
+        "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
+      },
+      "metrics_used": ""
+    },
     {
       "id": "18105158429112749",
       "timestamp": "2026-10-04T02:23:48+0000",
       "permalink": "https://www.instagram.com/p/DeDjY9VFcjy/",
       "type": "CAROUSEL_ALBUM",
       "caption_head": "LLM 추론 비용이 폭등하고 있다. 하루 수천만 원이 추론에 사라진다. 해결책은 생각보다 단순하다: 필요 없는 가중치를 자르는 것. 이것이 가지",
-      "like_count": 2,
+      "like_count": 3,
       "comments_count": 0,
       "insights": {
         "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
@@ -21,7 +112,7 @@
       "permalink": "https://www.instagram.com/p/DeA-uwHkbg-/",
       "type": "CAROUSEL_ALBUM",
       "caption_head": "BERT vs GPT, 10년 대립의 결론은 '둘 다'입니다. GPT는 생성에서 압도적이지만, BERT는 이해와 검색에서 독보적입니다. 2026",
-      "like_count": 1,
+      "like_count": 2,
       "comments_count": 0,
       "insights": {
         "_error": "HTTP 400: {\"error\":{\"message\":\"(#10) Application does not have permission for this action\",\"code\":10,\"type\":\"OAuthExcept"
